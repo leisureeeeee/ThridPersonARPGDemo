@@ -233,3 +233,14 @@
 - 涉及文件：Source/ThirdPersonARPG/PlayerController/MyPlayerController.cpp，既有 Tests/PlayerInputTests.cpp 仅将对应 Pitch 期望从 0.75 改为 -0.75 并修改说明，Docs/CameraArchitecture.md 更新当前方向处理和历史验证范围，追加本执行记录；未新增测试用例或运行测试。
 - 检查结果：仅阅读规范、源码及 Git 差异；没有编译、运行自动化或启动 UE。按项目路径规则运行 see 检查附带 .h，报告不支持媒体格式，继续文本读取。历史编译及测试结果不作为本次修正已验证的依据。
 - 用户修改保护与后续：保留用户 Content/NewMap.umap 修改和未跟踪 Content/BP/，不编辑、不暂存资源。用户重新编译加载后检查上下视角符合预期，左右转向保持原有表现；本次实际效果尚未验证。仅暂存本次明确修改的四个文本文件，审阅暂存区后提交推送，结果以 Git 输出及最终回复为准。
+
+## 2026-10-19 19:29:46 北京时间 — 补齐角色模型高度偏移并减少常规确认
+
+- 用户需求：角色看起来悬空；再次要求非必要的命令运行不要请求确认，并要求继续处理。保留仅用户明确要求才编译或测试的约定。
+- 检查内容：静态读取 MyCharacter、项目配置、UE 本机 Character / CharacterMovement 源码及 BP_Character 保存文件的名称、属性和导出元数据。源码没有设置 Mesh 的相对位置，UE 默认胶囊半高 88 cm、重力比例 1、碰撞配置为 Pawn；未发现项目源码禁用重力或设置飞行模式。蓝图唯一读取到的 RelativeLocation 为 (0,0,116)，所在导出对象为 SpringArm，属于相机装置高度，不能当作 Mesh 高度修改。
+- 实现内容：MyCharacter.cpp 增加 CapsuleComponent 头文件，在构造函数将 Mesh 相对位置设为 (0,0,-GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight())，默认 Z=-88，使当前脚底原点模型对齐胶囊底部。保留已有 Mesh Yaw=-90、移动、重力及相机设置；不移动角色 Actor 或地面。蓝图仍可针对不同模型覆盖默认变换。
+- 自主执行偏好：AGENTS.md 补充普通命令优先在沙箱或已授权范围直接执行，只在实际权限受限、工具环境强制要求或存在真实风险时触发必要审批；不为日常命令增加额外业务确认。
+- 涉及文件：Source/ThirdPersonARPG/MyCharacter/MyCharacter.cpp、Docs/CameraArchitecture.md、AGENTS.md、Docs/ExecutionLog.md。保留用户 Content/NewMap.umap 修改及未跟踪 Content/BP/，不编辑、不暂存资产。
+- 检查结果与限制：仅源码、二进制资源元数据及 Git 差异静态审阅；未编译、未启动 UE、未运行测试，未检查实际关卡地面碰撞或运行时蓝图覆盖。二进制 RelativeLocation 首次试读因属性头字节对齐不正确得到无效浮点值，核对属性尺寸、标志和导出范围后读取为 (0,0,116)，确认属于 SpringArm，未依据误读修改资源。按项目路径规则调用 see 检查附带 .h，返回不支持媒体格式后继续文本检查。
+- 用户验证步骤：重新编译加载后，检查角色蓝图 Mesh 的 Location Z 继承为 -88（当前默认胶囊半高）；若存在旧覆盖，将 Mesh 的 Location 重置为父类默认值，使脚底与胶囊底部对齐。胶囊尺寸或模型原点改变时应重新对齐。实际落地效果交由用户验证，本次不声称运行已通过。审阅并提交推送本次四个文本文件，结果以 Git 输出及最终回复为准。
+- 权限执行：普通沙箱 git add 因 .git/index.lock 写权限受限而失败，随后仅为必要的 Git 暂存申请环境权限重试；未为源码修改、只读检查或执行步骤额外请求业务确认。

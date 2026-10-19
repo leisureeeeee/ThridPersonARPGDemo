@@ -3,6 +3,7 @@
 #include "MyCharacter.h"
 #include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -10,6 +11,10 @@
 AMyCharacter::AMyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// The capsule origin is its center; this mesh's origin is at the feet.
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f,
+		-GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 
 	// The mannequin mesh faces +Y; CharacterMovement turns the capsule's +X.
 	// Keep this asset alignment on the mesh so movement and camera axes stay intact.
