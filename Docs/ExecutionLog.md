@@ -70,3 +70,14 @@
 - 涉及文件：本次仅追加 Docs/ExecutionLog.md；Saved/Logs/ThirdPersonARPG.log、Rider 本机日志和引擎插件文件仅用于只读诊断，不提交缓存、构建产物或本机配置。
 - 验证结果与限制：插件构建及版本匹配已通过现有日志和文件核验；未启动编辑器，未验证实际 IPC 握手；未更改代码，无需重新编译。着色器编译失败的根因尚未确定，不将其直接归因于内存、驱动或 RiderLink。
 - 未完成事项：等待编辑器正常启动后验证连接；本记录按项目规范单独提交并推送，最终提交及推送结果以 Git 输出和回复为准。
+
+## 2026-10-19 15:34:28 北京时间 — 说明如何更换项目初始关卡
+
+- 用户需求：了解如何更换项目初始关卡。
+- 执行内容：只读检查 AGENTS.md、Config/DefaultEngine.ini、Content 下的关卡资源及 Git 状态；查阅 Epic 官方默认关卡设置文档，说明编辑器启动地图和游戏默认地图的区别及设置入口。
+- 涉及文件：本次仅追加 Docs/ExecutionLog.md；未更改关卡、源码或项目配置。
+- 验证结果：项目 GameDefaultMap 当前为 /Engine/Maps/Templates/OpenWorld，Config 中未显式配置 EditorStartupMap；找到 Content/ARPG_Samurai/Demo/Maps/DemoMap.umap，可在地图选择列表中选取。初始工作区干净。
+- 验证范围：已核对配置和资源文件，未操作编辑器或运行游戏；无代码变更，无需编译。
+- 未完成事项：用户尚未指定要设为默认的关卡，本次提供操作方法，不执行配置替换。执行记录提交并推送，实际结果以 Git 输出及最终回复为准。
+- 提交前观察：用户工作过程中出现未跟踪资源 Content/NewMap.umap，保留原样，不纳入本次执行记录提交。
+- 执行限制：首次 git add 因沙箱禁止创建 .git/index.lock 失败，获准重试后暂存成功。
