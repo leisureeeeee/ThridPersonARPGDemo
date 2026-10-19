@@ -32,6 +32,18 @@
 
 ## 先建立一个可替换的角色模型
 
+这里的操作入口在 **UE 编辑器的内容浏览器**，不是 Windows 资源管理器里右键 `1.fbx`。
+
+1. 在 UE 按 `Ctrl+Space` 打开内容抽屉，进入用于存放新角色资产的目标目录。
+2. 点击内容浏览器工具栏的 **Import / 导入**，在弹出的文件选择器里选择 `G:/UEProject/ThirdPersonARPG/Content/039-雅/fbx/雅/1.fbx`，再点打开。
+3. 接下来出现的才是导入设置窗口。旧版界面勾选 **Skeletal Mesh / 骨骼网格体**；新版 Interchange 界面在相应分类中启用 **Import Skeletal Meshes**。这是指定模型的导入类型，不是右键文件时选的菜单。
+4. 在该窗口找到 **Skeleton / 骨架**资源选择框，保持 **None / 无**，不要选择原来的 `UE4_Mannequin_Skeleton`。这里留空表示不复用已有 Skeleton；UE 仍会读取 FBX 自带的骨骼，并生成新的 Skeleton 资产，不表示导入一个没有骨骼的模型。
+5. 首次先关闭 **Import Animations / 导入动画**，再点击窗口的 Import / 导入按钮。下文继续说明合并模型、Morph Targets、比例和材质。
+
+Skeletal Mesh 是人物表面网格及蒙皮，Skeleton 是骨骼名称和层级；两者通常会作为相关联但不同的 UE 资产生成。UE 5.8 的新旧导入窗口布局不同，上述选项可能分组显示；本次没有看到用户当前窗口，不假定某个选项一定在固定位置。
+
+资源设置顺序：
+
 1. 在内容浏览器新建 `/Game/Characters/Unagi`，建议按 Mesh、Materials、Textures、Animations 分目录。这里是建议的新目录，尚未创建。
 2. 先导入 `Content/039-雅/fbx/雅/1.fbx`。选它是为了获得主体模型和骨架，不表示它的动画就是待机。
 3. 导入为 **Skeletal Mesh**，**Skeleton 留空/None** 以建立新骨架。先关闭动画导入，避免将未知动作当作默认站姿；不勾选用第 0 帧替换参考姿势。导入成功后可命名为 `SK_Unagi`、`SKEL_Unagi`。

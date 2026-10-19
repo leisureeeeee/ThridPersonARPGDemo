@@ -257,3 +257,12 @@
 - 验证与限制：仅静态检查和文档审阅，没有编译、运行测试、启动 UE、导入资产或打开 3ds Max。按路径规则调用 see 处理资源目录，脚本因目录输入及中文路径传递问题返回未找到媒体文件，未获得视觉结果；实际形象、动画含义、_M 通道含义、最终比例及参考姿势均未验证，文档区分了已读元数据与待用户确认事项。
 - 未完成事项：用户按说明完成 UE 导入、材质连接、动画选择与蓝图 Mesh 替换；本次完成资源检查与操作指南，不声称角色已经替换。仅暂存两份文档、审阅 Git 状态和暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-skeletal-meshes-using-fbx-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine 。
+
+## 2026-10-19 21:22:44 北京时间 — 解释 FBX 导入入口与 Skeleton 留空
+
+- 用户需求：不理解 Skeletal Mesh 和 Skeleton 留空的操作位置，询问是否右键 1.fbx。
+- 执行内容：查阅 Epic 官方骨骼模型导入和 FBX 导入选项说明，补充 Docs/UnagiCharacterSetup.md 的编辑器点击步骤：Ctrl+Space 打开内容浏览器、进入目标目录、点击 Import、选择 FBX、在弹出的导入窗口启用骨骼网格导入、Skeleton 选 None、首次关闭动画导入。解释留空是创建该 FBX 对应的新 Skeleton，不是移除骨骼，也不选择旧 Mannequin Skeleton。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；未修改源代码、原始 FBX、配置或 UE 资产。
+- 验证结果与限制：仅核对官方文档和本次文档差异，没有编译、测试、启动 UE 或代为导入；用户实际看到的新旧导入窗口布局尚未知，说明中保留 Skeletal Mesh / Import Skeletal Meshes 名称差异，不声称已操作其界面。
+- 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/ 的已有修改或未跟踪内容，只暂存本次两份文档。未完成事项：用户在 UE 中打开导入设置窗口后按步骤操作；本次说明任务完成，提交推送结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-skeletal-meshes-using-fbx-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
