@@ -192,3 +192,17 @@
 - 涉及文件：本次仅修改 AGENTS.md 和 Docs/ExecutionLog.md；保留用户已有 Content/NewMap.umap 修改及未跟踪 Content/BP/，不暂存资源、日志、IDE 配置或构建产物。
 - 验证与限制：已核对失败日志、进程、引擎检查逻辑与运行配置。本次没有 C++ 或反射改动，未重复执行条件未变的失败构建，也未强制关闭可能有未保存内容的 UE。按路径输入规则调用 see 检查附带 .h，脚本报告不支持此媒体格式，随后以文本正常读取。控制台默认编码导致首次中文输出显示异常，以 UTF-8 重读确认文件内容正常。
 - 未完成事项：需要保存并关闭正在运行的 UE 后，才能完成 Editor 构建与 Rider 实际启动验证；此次仅确认根因与处理步骤，不声称已修复启动。文本差异及暂存区检查后提交推送本次规范和记录，结果以 Git 输出及最终回复为准。
+
+## 2026-10-19 17:38:09 北京时间 — 补全鼠标视角并修正移动的相机参考方向
+
+- 用户需求：鼠标不能控制视角，按 W 时不是预期前进；保持输入由 PlayerController 负责，注意封装并解释原理。
+- 检查与判断：原代码只有 MoveAction，没有鼠标动作或视角处理；现有 WASD 的 Negate / Swizzle 及 X 左右、Y 前后约定正确，原移动基准使用 ControlRotation，无法涵盖基础相机与控制器存在旋转差异的情况。已询问 W 的实际偏移方向，未收到补充，按相机相对移动修正；未读取或修改用户蓝图以宣称已确认具体关卡实例的偏移来源。查阅 Epic Enhanced Input 官方文档并核对本机 UE 的输入修饰器、CalcCamera、相机与控制器旋转实现。
+- 实现内容：控制器运行时创建私有 Transient LookAction，Axis2D 绑定 Mouse2D，只对 Y 取负，SetupInputComponent 绑定视角事件。HandleLookInput 向 AddYawInput / AddPitchInput 提交鼠标位移，使用私有 EditDefaultsOnly MouseSensitivity（默认 0.15 度），不额外乘 DeltaTime；无 Pawn、Pawn 禁用输入或视角输入被忽略时返回。本地 BeginPlay 设置 GameOnly 模式并隐藏光标。
+- 移动与原理：通过当前 Pawn 的标准 CalcCamera 接口读取基础相机朝向，仅保留 Yaw，按相机前向乘输入 Y、相机右向乘输入 X，再 AddMovementInput；保留斜向限长及 Cumulative 的反向抵消。移动不依赖最终 CameraManager 的镜头震动或外部过场视角；Character 与 Rig 不增加按键或输入绑定。DefaultInput.ini 关闭旧输入缩放，避免默认旧 Pitch 反号和比例叠加到新视角动作。
+- 涉及文件：Source/ThirdPersonARPG/PlayerController/MyPlayerController.h、.cpp，Config/DefaultInput.ini，新增 Source/ThirdPersonARPG/Tests/PlayerInputTests.cpp，更新 Docs/CameraArchitecture.md 及本记录；未修改 Character、CameraManager 或用户关卡资产。
+- 验证结果：主项目 ThirdPersonARPG / Win64 / Development 完整构建成功，退出码 0；主项目 Editor 的运行代码、反射及测试源码编译通过，链接因进程 34228 占用 UnrealEditor-ThirdPersonARPG.dll 报 LNK1104，未声称主项目 Editor 构建通过。为避免关闭用户编辑器，在被忽略的 Saved/InputValidation_20261019_1732 复制 Source、Config 和项目描述，独立 Editor 目标完整编译链接通过；最终源码 SHA256 对比主项目无差异。
+- 自动化结果：使用临时工程 UnrealEditor-Cmd、NullRHI、独立文件缓存运行 ThirdPersonARPG.Input.CameraRelativeMoveAndMouseLook。报告 1 项成功、0 失败，单项 0 错误、0 警告；覆盖相机相对控制器偏转 90° 时的 WASD、改变相机方向后的 W、俯仰时平面移动、斜向限速、W+S 抵消、鼠标水平/垂直符号及精确比例、忽略视角和移动输入。报告保留在临时工程 TestReport/index.json，不追踪构建或测试产物。
+- 失败与修正：首次测试编译使用的 ApplicationContextMask 在 UE 5.8 中已不是枚举成员，改为明确的 Editor / Client / Commandlet 标志后编译通过。第一次自动化运行中测试世界尚未完成角色组件初始化，导致相机未按生产生命周期激活，移动断言失败；补全 InitializeActorsForPlay 并检查相机激活后全部通过。临时工程首次沙箱构建失败，正常权限重试成功；首次沙箱测试进程因 Zen 数据目录无效反复等待，停止仅本次启动的 UnrealEditor-Cmd（PID 60020），改为独立文件缓存并正常权限重试，未结束用户 UnrealEditor。按路径规则运行 see 检查附带 .h，返回不支持媒体格式，继续以文本检查。
+- 用户修改保护：保留 Content/NewMap.umap 修改和未跟踪 Content/BP/，不暂存这些资源。仅提交本次明确处理的代码、配置、测试、说明及记录，提交前检查文本与暂存差异，推送结果以实际 Git 输出及最终回复为准。
+- 后续与限制：用户编辑器仍在运行，需先保存关闭 UE，再完成主项目 Editor 构建并启动 Play，点击视口验证硬件鼠标捕获、蓝图 SpringArm 继承旋转设置及实际画面。临时工程不包含用户地图和蓝图，自动化通过不代表其覆盖设置已验证；若位移正确而模型侧身，应另查 Mesh 相对 Capsule 的朝向。更新文档讲解映射坐标、世界方向、旋转链和蓝图灵敏度调整方式。
+- 用户追加要求：在已完成上述验证之后，用户表示“不用测试了，我来测试就行”。已立即停止后续测试和构建，仅整理说明、执行记录及提交推送；将后续默认由用户完成功能测试的偏好写入 AGENTS.md。本次已有测试代码保留，不再扩展或重跑；不把已发生的测试记录改写为未执行。

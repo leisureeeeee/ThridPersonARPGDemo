@@ -1,5 +1,6 @@
 #include "MyPlayerController.h"
 #include "Camera/ARPGPlayerCameraManager.h"
+#include "Camera/CameraTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -13,6 +14,18 @@
 AMyPlayerController::AMyPlayerController()
 {
 	PlayerCameraManagerClass = AARPGPlayerCameraManager::StaticClass();
+}
+
+void AMyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	if (IsLocalPlayerController())
+	{
+		FInputModeGameOnly InputMode;
+		InputMode.SetConsumeCaptureMouseDown(false);
+		SetInputMode(InputMode);
+		bShowMouseCursor = false;
+	}
 }
 
 void AMyPlayerController::AutoManageActiveCameraTarget(AActor* SuggestedTarget)
@@ -41,6 +54,7 @@ void AMyPlayerController::SetupInputComponent()
 
 	CreateInputMappingContext();
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMoveInput);
+	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleLookInput);
 	RegisterInputMappingContext();
 }
 
@@ -72,6 +86,16 @@ void AMyPlayerController::CreateInputMappingContext()
 		PlayerMappingContext, NAME_None, RF_Transient);
 	BackwardSwizzle->Order = EInputAxisSwizzle::YXZ;
 	BackwardMapping.Modifiers.Add(BackwardSwizzle);
+
+	LookAction = NewObject<UInputAction>(this, TEXT("LookAction"), RF_Transient);
+	LookAction->ValueType = EInputActionValueType::Axis2D;
+	FEnhancedActionKeyMapping& MouseMapping = PlayerMappingContext->MapKey(LookAction, EKeys::Mouse2D);
+	UInputModifierNegate* InvertMouseY = NewObject<UInputModifierNegate>(
+		PlayerMappingContext, NAME_None, RF_Transient);
+	InvertMouseY->bX = false;
+	InvertMouseY->bY = true;
+	InvertMouseY->bZ = false;
+	MouseMapping.Modifiers.Add(InvertMouseY);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()
@@ -116,7 +140,24 @@ void AMyPlayerController::HandleMoveInput(const FInputActionValue& Value)
 	}
 
 	const FVector2D MovementInput = Value.Get<FVector2D>().GetClampedToMaxSize(1.0f);
-	const FRotator YawRotation(0.0f, GetControlRotation().Yaw, 0.0f);
+	// Use this pawn's base camera, before CameraManager shakes/modifiers. Its
+	// authored relative rotation can differ from the controller's rotation.
+	FMinimalViewInfo CameraView;
+	ControlledPawn->CalcCamera(0.0f, CameraView);
+	const FRotator YawRotation(0.0f, CameraView.Rotation.Yaw, 0.0f);
 	ControlledPawn->AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X), MovementInput.Y);
 	ControlledPawn->AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y), MovementInput.X);
+}
+
+void AMyPlayerController::HandleLookInput(const FInputActionValue& Value)
+{
+	const APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn || !ControlledPawn->InputEnabled() || IsLookInputIgnored())
+	{
+		return;
+	}
+
+	const FVector2D LookInput = Value.Get<FVector2D>();
+	AddYawInput(LookInput.X * MouseSensitivity.X);
+	AddPitchInput(LookInput.Y * MouseSensitivity.Y);
 }
