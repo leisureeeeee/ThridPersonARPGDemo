@@ -312,3 +312,13 @@
 - 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；不改写任何材质或贴图资产。_M 通道含义仍未确认，不推荐随意分配。
 - 验证结果与限制：仅核对已有静态检查结论和本次文档差异，未编译、测试、启动 UE 或操作参数；实际渲染、透明和卡通效果未验证，不声称材质已经配置完成。
 - 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/；仅暂存两份文档，审阅暂存区后提交推送。本次说明任务无其他待办，资产设置及效果由用户自行操作验证，提交推送结果以实际 Git 输出及最终回复为准。
+
+## 2026-10-19 21:54:26 北京时间 — 说明角色模型过小的缩放位置
+
+- 用户需求：材质已绑定，但骨骼网格体太小，询问如何放大。
+- 执行内容：结合此前 FBX 原始几何约 0～2、单位声明为厘米的静态结果，说明可能存在约 100 倍单位差异；核对本机 UE 5.8 Interchange 的 ImportOffsetUniformScale 字段及显示名称 Offset Uniform Scale（偏移统一缩放），并查阅 Epic 官方旧版 Import Uniform Scale（导入统一缩放）说明。
+- 操作建议：快速调整是在 BP_Character 选择 Mesh（网格体组件），在 Transform（变换）→ Scale（缩放）等比放大；若符合本批约 100 倍单位差异，可先设 100/100/100 后按目标身高调整。正式动画接入前，建议统一导入缩放、在新目录创建尺寸匹配的模型和骨架、复用现有材质，并把角色组件缩放恢复 1/1/1，后续动画保持同一导入变换；说明不应把组件和导入两层的 100 倍叠加。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md。未修改模型、骨架、物理资产、蓝图、材质、C++ 或配置，未替用户执行重新导入或缩放。
+- 验证结果与限制：只静态检查文件及官方资料，没有编译、运行测试、启动 UE 或读取当前界面中的实际尺寸；100 倍属于结合源文件数据的建议，不宣称已确认最终身高。源码确认导入统一缩放默认值为 1；未从现有二进制保存文件中确定用户当前全部缩放设置。
+- 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/，只暂存两份文档并审阅差异后提交推送。用户按模型所在位置选择组件缩放或导入比例调整，脚底、胶囊及物理资产匹配由用户自行观察；本次说明任务无其他待办，提交推送结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
