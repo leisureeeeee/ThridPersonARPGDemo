@@ -91,3 +91,13 @@
 - 运行验证范围：现有编辑器日志显示 2026-10-19 15:38:14 在 NewMap 中创建 PIE 世界并运行，15:38:22 结束；此为用户当前操作的日志证据。本次未重启编辑器、未验证重启自动加载和打包启动；无 C++ 修改，无需编译。
 - 执行限制：按项目规则用 see 处理附带 MyCharacter.h 路径，首次 Bash 受沙箱信号管道限制，获准重试后脚本报告 .h 不支持媒体解析；使用正常文本与文件检查完成任务。
 - 未完成事项：无待处理的请求内文件变更；当前已打开编辑器的内存设置可能需要重启后重新读取配置。仅提交本次明确涉及的文件，NewMap 按 .gitattributes 使用 Git LFS；提交推送结果以实际 Git 输出和最终回复为准。
+
+## 2026-10-19 15:52:33 北京时间 — 为 MyCharacter 接入 Enhanced Input 与 WASD 移动（等待资源保存）
+
+- 用户需求：为 MyCharacter 增加基础 WASD 移动；随后指定使用新建 IMA_Character，并询问是否更适合由 C++ 实现。按同一输入移动任务连续处理。
+- 执行内容：在 AMyCharacter 中增加可配置的 CharacterMappingContext 和 MoveAction，默认引用 /Game/BP/MyCharatcer/IMA_Character 与 IA_Move；使用 UEnhancedInputComponent 绑定 Triggered，在 PawnClientRestart 中为本地玩家添加映射，解除控制或 EndPlay 时清理；按控制器水平朝向移动并限制斜向输入长度，启用面向移动方向转身。Build.cs 增加 EnhancedInput 模块依赖。
+- 涉及文件：Source/ThirdPersonARPG/MyCharacter/MyCharacter.h、MyCharacter.cpp、Source/ThirdPersonARPG/ThirdPersonARPG.Build.cs、Docs/ExecutionLog.md。另在已忽略 Saved/Automation/ConfigureCharacterInput.py 准备离线资源配置脚本，尚未执行，不纳入 Git。
+- 资源检查：编辑器日志显示存在 IA_Move、IMA_Character 和 BP_Character 的未保存编辑及自动保存版本，但 Content/BP/MyCharatcer 目前没有已保存的资源文件。本次不复制自动保存包、不改写用户未保存的编辑内容；已请求用户保存全部资源并关闭 UE，等待答复。
+- 验证结果：git diff --check 通过。执行 ThirdPersonARPGEditor / Win64 / Development 构建（-NoHotReloadFromIDE -NoUBA -MaxParallelActions=1）；反射生成代码、MyCharacter.cpp 等编译动作通过，链接 UnrealEditor-ThirdPersonARPG.dll 时发生 LNK1104，Result: Failed，退出码 1。UE 进程 44852 仍运行，DLL 被当前编辑器占用，不能声称完整构建通过。
+- 工具限制：读取并使用 computer-use 技能后，sky 原生管道连接返回系统找不到指定的文件，未操作编辑器。按项目规则对附带 MyCharacter.h 路径调用 see，脚本报告 .h 不支持媒体格式；使用文本和引擎源码检查继续实现。
+- 后续工作：等待用户保存 IA_Move、IMA_Character、BP_Character、NewMap 并关闭 UE；然后配置 IA_Move 为 Axis2D / Cumulative，W 为 +Y、S 为 -Y、A 为 -X、D 为 +X，确认关卡角色由 Player 0 控制，并重试完整编译及保存后资源核验。当前仅先提交 C++ 实现和本记录，映射资源配置尚未完成。
