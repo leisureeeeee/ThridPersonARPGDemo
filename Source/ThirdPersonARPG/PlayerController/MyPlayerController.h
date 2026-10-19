@@ -14,6 +14,10 @@ class THIRDPERSONARPG_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	AMyPlayerController();
+	virtual void AutoManageActiveCameraTarget(AActor* SuggestedTarget) override;
+
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

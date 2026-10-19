@@ -1,12 +1,13 @@
-# ARPG 摄像机架构提案
+# ARPG 摄像机架构与实现
 
-状态：设计建议，尚未实现。适用于当前 PlayerController 接收输入、Character 执行角色行为的架构。
+状态：第一阶段已实现 CameraManager、CameraRigComponent、参数平滑过渡及受控角色视角接线。CameraMode、模式请求优先级、瞄准与锁定仍为后续设计。适用于当前 PlayerController 接收输入、Character 执行角色行为的架构。
 
 ## 当前开局视角
 
 - `ARPGGameMode` 指定 `MyPlayerController` 和 `MyCharacter`。
 - 本地玩家控制器控制目标 Pawn 后，UE 默认自动管理 ViewTarget，以该 Pawn 的激活摄像机组件计算视角。
 - 当前 `MyCharacter` 已有 `FollowCamera` 和 `SpringArm`。应先确认玩家实际控制了预期角色、摄像机处于激活状态、关卡没有优先自动激活的独立 CameraActor。
+- 当前项目重写了 `MyPlayerController::AutoManageActiveCameraTarget`：开启自动管理且目标为当前带 Rig 的受控 Pawn 时，由自定义 CameraManager 优先选择该 Pawn。其他情况沿用 UE 默认流程；手动过场需要独占视角时，可关闭自动管理再设置 ViewTarget。
 - 若使用关卡内的角色蓝图，检查该实例的 Auto Possess Player；若由 GameMode 生成角色，检查 Default Pawn Class 指向预期的角色类或蓝图。还需确认关卡 World Settings 未覆盖预期 GameMode。
 - 手动切换时，将角色 Actor 交给 PlayerController 的 SetViewTarget / SetViewTargetWithBlend；不要将 UCameraComponent 当作 ViewTarget，也不要每帧重复设置目标。需要在角色控制关系建立之后操作。
 
@@ -18,7 +19,7 @@
 | --- | --- | --- |
 | 玩家输入 | `AMyPlayerController` | 接收视角、瞄准、锁定等输入，发出意图；配置 PlayerCameraManagerClass。 |
 | 玩家最终视角 | `AARPGPlayerCameraManager` | 当前 ViewTarget、角色与演出镜头间的切换、视角限制及 CameraModifier / CameraShake；沿用 UE 输出流程。 |
-| 角色摄像机装置 | `UARPGCameraRigComponent` | 持有对当前 SpringArm 和 FollowCamera 的引用，接收模式请求，选择并过渡基础模式，统一应用摄像机装置参数。 |
+| 角色摄像机装置 | `UARPGCameraRigComponent` | 持有对当前 SpringArm 和 FollowCamera 的引用，统一应用摄像机装置参数并平滑过渡；后续在这一层扩展模式请求与选择。 |
 | 基础镜头模式 | `UARPGCameraMode` 及按需派生类 | 根据角色与锁定目标等上下文，计算跟随、瞄准、锁定所需的距离、偏移、FOV、朝向等参数。 |
 | 角色与玩法组件 | `AMyCharacter`、战斗和锁定组件 | 提供角色锚点、速度、瞄准状态和目标；请求镜头行为，不直接改动摄像机内部状态。 |
 
@@ -34,16 +35,40 @@
 6. 输入的控制朝向与最终画面效果保持区别：移动使用稳定的参考朝向，不使用震动后的最终相机旋转作为移动方向。
 7. 过场交给 Sequencer / CineCameraActor，CameraManager 协调 ViewTarget 交接。结束或中断后恢复到当前有效 Pawn，而非保存已可能销毁的旧角色。
 
-## 建议逐步落地
+## 已实现的第一阶段
 
-第一步新增 CameraManager 和 RigComponent，保持当前第三人称视角行为，先把摄像机参数修改集中起来。第二步在加入瞄准或锁定时引入 CameraMode 和过渡管理。第三步随技能演出需求加入请求优先级、修饰器及过场交接；无需现在一次实现所有模式或复制完整 Lyra 初始化框架。
+- `AMyCharacter` 创建并保存 CameraRig 组件，在 `PostInitializeComponents` 绑定原有 SpringArm 与 FollowCamera。此时蓝图构造已经完成，因此 Rig 捕获的是实际调好的默认距离、偏移和 FOV。
+- `FARPGCameraRigSettings` 是参数值对象；Rig 的公开接口为 `GetCurrentCameraSettings`、`SetCameraSettings`、`ResetCameraSettings`。外部通过参数副本提出调整，不直接访问组件内部指针。
+- 调整时从当前实际参数出发，以指定时长执行 SmoothStep 插值；中途再次调整会以当前视角参数作为新的起点。过渡结束后关闭 Rig 自身 Tick。SpringArm 的碰撞检测和原有更新继续工作。
+- Rig 建立 SpringArm 对自身的 Tick 前置依赖，确保先更新参数，再计算弹簧臂的最终位置，避免参数晚一帧生效。
+- `AMyPlayerController` 通过 `PlayerCameraManagerClass` 使用新的 Manager。Manager 不覆写最终 POV 计算，沿用 UE 的 CameraComponent、镜头切换及修饰器流程。
+- `RestoreControlledPawnCamera` 在调用时查找控制器当前 Pawn，支持从其他镜头恢复；不缓存可能已经销毁的旧角色。它不是完整的 Sequencer 中断管理器。
+
+参数调用示例（角色组件初始化之后）：
+
+```cpp
+if (UARPGCameraRigComponent* Rig = Pawn->FindComponentByClass<UARPGCameraRigComponent>())
+{
+    FARPGCameraRigSettings Settings = Rig->GetCurrentCameraSettings();
+    Settings.ArmLength = 200.0f;
+    Settings.FieldOfView = 70.0f;
+    Rig->SetCameraSettings(Settings, 0.25f);
+}
+```
+
+效果结束时单独调用 `Rig->ResetCameraSettings(0.25f)`，恢复该角色初始化时的默认参数。当前 setter 是一次参数调整，不是已经实现的瞄准模式或多请求优先级系统。
+
+第二步在加入瞄准或锁定时引入 CameraMode 和过渡管理。第三步随技能演出需求加入请求优先级、修饰器及过场交接；无需现在一次实现所有模式或复制完整 Lyra 初始化框架。
 
 建议目录：`Camera/ARPGPlayerCameraManager.*`、`Camera/ARPGCameraRigComponent.*`，模式增多后增加 `Camera/Modes/`。
 
 ## 实现后的验证方式
 
+本阶段独立游戏目标 `ThirdPersonARPG / Win64 / Development` 已通过完整编译和链接；Editor 目标的源码编译通过，但 DLL 链接被运行中的 UE 占用所阻挡。以下实际画面和参数过渡检查尚未执行，应在保存关闭 UE、完成 Editor 构建并重新打开后进行。
+
 - 使用 Play 而非 Simulate 启动；检查实际控制器与角色类型，确认开局 ViewTarget 为期望角色且只有预期摄像机激活。
-- 可在游戏视口控制台使用 `showdebug camera` 辅助观察摄像机信息；本次仅提供验证方法，未实际运行验证。
+- 可在游戏视口控制台使用 `showdebug camera` 辅助观察摄像机信息。
+- 可在角色蓝图 BeginPlay 中临时取得 CameraRig，复制当前参数并将 ArmLength 设为 200、FOV 设为 70，调用 SetCameraSettings（0.25 秒），等待后调用 ResetCameraSettings（0.25 秒）。预期距离和视野平滑变化并回到原有参数；验证后删除临时测试节点。
 - 基础跟随阶段检查摄像机跟随角色、靠墙缩短距离及离墙恢复。
 - 加入模式后检查进入与退出瞄准的平滑过渡，以及瞄准期间触发技能、技能结束后仍恢复瞄准的情况。
 - 加入镜头切换后检查角色销毁、重生和过场中断时的目标恢复；新增锁定和镜头震动后，检查移动方向仍使用稳定参考朝向。

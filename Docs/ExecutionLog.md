@@ -169,3 +169,15 @@
 - 涉及文件：AGENTS.md、Docs/ExecutionLog.md；与本次摄像机设计提案一并提交，不额外改动 C++ 或资产。
 - 验证结果：检查新增规范与摄像机提案，git diff --check 通过；本次仅文档变更，无需编译。用户已有地图和蓝图修改保持原样。
 - 未完成事项：无；该讲解要求持续适用于之后的代码工作，提交推送结果以实际 Git 输出及最终回复为准。
+
+## 2026-10-19 17:04:16 北京时间 — 实现摄像机基础层与开局受控角色视角
+
+- 用户需求：按上一阶段摄像机提案实施，并在完成后讲解实现方式和原理。依提案分阶段落地，首先实现 CameraManager 与 RigComponent，保留当前第三人称装置；CameraMode、优先级请求、瞄准及锁定为后续需求阶段。
+- 实现内容：新增 Camera/ARPGCameraRigComponent.h、.cpp，封装 FARPGCameraRigSettings（距离、FOV、末端局部偏移、起点世界偏移），提供 GetCurrentCameraSettings、SetCameraSettings、ResetCameraSettings；检查归属与参数有效性，限制距离及 FOV 范围，使用指定时长的 SmoothStep 插值，中途调整以当前实际参数为起点，完成后停用 Rig 自身 Tick。
+- 生命周期与封装：MyCharacter 创建私有、蓝图只读的 CameraRig，在 PostInitializeComponents 中绑定既有 SpringArm / FollowCamera，捕获蓝图构造后的实际默认参数用于恢复；激活指定 FollowCamera，保持原有摄像机命名、弹簧臂碰撞及跟随设置。建立 SpringArm 对 Rig Tick 的前置依赖，先应用参数再计算摄像机位置；EndPlay 解除依赖并清理组件引用。
+- 视角管理：新增 Camera/ARPGPlayerCameraManager.h、.cpp，通过当前控制器的 Pawn 及 Rig 组件校验并选取视角；RestoreControlledPawnCamera 每次解析当前 Pawn，不缓存旧角色。MyPlayerController 指定新的 PlayerCameraManagerClass，并在自动管理开启且建议目标为当前带 Rig 的 Pawn 时优先使用角色视角；其他情况保留引擎默认流程。未覆盖最终 POV 计算，保留引擎镜头混合和 CameraModifier / CameraShake 扩展通路。
+- 涉及文件：Camera 目录四个新 C++ 文件、MyCharacter.h / .cpp、MyPlayerController.h / .cpp、Docs/CameraArchitecture.md、Docs/ExecutionLog.md。更新架构文档为第一阶段已实现，并补充调用示例、职责原理、当前限制及编辑器验证步骤。
+- 验证结果：限定本次文件的 git diff --check 通过。ThirdPersonARPG / Win64 / Development 使用 -NoHotReloadFromIDE -NoUBA -MaxParallelActions=1 完成全部 8 项动作，成功生成 ThirdPersonARPG.exe，Result: Succeeded，退出码 0。代码复核确认没有将新的相机计算写入角色 Tick，且组件不依赖具体 MyCharacter 类型。
+- 失败与限制：ThirdPersonARPGEditor / Win64 / Development 的新增 C++ 与反射代码编译通过，链接 UnrealEditor-ThirdPersonARPG.dll 时 LNK1104，Result: Failed，退出码 1；UE 进程 59432 仍占用 DLL。未强制退出编辑器；已请求用户保存关卡和蓝图并关闭后继续完成编辑器构建与运行验证。按项目规则调用 see 处理附带 ARPGGameMode.h 路径，返回 .h 不支持媒体格式，改以源码文本核对继续工作。
+- 用户修改保护：初始已有 Content/NewMap.umap 修改和未跟踪 Content/BP/，本次不改动、不暂存这些资源；不追踪构建输出或 UE 缓存。
+- 后续事项：第一阶段代码实现和独立游戏目标构建已完成；编辑器链接、实际开局视角、参数过渡与碰撞画面验证尚待关闭 UE 后执行。当前参数 setter 不具备多模式请求优先级，也未新增鼠标视角、瞄准或锁定玩法。仅提交本次代码、说明与执行记录，推送结果以 Git 输出及最终回复为准。

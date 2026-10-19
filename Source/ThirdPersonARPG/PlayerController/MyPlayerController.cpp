@@ -1,4 +1,5 @@
 #include "MyPlayerController.h"
+#include "Camera/ARPGPlayerCameraManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -8,6 +9,25 @@
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+
+AMyPlayerController::AMyPlayerController()
+{
+	PlayerCameraManagerClass = AARPGPlayerCameraManager::StaticClass();
+}
+
+void AMyPlayerController::AutoManageActiveCameraTarget(AActor* SuggestedTarget)
+{
+	if (bAutoManageActiveCameraTarget)
+	{
+		AARPGPlayerCameraManager* CameraManager = Cast<AARPGPlayerCameraManager>(PlayerCameraManager);
+		if (CameraManager && CameraManager->TryUseControlledPawnCamera(Cast<APawn>(SuggestedTarget)))
+		{
+			return;
+		}
+	}
+
+	Super::AutoManageActiveCameraTarget(SuggestedTarget);
+}
 
 void AMyPlayerController::SetupInputComponent()
 {

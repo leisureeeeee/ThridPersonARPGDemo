@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UARPGCameraRigComponent;
 
 UCLASS()
 class THIRDPERSONARPG_API AMyCharacter : public ACharacter
@@ -17,10 +18,16 @@ class THIRDPERSONARPG_API AMyCharacter : public ACharacter
 public:
 	AMyCharacter();
 
+protected:
+	virtual void PostInitializeComponents() override;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UARPGCameraRigComponent> CameraRig;
 };
