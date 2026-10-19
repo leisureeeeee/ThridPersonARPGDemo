@@ -293,3 +293,14 @@
 - 验证结果与限制：只进行资料和源码静态核对及文档审阅，没有编译、运行测试、启动 UE、导入纹理或操作材质；用户具体节点图和最终效果未验证。首次在 Engine/Classes 下查找 Substrate 头文件路径不存在，随后通过文件列表定位到 Engine/Public/Materials/MaterialExpressionSubstrate.h 并核对节点输入。
 - 未完成事项：用户按示例连接贴图并观察效果；本次完成步骤与原理说明，不声称材质已经配置。仅暂存两份文档，审阅 Git 状态与暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/artist-03-create-materials-and-material-instances ，https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-substrate-materials-in-unreal-engine 。
+
+## 2026-10-19 21:43:08 北京时间 — 排查纹理拖入节点画布无反应
+
+- 用户需求：按上次说明将纹理拖入中间区域没有反应，希望明确操作方式。
+- 检查与发现：向用户询问当前窗口属于节点图、参数列表还是模型预览，并继续静态检查新出现的 Content/Asset。该目录保存了 1、1_Skeleton、1_PhysicsAsset 和 Material__25～28 共 7 个 uasset；四个材质均记录为 /Script/Engine.MaterialInstanceConstant，父材质是 /InterchangeAssets/Materials/FBXLegacyPhongSurfaceMaterial，导入模式为 ImportAsMaterialInstances。因此先前针对普通材质节点图的通用步骤不适用于这四个导入实例；用户当前选中窗口尚未直接查看，未将其窗口状态当作已观察事实。
+- 参数核对：只读检查本机引擎插件父材质，确认存在 DiffuseColorMap（漫反射颜色贴图）、NormalMap（法线贴图）及各自 MapWeight（贴图权重）参数。补充按实例参数指定 Body_D/Body_N、勾选覆盖框并设权重为 1 的做法；说明不必修改引擎共享父材质。磁盘未找到 Unagi 纹理 uasset，若选择框搜不到，应先导入 TEX 里的 TGA；不据此否认编辑器内可能存在未保存纹理。
+- 文档修正：资源指南增加当前实际材质实例的具体操作，将原有节点教程明确限制为自建普通材质；同时给出普通节点图中按 T 加单击或右键添加 Texture Sample（纹理采样）、在 Texture（纹理）属性框选择纹理的替代拖拽办法。所有新增英文界面术语附中文解释。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；仅静态读取用户导入的二进制资产与引擎父材质，没有改写材质、导入纹理、修改 C++、启动 UE、编译或运行测试。
+- 检查结果与限制：已确认导入文件的材质实例类型及父材质参数名称，并查阅 Epic 官方材质实例和手动添加纹理节点说明；未操作用户界面或验证实际渲染效果。首次大段资产元数据输出过长，改为只取类型和父材质信息；首次引擎资产文件搜索受忽略规则影响，改用 --no-ignore 找到对应父材质。
+- 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/ 的已有修改和未跟踪资产，只暂存两份文档。用户在 Material__27 实例参数中指定纹理并保存后观察效果，本次不声称已完成材质配置。审阅暂存差异后提交推送，结果以 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/unreal-engine/instanced-materials-in-unreal-engine ，https://dev.epicgames.com/documentation/unreal-engine/artist-quick-start-in-unreal-engine 。

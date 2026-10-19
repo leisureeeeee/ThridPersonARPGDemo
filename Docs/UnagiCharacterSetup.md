@@ -59,9 +59,26 @@ Skeletal Mesh 是人物表面网格及蒙皮，Skeleton 是骨骼名称和层级
 
 如果对应材质尚未配置，双击该材质打开 Material Editor，配置颜色、法线等贴图连接；如果它是 Material Instance，则打开实例调整已暴露的贴图参数。完成后保存材质和模型。角色蓝图 BP_Character → Mesh → Materials 也可为该组件覆盖材质；如果模型预览正确但角色仍显示旧材质，要检查这里是否残留旧覆盖。模型资产的材质槽定义默认外观，蓝图组件的设置作用于该角色组件。
 
-### 以身体材质为例连接贴图
+### 当前实际导入的是材质实例：在参数里指定贴图
 
-1. 先通过内容浏览器把 `fbx/雅/TEX` 中的 TGA 导入为 UE 纹理资产。然后双击身体槽对应的材质，打开 Material Editor（材质编辑器）。若导入后尚未生成身体材质，可在内容浏览器空白处右键，新建 Material（材质），例如命名 `M_Unagi_Body`。
+后续检查 `Content/Asset` 的保存文件，已确认 `Material__25`～`Material__28` 均为 Material Instance（材质实例），父材质为引擎的 `FBXLegacyPhongSurfaceMaterial`。因此双击这些资产后，不能按普通材质的方法在画布中拖入 Texture Sample（纹理采样）节点；应优先修改实例参数，不必修改引擎共享父材质。
+
+以身体的 `Material__27` 为例：
+
+1. 双击该资产，在 Details（详情）中找 Parameter Groups（参数组）；若上方有搜索过滤，先清空，再搜索下面的参数名。
+2. 找到 DiffuseColorMap（漫反射颜色贴图）和 NormalMap（法线贴图）。这两个名称已从本机父材质的参数定义中读取确认；界面可能保留英文名。
+3. 勾选参数左侧的覆盖复选框，用资源选择框给 DiffuseColorMap（漫反射颜色贴图）指定 `Unagi_Body_D`，给 NormalMap（法线贴图）指定 `Unagi_Body_N`。
+4. 同时覆盖 DiffuseColorMapWeight（颜色贴图权重）和 NormalMapWeight（法线贴图权重），设为 1，使这两张贴图完整参与对应效果。无需修改 Parent（父材质）或进入引擎插件父材质编辑节点。
+5. 如果选择框搜不到纹理，先通过内容浏览器 Import（导入）从 `fbx/雅/TEX` 导入 TGA，保存后再选择。截至本次静态检查，只看到 7 个模型/骨架/物理资产/材质实例文件，未在磁盘找到 Unagi 纹理 uasset；尚未保存的编辑器内资产不在此次检查范围。
+6. 保存实例，确认模型身体槽使用 `Material__27`。头发 `Material__25` 用 Hair_D/Hair_N，武器 `Material__28` 用 Weapon_D/Weapon_N，脸 `Material__26` 先使用 Face_D，保留默认法线。
+
+材质实例共享父材质定义好的节点逻辑，只覆盖纹理等参数；只有普通材质才编辑节点图。如果打开的是人物模型预览窗口，也不能在该预览区域添加材质节点。
+
+### 普通材质中的身体贴图接线（仅自建普通材质时使用）
+
+下面是普通 Material（材质）的节点做法，不适用于上面四个已导入的 Material Instance（材质实例）。如果确实在有节点与连线的画布中拖拽无反应，可手动添加节点：在空白处按住 T 并单击左键，创建 Texture Sample（纹理采样）；选中它，在 Details（详情）的 Texture（纹理）资源框选择对应的 Body_D 或 Body_N。也可在画布空白处右键搜索 Texture Sample（纹理采样）添加。
+
+1. 先通过内容浏览器把 `fbx/雅/TEX` 中的 TGA 导入为 UE 纹理资产。若选择自建普通材质，可在内容浏览器空白处右键，新建 Material（材质），例如命名 `M_Unagi_Body`；双击这个普通材质打开 Material Editor（材质编辑器）。不要将实例参数窗口当成可编辑节点图。
 2. 将内容浏览器中的 `Unagi_Body_D` 和 `Unagi_Body_N` 拖入材质编辑器中间的节点画布，会各生成一个 Texture Sample（纹理采样）节点。拖入的是已经导入的 UE 纹理，不是直接把磁盘里的 TGA 拖到输入引脚上。
 3. 找到右侧名字与材质相同的主输出节点。把 `Unagi_Body_D` 节点的 RGB（红绿蓝颜色）输出圆点，拖线接到主节点 Base Color（基础颜色）输入圆点。
 4. 把 `Unagi_Body_N` 节点的 RGB（红绿蓝向量）输出接到 Normal（法线）。不要用 A（透明度通道）或单独的 R/G/B（红/绿/蓝通道）代替完整法线向量。
