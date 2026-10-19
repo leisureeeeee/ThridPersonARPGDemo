@@ -181,3 +181,14 @@
 - 失败与限制：ThirdPersonARPGEditor / Win64 / Development 的新增 C++ 与反射代码编译通过，链接 UnrealEditor-ThirdPersonARPG.dll 时 LNK1104，Result: Failed，退出码 1；UE 进程 59432 仍占用 DLL。未强制退出编辑器；已请求用户保存关卡和蓝图并关闭后继续完成编辑器构建与运行验证。按项目规则调用 see 处理附带 ARPGGameMode.h 路径，返回 .h 不支持媒体格式，改以源码文本核对继续工作。
 - 用户修改保护：初始已有 Content/NewMap.umap 修改和未跟踪 Content/BP/，本次不改动、不暂存这些资源；不追踪构建输出或 UE 缓存。
 - 后续事项：第一阶段代码实现和独立游戏目标构建已完成；编辑器链接、实际开局视角、参数过渡与碰撞画面验证尚待关闭 UE 后执行。当前参数 setter 不具备多模式请求优先级，也未新增鼠标视角、瞄准或锁定玩法。仅提交本次代码、说明与执行记录，推送结果以 Git 输出及最终回复为准。
+
+## 2026-10-19 17:13:20 北京时间 — 排查 Rider 启动失败并记录自主执行偏好
+
+- 用户需求：排查 Rider 无法启动项目；追加要求常规操作直接执行，只在有实际风险时询问。
+- 执行内容：读取项目规范、两套 Rider 工作区运行配置、生成的 ThirdPersonARPG.vcxproj、最新 UnrealBuildTool 日志、UE 项目日志及运行进程；对照本机 UE 5.8 的 HotReload.cs 核实 Live Coding 检查。将用户自主执行偏好写入 AGENTS.md，未改动运行代码、输入或摄像机配置。
+- 确认原因：17:10:34 的 UBT 日志显示 Rider 调用 ThirdPersonARPGEditor / Win64 / Development，因活动的 Live Coding 会话报 Unable to build while Live Coding is active，Result: Failed (OtherCompilationError)，总耗时 1.01 秒。当前 UnrealEditor 进程 59432 自 16:42:52 持续运行；UE 日志显示 17:10:12 Live Coding 成功但未检测到代码变化。Rider 启动前有 Build 步骤，因此此次失败发生在启动前的构建环节，尚未进入启动新编辑器的步骤。
+- 配置核对：当前 C++ 项目运行配置为 Development_Editor / x64，生成项目的构建目标是 ThirdPersonARPGEditor，输出指向实际存在的 G:/UE_5.8/Engine/Binaries/Win64/UnrealEditor.exe。未发现该配置的目标或可执行路径错误，未删除启动前 Build，也未通过忽略 Live Coding 锁来尝试覆盖已加载 DLL。
+- 原理及处理：Rider 先构建编辑器项目模块再启动 UE；运行中的编辑器启用 Live Coding 时，UBT 阻止普通构建与该会话同时改写模块。保存关卡和蓝图、完整关闭当前 UE 后，再用 ThirdPersonARPG 的 Development Editor / Win64（生成 C++ 工程显示 Development_Editor / x64）执行 Build 并 Run/Debug。此前独立游戏目标构建通过不等同于本次编辑器目标已成功链接。
+- 涉及文件：本次仅修改 AGENTS.md 和 Docs/ExecutionLog.md；保留用户已有 Content/NewMap.umap 修改及未跟踪 Content/BP/，不暂存资源、日志、IDE 配置或构建产物。
+- 验证与限制：已核对失败日志、进程、引擎检查逻辑与运行配置。本次没有 C++ 或反射改动，未重复执行条件未变的失败构建，也未强制关闭可能有未保存内容的 UE。按路径输入规则调用 see 检查附带 .h，脚本报告不支持此媒体格式，随后以文本正常读取。控制台默认编码导致首次中文输出显示异常，以 UTF-8 重读确认文件内容正常。
+- 未完成事项：需要保存并关闭正在运行的 UE 后，才能完成 Editor 构建与 Rider 实际启动验证；此次仅确认根因与处理步骤，不声称已修复启动。文本差异及暂存区检查后提交推送本次规范和记录，结果以 Git 输出及最终回复为准。
