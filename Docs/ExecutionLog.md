@@ -332,3 +332,12 @@
 - 验证结果与限制：只读取源码和官方资料，未编译、测试、启动 UE、执行重新导入或实际观察界面；不能声称用户已成功调整尺寸。最初查找 EditorPerProjectUserSettings 的旧路径不存在，随后定位到实际文件并区分新旧导入器的配置；后续源码搜索中没有匹配的查询退出码为 1，不影响已定位到的设置定义。
 - 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/，仅暂存两份文档，审阅暂存区后提交推送。模型重新导入与效果由用户自行执行，本次说明任务无其他待办，提交推送结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-assets-using-interchange-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine 。
+
+## 2026-10-19 22:00:55 北京时间 — 说明重新导入与材质保留
+
+- 用户需求：确认调整模型导入缩放后，是否需要重新配置材质。
+- 执行内容：核对 Epic 骨骼网格体编辑器与 FBX 导入选项文档；解释仅修改同一模型的缩放通常可复用已有材质，但重导入材质、重置分配或材质槽变化可能影响结果。区分材质实例贴图参数与模型材质槽引用，槽分配丢失时重新选择原材质即可，通常无需重做贴图。
+- 涉及文件：仅 Docs/ExecutionLog.md；未修改模型、材质、蓝图或配置，保留用户已有变更。
+- 验证结果：只读核对官方资料；未编译、未测试、未重新导入，实际保留情况由用户在编辑器确认。首次 PowerShell 管道写入中文变成问号，审阅暂存差异发现后用补丁修正，仅修正本条新记录。
+- 后续：本次说明任务完成；仅暂存本条记录，审阅后提交推送，结果见最终回复。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
