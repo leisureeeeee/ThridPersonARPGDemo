@@ -29,12 +29,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> CharacterMappingContext;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> MoveAction;
 
+	void CreateInputMappingContext();
 	void Move(const FInputActionValue& Value);
 	void RemoveInputMappingContext();
 	TWeakObjectPtr<UEnhancedInputLocalPlayerSubsystem> MappingSubsystem;

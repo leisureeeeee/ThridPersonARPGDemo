@@ -101,3 +101,13 @@
 - 验证结果：git diff --check 通过。执行 ThirdPersonARPGEditor / Win64 / Development 构建（-NoHotReloadFromIDE -NoUBA -MaxParallelActions=1）；反射生成代码、MyCharacter.cpp 等编译动作通过，链接 UnrealEditor-ThirdPersonARPG.dll 时发生 LNK1104，Result: Failed，退出码 1。UE 进程 44852 仍运行，DLL 被当前编辑器占用，不能声称完整构建通过。
 - 工具限制：读取并使用 computer-use 技能后，sky 原生管道连接返回系统找不到指定的文件，未操作编辑器。按项目规则对附带 MyCharacter.h 路径调用 see，脚本报告 .h 不支持媒体格式；使用文本和引擎源码检查继续实现。
 - 后续工作：等待用户保存 IA_Move、IMA_Character、BP_Character、NewMap 并关闭 UE；然后配置 IA_Move 为 Axis2D / Cumulative，W 为 +Y、S 为 -Y、A 为 -X、D 为 +X，确认关卡角色由 Player 0 控制，并重试完整编译及保存后资源核验。当前仅先提交 C++ 实现和本记录，映射资源配置尚未完成。
+
+## 2026-10-19 15:57:36 北京时间 — 将 WASD 输入重构为纯 C++ 运行时映射
+
+- 用户需求：移除编辑器创建的 IA / IMA，改用 C++ 实现输入与基础 WASD 移动；该要求替代上一条记录中等待资源配置的混合方案。
+- 执行内容：移除构造函数中的 IA_Move / IMA_Character 硬路径加载，将输入动作和映射上下文改为 UPROPERTY(Transient) 持有的运行时对象；在输入绑定时创建 Axis2D / Cumulative 移动动作及 WASD 映射，W 交换 XY 为 +Y，S 取反后交换 XY 为 -Y，A 取反为 -X，D 为 +X。沿用本地玩家映射注册与清理、按摄像机水平朝向移动、斜向速度限制和面向移动方向转身；构造函数新增 AutoPossessPlayer=Player0，支持放入关卡的本地玩家角色。
+- 涉及文件：Source/ThirdPersonARPG/MyCharacter/MyCharacter.h、MyCharacter.cpp、Docs/ExecutionLog.md。删除上一阶段未执行、未追踪的 Saved/Automation/ConfigureCharacterInput.py，不再准备修改 IA / IMA 资源映射。
+- 旧资源检查：Content/BP/MyCharatcer 下尚无已保存的 IA_Move / IMA_Character 文件，Git 也未追踪这两项资产；当前 UE 中存在未保存资产及 Saved/Autosaves 下的对应备份。未擅自替换用户角色蓝图、关卡或自动保存数据；在编辑器自动化不可用的情况下，尚无法删除编辑器内存中的两个资产，已请求用户保存全部资源并关闭 UE 后继续清理。
+- 验证结果：源码与 Config 中已无 IA_Move / IMA_Character / FObjectFinder 依赖，git diff --check 通过。重试 ThirdPersonARPGEditor / Win64 / Development 构建，反射生成代码和 MyCharacter.cpp 编译通过，链接 DLL 时再次 LNK1104，Result: Failed，退出码 1；UE 进程 44852 仍占用项目模块，不能声称完整构建或运行验证通过。
+- 工具限制：本任务按项目规则再次对附带 .h 路径调用 see，返回不支持媒体格式。此前 computer-use 原生管道不可用，未操作编辑器；未强制终止 UE，避免丢失用户未保存的角色和关卡编辑。
+- 后续工作：代码已完成重构；仍需在用户保存并关闭 UE 后删除实际保存的 IA / IMA、重试完整构建并核验角色实际移动。旧的编辑器内存资源清理和完整构建尚未完成，代码与本记录先独立提交并推送。

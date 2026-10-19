@@ -12,7 +12,8 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
-#include "UObject/ConstructorHelpers.h"
+#include "InputModifiers.h"
+#include "InputCoreTypes.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -29,17 +30,10 @@ AMyCharacter::AMyCharacter()
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
-
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextAsset(
-		TEXT("/Game/BP/MyCharatcer/IMA_Character.IMA_Character"));
-	CharacterMappingContext = MappingContextAsset.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionAsset(
-		TEXT("/Game/BP/MyCharatcer/IA_Move.IA_Move"));
-	MoveAction = MoveActionAsset.Object;
 }
 
 // Called when the game starts or when spawned
@@ -62,10 +56,41 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (ensure(EnhancedInput && MoveAction))
+	if (ensure(EnhancedInput))
 	{
+		CreateInputMappingContext();
 		EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyCharacter::Move);
 	}
+}
+
+void AMyCharacter::CreateInputMappingContext()
+{
+	if (CharacterMappingContext)
+	{
+		return;
+	}
+
+	// Each character owns its runtime input objects; no Content assets are required.
+	MoveAction = NewObject<UInputAction>(this, TEXT("MoveAction"), RF_Transient);
+	MoveAction->ValueType = EInputActionValueType::Axis2D;
+	MoveAction->AccumulationBehavior = EInputActionAccumulationBehavior::Cumulative;
+	CharacterMappingContext = NewObject<UInputMappingContext>(this, TEXT("CharacterMappingContext"), RF_Transient);
+
+	CharacterMappingContext->MapKey(MoveAction, EKeys::D);
+	CharacterMappingContext->MapKey(MoveAction, EKeys::A).Modifiers.Add(
+		NewObject<UInputModifierNegate>(CharacterMappingContext, NAME_None, RF_Transient));
+
+	UInputModifierSwizzleAxis* ForwardSwizzle = NewObject<UInputModifierSwizzleAxis>(
+		CharacterMappingContext, NAME_None, RF_Transient);
+	ForwardSwizzle->Order = EInputAxisSwizzle::YXZ;
+	CharacterMappingContext->MapKey(MoveAction, EKeys::W).Modifiers.Add(ForwardSwizzle);
+
+	FEnhancedActionKeyMapping& BackwardMapping = CharacterMappingContext->MapKey(MoveAction, EKeys::S);
+	BackwardMapping.Modifiers.Add(NewObject<UInputModifierNegate>(CharacterMappingContext, NAME_None, RF_Transient));
+	UInputModifierSwizzleAxis* BackwardSwizzle = NewObject<UInputModifierSwizzleAxis>(
+		CharacterMappingContext, NAME_None, RF_Transient);
+	BackwardSwizzle->Order = EInputAxisSwizzle::YXZ;
+	BackwardMapping.Modifiers.Add(BackwardSwizzle);
 }
 
 void AMyCharacter::PawnClientRestart()
