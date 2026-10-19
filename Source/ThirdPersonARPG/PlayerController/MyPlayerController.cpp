@@ -89,13 +89,8 @@ void AMyPlayerController::CreateInputMappingContext()
 
 	LookAction = NewObject<UInputAction>(this, TEXT("LookAction"), RF_Transient);
 	LookAction->ValueType = EInputActionValueType::Axis2D;
-	FEnhancedActionKeyMapping& MouseMapping = PlayerMappingContext->MapKey(LookAction, EKeys::Mouse2D);
-	UInputModifierNegate* InvertMouseY = NewObject<UInputModifierNegate>(
-		PlayerMappingContext, NAME_None, RF_Transient);
-	InvertMouseY->bX = false;
-	InvertMouseY->bY = true;
-	InvertMouseY->bZ = false;
-	MouseMapping.Modifiers.Add(InvertMouseY);
+	// Pass mouse Y through without an additional pitch inversion.
+	PlayerMappingContext->MapKey(LookAction, EKeys::Mouse2D);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()

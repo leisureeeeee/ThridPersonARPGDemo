@@ -225,3 +225,11 @@
 - 检查结果：仅进行源码、资源可读元数据与 Git 差异静态审阅；没有新增或运行测试，没有编译、启动项目或关闭用户编辑器。按项目路径规则调用 see 处理附带 .h，返回不支持媒体格式后继续文本检查。源码变更需要用户重新编译加载，并检查蓝图 Mesh 是否覆盖父类默认旋转。
 - 原理与用户操作：角色胶囊转向与 Mesh 相对朝向是两层变换；CharacterMovement 转动胶囊，Mesh 用固定资产偏移对齐其前向。用户重新编译后在角色蓝图选择 Mesh，检查 Rotation Z=-90、人物正面与胶囊前向箭头一致；若蓝图覆盖旧值，重置为父类默认值。实际运行效果由用户验证，未声称修复已通过运行验证。相关文件和记录审阅后提交推送，结果以 Git 输出及最终回复为准。
 - 参考：https://dev.epicgames.com/documentation/unreal-engine/coder-04-adding-a-firstperson-camera-mesh-and-animation?lang=en-US 。
+
+## 2026-10-19 18:12:59 北京时间 — 反转鼠标上下视角方向
+
+- 用户需求：将当前鼠标上下输入反过来，沿用由用户自行测试、仅明确要求才编译或测试的约定。
+- 执行内容：MyPlayerController.cpp 移除 LookAction 的 Mouse2D 映射上额外的 Y 轴 Negate，改为直接映射；HandleLookInput 继续将原始 Y 乘 MouseSensitivity.Y 传给 AddPitchInput，因此 Pitch 与此前符号相反。水平 Yaw、灵敏度、WASD、角色旋转及旧输入缩放关闭设置均保留。
+- 涉及文件：Source/ThirdPersonARPG/PlayerController/MyPlayerController.cpp，既有 Tests/PlayerInputTests.cpp 仅将对应 Pitch 期望从 0.75 改为 -0.75 并修改说明，Docs/CameraArchitecture.md 更新当前方向处理和历史验证范围，追加本执行记录；未新增测试用例或运行测试。
+- 检查结果：仅阅读规范、源码及 Git 差异；没有编译、运行自动化或启动 UE。按项目路径规则运行 see 检查附带 .h，报告不支持媒体格式，继续文本读取。历史编译及测试结果不作为本次修正已验证的依据。
+- 用户修改保护与后续：保留用户 Content/NewMap.umap 修改和未跟踪 Content/BP/，不编辑、不暂存资源。用户重新编译加载后检查上下视角符合预期，左右转向保持原有表现；本次实际效果尚未验证。仅暂存本次明确修改的四个文本文件，审阅暂存区后提交推送，结果以 Git 输出及最终回复为准。

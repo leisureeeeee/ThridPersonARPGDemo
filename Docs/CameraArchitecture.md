@@ -18,7 +18,7 @@
 - 输入动作与映射继续由 `MyPlayerController` 用 C++ 在运行时创建，保留在私有 Transient 成员中；无需编辑器 IA / IMC 资产。移动动作 Axis2D 约定 X 为左右、Y 为前后：W=(0,1)、S=(0,-1)、A=(-1,0)、D=(1,0)。键盘原始输入落在 X，W/S 经 Swizzle 交换到 Y，A/S 使用 Negate 反号。
 - `HandleMoveInput` 通过当前 Pawn 的标准 `CalcCamera` 接口读取其基础视角，只保留 Yaw。用世界前向乘输入 Y、世界右向乘输入 X，再调用 `AddMovementInput`。因此 W 跟随角色基础相机的水平前方，相机俯仰不产生上下移动。输入长度限制为 1，避免斜走加速；相反方向按键通过 Cumulative 累加抵消。
 - 这里读取 Pawn 基础视角，不读取 CameraManager 应用震动和修饰器后的最终旋转；过场镜头也不会接管角色的移动参考。当前实现读取最近更新的基础相机姿态，SpringArm 旋转延迟会体现在移动参考中；若未来玩法需要独立、无延迟的移动朝向，应在 CameraMode 阶段明确提供该参考。
-- `LookAction` 是 Axis2D，绑定 Mouse2D；只对 Y 取负，保持鼠标右移向右转、上移向上看。配置关闭 `bEnableLegacyInputScales`，防止 UE 旧输入比例（默认 Pitch 还含反号）叠加。`MouseSensitivity` 是控制器的私有 EditDefaultsOnly 参数，默认每单位鼠标位移 0.15 度，蓝图类默认值中可调整；鼠标位移不再乘 DeltaTime。
+- `LookAction` 是 Axis2D，直接绑定 Mouse2D；根据用户实际体验反馈，已移除原先额外的 Y 轴 Negate，鼠标 Y 原值乘灵敏度后交给 AddPitchInput，反转此前的上下操作。配置保持关闭 `bEnableLegacyInputScales`，防止 UE 旧输入比例叠加。`MouseSensitivity` 是控制器的私有 EditDefaultsOnly 参数，默认每单位鼠标位移 0.15 度，蓝图类默认值中可调整；鼠标位移不再乘 DeltaTime。
 - 本地控制器 `BeginPlay` 设置 GameOnly 输入模式并隐藏光标。PIE 应使用 Play，点击游戏视口捕获鼠标；Shift+F1 可释放鼠标。处理器分别尊重移动/视角输入禁用状态，没有受控角色时不处理。
 - Character 继续负责移动与组件装配，Rig 负责相机参数，CameraManager 负责视角输出；键位和输入事件仍封装在控制器中。
 
@@ -81,7 +81,7 @@ if (UARPGCameraRigComponent* Rig = Pawn->FindComponentByClass<UARPGCameraRigComp
 
 ## 实现后的验证方式
 
-摄像机基础层与本次输入修改的独立游戏目标 `ThirdPersonARPG / Win64 / Development` 已通过完整编译和链接。本次主项目 Editor 目标的源码和回归测试编译通过，但 DLL 链接仍被运行中的 UE 占用。实际项目画面、鼠标捕获和参数过渡检查应在保存关闭 UE、完成 Editor 构建并重新打开后进行；自动化测试与主项目运行验证分开记录。
+最初摄像机基础层与输入实现的独立游戏目标 `ThirdPersonARPG / Win64 / Development` 已通过完整编译和链接，当时主项目 Editor 的 DLL 链接被运行中的 UE 占用；临时工程自动化结果见上文。后续 Mesh 朝向对齐与鼠标 Y 方向修正遵照用户要求未编译、未运行测试，已有自动化代码仅同步调整对应的 Pitch 期望值，不代表当前版本已通过。实际项目画面、鼠标捕获和参数过渡由用户重新编译加载后验证。
 
 - 使用 Play 而非 Simulate 启动；检查实际控制器与角色类型，确认开局 ViewTarget 为期望角色且只有预期摄像机激活。
 - 可在游戏视口控制台使用 `showdebug camera` 辅助观察摄像机信息。

@@ -92,8 +92,8 @@ bool FARPGPlayerInputTest::RunTest(const FString& Parameters)
 	ProcessInput();
 	TestTrue(TEXT("Mouse right turns right without legacy yaw scaling"),
 		FMath::IsNearlyEqual(Controller->RotationInput.Yaw, 1.5f));
-	TestTrue(TEXT("Mouse up looks up with exactly one Y inversion"),
-		FMath::IsNearlyEqual(Controller->RotationInput.Pitch, 0.75f));
+	TestTrue(TEXT("Mouse Y reaches pitch without an extra inversion"),
+		FMath::IsNearlyEqual(Controller->RotationInput.Pitch, -0.75f));
 	ProcessInput();
 
 	Controller->RotationInput = FRotator::ZeroRotator;
