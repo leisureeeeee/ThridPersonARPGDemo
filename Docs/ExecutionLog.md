@@ -322,3 +322,13 @@
 - 验证结果与限制：只静态检查文件及官方资料，没有编译、运行测试、启动 UE 或读取当前界面中的实际尺寸；100 倍属于结合源文件数据的建议，不宣称已确认最终身高。源码确认导入统一缩放默认值为 1；未从现有二进制保存文件中确定用户当前全部缩放设置。
 - 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/，只暂存两份文档并审阅差异后提交推送。用户按模型所在位置选择组件缩放或导入比例调整，脚底、胶囊及物理资产匹配由用户自行观察；本次说明任务无其他待办，提交推送结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
+
+## 2026-10-19 21:56:57 北京时间 — 说明已导入模型的缩放重导入入口
+
+- 用户需求：模型已导入，询问如何修改 Offset Uniform Scale（偏移统一缩放）。
+- 执行内容：核对 Epic 官方 Interchange（交换导入）与骨骼网格体编辑器重新导入说明，并静态检查本机 UE 5.8 的 InterchangeProjectSettings 与导入窗口源码。确认 Offset Uniform Scale（偏移统一缩放）属于保存的导入流程参数，当前 Content/Asset/1 是需要操作的模型资产；说明通过 Reimport（重新导入）打开设置，而不是右键磁盘 FBX 或模型骨架。
+- 窗口未出现时的处理：本机源码中 Content Import Settings（内容导入设置）的 Show Reimport Dialog（显示重新导入对话框）默认 false；文档给出在项目设置的 Interchange（交换导入）类别开启后重新操作，并说明资产类型覆盖可能影响显示。搜索不到缩放参数时清空过滤或关闭 Show Only Essential Properties（仅显示必要属性）；不将旧版 FBX 编辑器偏好开关误当作当前 Interchange 的相同入口。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md。只补充点击步骤、100 倍单位修正建议、恢复角色组件 1/1/1 避免重复缩放及检查材质/物理资产尺寸的说明，没有修改模型、骨架、材质、蓝图、C++ 或用户项目设置。
+- 验证结果与限制：只读取源码和官方资料，未编译、测试、启动 UE、执行重新导入或实际观察界面；不能声称用户已成功调整尺寸。最初查找 EditorPerProjectUserSettings 的旧路径不存在，随后定位到实际文件并区分新旧导入器的配置；后续源码搜索中没有匹配的查询退出码为 1，不影响已定位到的设置定义。
+- 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/，仅暂存两份文档，审阅暂存区后提交推送。模型重新导入与效果由用户自行执行，本次说明任务无其他待办，提交推送结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-assets-using-interchange-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine 。
