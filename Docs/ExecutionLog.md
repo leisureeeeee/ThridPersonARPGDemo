@@ -120,3 +120,14 @@
 - 验证结果：检查项目规范、Git 状态和上一任务记录；初始工作区干净，git diff --check 通过。仅文档变更，无需编译。
 - 执行限制：依项目路径规则调用 see 处理附带 MyCharacter.cpp，首次 Bash 受沙箱信号管道限制，获准重试后返回 .cpp 不支持媒体格式；不影响文本规范修改。
 - 未完成事项：本次规范更新无待处理项；此前纯 C++ 输入重构的完整构建与旧 IA / IMA 编辑器内存清理仍等待用户保存并关闭 UE（本次检查 UE 进程 44852 仍在运行）。本记录及规范单独提交推送，实际结果以 Git 输出和最终回复为准。
+
+## 2026-10-19 16:25:58 北京时间 — 调研成熟项目的输入绑定职责划分
+
+- 用户需求：查阅其他成熟项目，比较输入事件绑定在 Character 还是 PlayerController 中，并结合本项目的解耦与封装要求给出建议。
+- 执行内容：只读核对当前 MyCharacter 输入实现；查阅 Epic 官方 Player Controllers、Pawn 输入绑定接口、Lyra 输入配置及组件初始化文档，并核对 Tom Looman ActionRoguelike 当前 Character / PlayerController 源码。本次不改运行时代码。
+- 核实结果：ActionRoguelike 的 ARoguePlayerCharacter::SetupPlayerInputComponent 绑定移动、跳跃、冲刺、视角与攻击；ARoguePlayerController::SetupInputComponent 实际注册交互和 AnyKey（输入设备检测）。其暂停处理片段仅构造 PauseBinding，所查函数未见 AddActionBinding，不作为有效暂停绑定示例。Lyra 通过 Pawn 侧 HeroComponent、PawnExtensionComponent 及 GameFeatureActions 协作初始化和扩展玩家输入，并非将全部逻辑集中在 Character 或 Controller 单一类。
+- 架构建议：按输入生命周期划分，角色专属操作由 Pawn 侧输入组件封装映射、动作绑定与上下文清理，Character / MovementComponent 执行角色行为；跨角色的玩家级操作由 PlayerController 等玩家层承接。若以后需要统一控制多种 Pawn，可让 Controller 分发意图，避免依赖某个具体 Character。当前问题是 MyCharacter 同时包含映射构建、注册清理及移动执行；可保留 SetupPlayerInputComponent 入口并委托专门组件，无需仅为解耦把全部绑定搬到 Controller。这是结合公开示例作出的项目建议，不声称行业统一标准。
+- 一手来源：https://github.com/tomlooman/ActionRoguelike/blob/master/Source/ActionRoguelike/Player/RoguePlayerCharacter.cpp ； https://github.com/tomlooman/ActionRoguelike/blob/master/Source/ActionRoguelike/Player/RoguePlayerController.cpp ； https://dev.epicgames.com/documentation/en-us/unreal-engine/game-framework-component-manager-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/lyra-input-settings-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/player-controllers-in-unreal-engine 。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；AGENTS.md 与 MyCharacter.cpp 用于只读核对。
+- 验证结果及限制：已核对上述文档和可访问源码，git diff --check 通过；未修改构造函数或反射声明，无需编译。部分直接源码 URL 和首次使用的单数 PlayerController 文档地址访问失败，改用可访问的项目文件及官方复数页面完成核验；不依赖未成功访问的内容。按项目路径规则调用 see，返回 .cpp 不支持媒体格式，不影响源码文本核对。
+- 未完成事项：本次调研无待处理项；此前纯 C++ 输入改造的完整构建与旧 IA / IMA 清理仍等待用户保存并关闭 UE，本次检查进程 44852 仍运行。执行记录单独提交推送，实际结果以 Git 输出和最终回复为准。
