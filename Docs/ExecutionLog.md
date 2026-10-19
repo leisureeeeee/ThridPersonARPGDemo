@@ -275,3 +275,11 @@
 - 验证结果与限制：仅核对官方资料及文档差异，没有编译、运行测试、启动 UE 或实际操作材质；用户当前导入界面和生成的材质名称未知，使用示例名称说明入口，不声称资源已经配置。
 - 用户修改保护与后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/；仅暂存本次两份文档，审阅暂存区后提交推送。操作由用户在模型和材质编辑器中进行，本次解释任务无其他待处理事项，提交推送结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine 。
+
+## 2026-10-19 21:31:24 北京时间 — 英文术语附中文翻译
+
+- 用户需求：使用中文版 UE，要求给出英文词时在后面用括号标注中文翻译。
+- 执行内容：在 AGENTS.md 的实现说明与学习支持中记录持久偏好，要求英文术语、菜单和选项后紧跟中文括号翻译，并使用可与中文版界面对照的名称；文件名、路径和代码标识符保留原样，含义另行解释。
+- 涉及文件：AGENTS.md、Docs/ExecutionLog.md；不修改 C++、配置、资产或其他现有文档。
+- 验证结果：仅审阅规范文本及 Git 状态和暂存差异，无需且未进行编译或测试；保留用户 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/ 的已有修改或未跟踪内容。
+- 未完成事项：无，后续说明按该偏好执行。仅暂存两份规范和记录文件，审阅后提交推送，结果以实际 Git 输出及最终回复为准。
