@@ -28,6 +28,10 @@
 
 ## 职责划分
 
+角色转身与模型朝向分别处理：`bUseControllerRotationYaw=false`、`bUseControllerDesiredRotation=false`、`bOrientRotationToMovement=true`，由 CharacterMovement 根据加速度方向和 RotationRate 转动角色胶囊。当前蓝图使用 UE4 `SK_Mannequin`，其模型前向需要相对胶囊做 Yaw=-90° 的对齐；在 `MyCharacter` 构造函数中设置 `GetMesh()->SetRelativeRotation(FRotator(0,-90,0))`，不用旋转 Actor、相机或移动输入来补偿模型偏移。
+
+构造函数提供默认对齐，蓝图仍可针对不同模型调整 Mesh 的 Transform → Rotation。重新编译加载后，检查角色蓝图 Mesh 的相对 Rotation 是否为 `(0,0,-90)`（编辑器按 X/Roll、Y/Pitch、Z/Yaw 显示），并确认人物正面朝向胶囊的前向箭头。若已有蓝图覆盖，则将该 Rotation 重置为父类默认值。换成原本面向 +X 的模型时，应将 Mesh 相对 Yaw 调回 0。此调整未运行编译或测试，遵照用户要求由用户验证。
+
 | 层 | 建议类型 | 职责 |
 | --- | --- | --- |
 | 玩家输入 | `AMyPlayerController` | 接收视角、瞄准、锁定等输入，发出意图；配置 PlayerCameraManagerClass。 |

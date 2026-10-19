@@ -3,12 +3,17 @@
 #include "MyCharacter.h"
 #include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 AMyCharacter::AMyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// The mannequin mesh faces +Y; CharacterMovement turns the capsule's +X.
+	// Keep this asset alignment on the mesh so movement and camera axes stay intact.
+	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -23,6 +28,7 @@ AMyCharacter::AMyCharacter()
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 }

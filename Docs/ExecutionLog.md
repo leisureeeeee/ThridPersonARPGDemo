@@ -214,3 +214,14 @@
 - 涉及文件：AGENTS.md、Docs/ExecutionLog.md；未修改运行时代码或用户关卡、蓝图资产。
 - 验证结果：仅审阅本次规范文本、Git 状态及暂存差异；没有再次编译、运行测试或启动项目。此前输入修复已在 4086303 提交并推送，保留其真实验证历史。
 - 未完成事项：无；后续代码修改交由用户自行测试，按实际情况说明未验证范围。本次偏好与执行记录单独提交推送，结果以实际 Git 输出及最终回复为准。
+
+## 2026-10-19 17:50:14 北京时间 — 对齐角色模型与移动转向
+
+- 用户需求：移动方向已正确，但人物旋转不正确；沿用仅在明确要求时才编译和测试的约定。
+- 检查内容：阅读 MyCharacter、PlayerController、GameMode 及项目规范；静态查看 BP_Character.uasset 的可读资源引用与名称，确认引用 ARPG_Samurai Demo 的 SK_Mannequin，名称表未出现 RelativeRotation；C++ 未设置 Mesh 相对旋转，角色已开启 OrientRotationToMovement。核对本机 CharacterMovement 的 ComputeOrientToMovementRotation / PhysicsRotation，确认该模式转向加速度方向；查阅 Epic 官方角色模型设置文档中的 Mesh Rotation Z=-90 对齐示例。
+- 判断与限制：当前证据符合模型默认朝向未对齐角色 +X 的情况；没有启动 UE 读取蓝图最终属性，不能声称已确认用户游戏中的具体旋转表现。已询问是侧身/倒走、跟随鼠标还是不转身，未收到补充，按当前 SK_Mannequin 的常规模型对齐修正。
+- 实现内容：MyCharacter.cpp 引入 SkeletalMeshComponent，在构造函数为 Mesh 设置相对 Yaw=-90°，使模型前向对齐胶囊前向；显式设置 CharacterMovement 的 bUseControllerDesiredRotation=false，保留 bUseControllerRotationYaw=false、bOrientRotationToMovement=true 及现有 RotationRate。未增加角色 Tick 或输入绑定，未改动已经正确的移动向量和相机基准；蓝图可针对其他模型覆盖 Mesh 相对旋转。
+- 涉及文件：Source/ThirdPersonARPG/MyCharacter/MyCharacter.cpp、Docs/CameraArchitecture.md、Docs/ExecutionLog.md；保留用户 Content/NewMap.umap 修改及未跟踪 Content/BP/，不编辑、不暂存这些资源。
+- 检查结果：仅进行源码、资源可读元数据与 Git 差异静态审阅；没有新增或运行测试，没有编译、启动项目或关闭用户编辑器。按项目路径规则调用 see 处理附带 .h，返回不支持媒体格式后继续文本检查。源码变更需要用户重新编译加载，并检查蓝图 Mesh 是否覆盖父类默认旋转。
+- 原理与用户操作：角色胶囊转向与 Mesh 相对朝向是两层变换；CharacterMovement 转动胶囊，Mesh 用固定资产偏移对齐其前向。用户重新编译后在角色蓝图选择 Mesh，检查 Rotation Z=-90、人物正面与胶囊前向箭头一致；若蓝图覆盖旧值，重置为父类默认值。实际运行效果由用户验证，未声称修复已通过运行验证。相关文件和记录审阅后提交推送，结果以 Git 输出及最终回复为准。
+- 参考：https://dev.epicgames.com/documentation/unreal-engine/coder-04-adding-a-firstperson-camera-mesh-and-animation?lang=en-US 。
