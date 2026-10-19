@@ -385,3 +385,13 @@
 - 验证结果：内部数据静态读取完成；未打开 Max 或 UE，未导出、编译或测试。未在默认 Autodesk 安装目录及 PATH 找到 Max 工具，此检查不代表整机未安装。
 - 失败记录：按 see 技能运行 scripts/see.sh，返回 .max 不支持媒体解析，转为本地二进制只读检查；首次 Python 管道中中文路径编码变为问号而失败，随后用目录枚举成功读取。Python olefile 模块不可用，使用内置 struct 读取复合文档目录，未安装依赖。
 - 未完成事项：每个动作实际帧数、循环效果和武器跟随情况需在 3ds Max 播放确认；本次文件检查和解释完成。仅暂存本次记录，检查状态和暂存差异后提交推送。
+
+## 2026-10-19 23:20:29 北京时间 — MAX 转 UE 动画序列操作说明
+
+- 用户需求：了解如何把雅角色的 .max 动作转换为 UE 可用的动画序列。
+- 执行内容：核对项目 UE 5.8 配置、既有角色资源说明和 Epic/Autodesk 官方文档，提供先用 Unagi_Idle.max 单份导出的流程：Max 预览动作和帧区间、保留完整骨骼层级、FBX 开启动画及烘焙/逐帧重采样，然后 UE 仅导入动画并关联人物实际使用的 Skeleton。解释烘焙将 Max 控制器结果转换成骨骼变换曲线；说明单位一致、骨架兼容、武器跟随和导入后预览要点。
+- 涉及文件：仅 Docs/ExecutionLog.md；只读 ThirdPersonARPG.uproject 和 Docs/UnagiCharacterSetup.md，保留已有配置、地图和未跟踪资产。
+- 验证结果：核对官方动画 FBX 导入与 Bake Animation 文档；未实际打开 Max/UE、导出 FBX、导入动画、编译或执行测试。现有骨架名称 SKEL_Unagi 需以当前人物模型实际关联资产为准，未保证与 MAX 导出的骨架兼容。
+- 失败记录：按项目 see 路径处理规则运行 scripts/see.sh 检查上下文 MyCharacter.cpp，返回 .cpp 非支持媒体格式，不影响文本说明。
+- 未完成事项：实际转换与播放待用户按步骤执行；本次操作说明完成。审阅状态和暂存差异后仅提交本次日志并推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-animations-using-fbx-in-unreal-engine ； https://help.autodesk.com/cloudhelp/2016/ENU/3DSMax/files/GUID-31EA2A4F-A126-498B-96E8-31811522738A.htm
