@@ -244,3 +244,16 @@
 - 检查结果与限制：仅源码、二进制资源元数据及 Git 差异静态审阅；未编译、未启动 UE、未运行测试，未检查实际关卡地面碰撞或运行时蓝图覆盖。二进制 RelativeLocation 首次试读因属性头字节对齐不正确得到无效浮点值，核对属性尺寸、标志和导出范围后读取为 (0,0,116)，确认属于 SpringArm，未依据误读修改资源。按项目路径规则调用 see 检查附带 .h，返回不支持媒体格式后继续文本检查。
 - 用户验证步骤：重新编译加载后，检查角色蓝图 Mesh 的 Location Z 继承为 -88（当前默认胶囊半高）；若存在旧覆盖，将 Mesh 的 Location 重置为父类默认值，使脚底与胶囊底部对齐。胶囊尺寸或模型原点改变时应重新对齐。实际落地效果交由用户验证，本次不声称运行已通过。审阅并提交推送本次四个文本文件，结果以 Git 输出及最终回复为准。
 - 权限执行：普通沙箱 git add 因 .git/index.lock 写权限受限而失败，随后仅为必要的 Git 暂存申请环境权限重试；未为源码修改、只读检查或执行步骤额外请求业务确认。
+
+## 2026-10-19 20:45:34 北京时间 — 检查 039-雅 资源并说明角色替换流程
+
+- 用户需求：查看新放入的 039-雅 资源，说明各文件如何搭配，以及如何把当前角色替换为这套骨骼模型；本次只检查和提供操作说明，不代为导入或修改资产。
+- 检查内容：读取项目规范、目录、MyCharacter 和 ARPGGameMode；以只读 Python 解析二进制 FBX 的节点、几何范围、骨骼名称、动画时间、材质及纹理连接；读取 TGA 文件头并对同名贴图计算哈希。查阅 Epic 官方 FBX 导入与 IK Rig 重定向文档，并核对本机 UE 5.8 Interchange 的 Combine Skeletal Meshes 枚举。
+- 资产结果：源目录共有 12 个 FBX、149 个 MAX、30 个 TGA，没有 UE uasset。1～11.fbx 每份有 8 个 Mesh（Body、Face、Hair 及 Weapon01～05）、206 个 LimbNode、40 个表情 Shape 和 1 个名为 Take 001 的动画，骨骼名称列表一致；不能从匿名编号确定待机/跑步等动作语义。Unagi_Ghost.FBX 只有 1 个 Mesh 和 2 个 LimbNode，不能作为主体人物。MAX 目录有 Unagi.max 及 Idle、Walk、Run 等命名源文件，未打开 MAX 场景。
+- 材质结果：Material #25→Hair、#27→Body、#26→Face、#28→Weapon，FBX 连接到相应 _D 贴图的 DiffuseColor。10 张独立贴图各有 3 份相同内容，均 2048×2048；只需导入 fbx/雅/TEX 一套。贴图引用是原作者 W: 绝对路径，应手动重新关联。_M 没有提供 FBX 材质通道连接，未推断其为 ORM 或直接金属度。
+- 导入与架构建议：先以一份 FBX 建立 SK_Unagi 和新 Skeleton，不强用旧 Mannequin 骨架；合并同 Skeleton 的可见 Mesh，保留需要的 Morph Targets，后续其他 FBX 仅导动画。通过 BP_Character 的 Mesh 选择资源，输入、移动和相机仍由原 C++ 类负责；按新模型重新对齐朝向、脚底和胶囊。自带 MAX 动作需要 DCC 导出 FBX；使用现有武士动画则需 IK Rig / IK Retargeter 和匹配的 AnimBlueprint。
+- 比例提示：FBX 单位声明为厘米，但几何和主要骨骼坐标接近 0～2 且未见根部 100 倍缩放，可能导入偏小；文档要求先确认 UE 最终尺寸，只有约 2 cm 时才统一调整导入缩放，不宣称已在 UE 验证需要 100 倍。编号动画的时长和材质映射已整理到说明文档。
+- 涉及文件：新增 Docs/UnagiCharacterSetup.md，追加 Docs/ExecutionLog.md。原始解析报告临时保存在被忽略的 Saved/AssetInspection/UnagiAssetInventory.json，不提交。保留用户已有 Config/DefaultEditor.ini、Content/NewMap.umap、Content/BP/ 和整个 Content/039-雅/，不暂存、不改写这些配置和资产。
+- 验证与限制：仅静态检查和文档审阅，没有编译、运行测试、启动 UE、导入资产或打开 3ds Max。按路径规则调用 see 处理资源目录，脚本因目录输入及中文路径传递问题返回未找到媒体文件，未获得视觉结果；实际形象、动画含义、_M 通道含义、最终比例及参考姿势均未验证，文档区分了已读元数据与待用户确认事项。
+- 未完成事项：用户按说明完成 UE 导入、材质连接、动画选择与蓝图 Mesh 替换；本次完成资源检查与操作指南，不声称角色已经替换。仅暂存两份文档、审阅 Git 状态和暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-skeletal-meshes-using-fbx-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine 。
