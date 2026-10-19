@@ -145,6 +145,17 @@ FBX 中的材质绑定和 Diffuse 引用已读取确认：
 - 如果关卡放置了自动控制的 `BP_Character`，修改这个蓝图即可。如果由 GameMode 出生，则其 Default Pawn Class 应指向这个角色蓝图；当前原生 ARPGGameMode 默认是 `AMyCharacter`，它本身不指定角色资源。
 - 此时可以替换外观，但没有匹配的动画驱动时仍可能是参考姿势。Mesh、Skeleton、动画和 AnimBlueprint 是不同职责，换 Mesh 不会自动把旧动画转换成新骨架。
 
+## 武器悬空与手持挂接
+
+先双击当前人物骨骼网格体，观察没有添加其他组件时是否仍显示悬空武器。源 FBX 同时包含 `Unagi_Weapon01`～`05`，因此可能是合并进角色的武器几何；当前尚未直接观察用户界面，不能认定是挂接错误或缩放造成。
+
+- 若人物网格预览本身就带武器：它可能已经蒙皮到专用武器骨骼。Socket（插槽）不能直接把同一个网格资产中的一部分几何重新挂到手上。先检查源动画是否驱动该武器骨骼；长期装备方案可在 3ds Max 等建模软件中保留原文件，另存并拆出武器，以握柄附近为合理原点，按一致单位导出独立武器和不带该武器的角色。不要仅给角色添加另一把武器导致重复，也不要删除未知骨骼作为快捷修复。材质槽不等于可自由变换的物体。
+- 若武器是独立组件或资产：打开人物骨架，在 Skeleton Tree（骨骼树）定位实际右手骨骼（本资源可能采用 `Bip001 R Hand` 一类名称，需实际确认），右键 Add Socket（添加插槽），命名 `Weapon_R` 并保存骨架。在 `BP_Character` 中将武器网格组件置于角色 Mesh（网格体组件）之下，Parent Socket（父级插槽）选择 `Weapon_R`，以相对位置/旋转归零为起点，按握柄实际位置调整偏移与朝向；尺寸使用与人物一致的单位。手持时关闭武器 Simulate Physics（模拟物理），按游戏需要配置碰撞。
+
+原理：手骨的动画变换带动插槽，插槽再带动独立武器组件；握柄偏移由插槽或武器相对变换补偿。Add Preview Asset（添加预览资产）只用于编辑器预览，不等于在游戏中装备。挂接也不会自动弯曲手指，需要匹配的握持动画。具体来源与蒙皮情况需确认后再选路径，本文未修改武器或资产，未运行测试。
+
+官方参考：[Skeletal Mesh Sockets（骨骼网格体插槽）](https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine)。
+
 ## 动画搭配的两条路线
 
 **用雅自带动作：** 模型建立后，再从编号 FBX 导入动画，关闭 Import Mesh、选择 `SKEL_Unagi`、开启 Import Animations，避免重复生成 11 份模型和骨架。逐个预览后按实际动作重命名；如果编号文件没有待机/走/跑，就用 Max 打开对应 `Unagi_Idle.max`、`Unagi_Walk.max`、`Unagi_Run.max`，以相同骨骼层级导出 FBX、烘焙动画并使用一致单位。为 `SKEL_Unagi` 创建 `ABP_Unagi`，通过速度驱动 Idle/Walk/Run 的 BlendSpace/状态机，最后赋给角色 Mesh 的 Anim Class。没有 Max 时，需要可用的已导出 FBX 或走重定向路线。

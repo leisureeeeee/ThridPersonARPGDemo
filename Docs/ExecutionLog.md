@@ -341,3 +341,12 @@
 - 验证结果：只读核对官方资料；未编译、未测试、未重新导入，实际保留情况由用户在编辑器确认。首次 PowerShell 管道写入中文变成问号，审阅暂存差异发现后用补丁修正，仅修正本条新记录。
 - 后续：本次说明任务完成；仅暂存本条记录，审阅后提交推送，结果见最终回复。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
+
+## 2026-10-19 22:06:00 北京时间 — 说明悬空武器的诊断与手持挂接
+
+- 用户需求：导入后武器悬浮上空，希望放到角色手中。
+- 执行内容：读取既有资源检查记录，确认源 FBX 含五个武器网格；核对 Epic 插槽文档，补充区分合并蒙皮几何与独立武器组件的检查方法，以及手骨插槽、蓝图父组件、偏移、物理和握持动画的职责。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；未修改模型、骨架、蓝图、代码或用户配置。
+- 验证结果与限制：只读检查文档和 Git 状态，未直接观察用户当前武器结构，未编译或测试。不能认定是缩放或骨骼绑定造成，先由用户确认人物网格预览是否自带悬空武器；给出两种结构对应步骤，不把添加插槽描述成能移动合并网格的一部分。
+- 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap 以及未跟踪资源；仅暂存本次两份文档，检查差异后提交推送。资产调整待确认实际结构后操作，本次说明工作完成。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine 。
