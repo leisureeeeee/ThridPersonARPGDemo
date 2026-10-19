@@ -131,3 +131,22 @@
 - 涉及文件：仅追加 Docs/ExecutionLog.md；AGENTS.md 与 MyCharacter.cpp 用于只读核对。
 - 验证结果及限制：已核对上述文档和可访问源码，git diff --check 通过；未修改构造函数或反射声明，无需编译。部分直接源码 URL 和首次使用的单数 PlayerController 文档地址访问失败，改用可访问的项目文件及官方复数页面完成核验；不依赖未成功访问的内容。按项目路径规则调用 see，返回 .cpp 不支持媒体格式，不影响源码文本核对。
 - 未完成事项：本次调研无待处理项；此前纯 C++ 输入改造的完整构建与旧 IA / IMA 清理仍等待用户保存并关闭 UE，本次检查进程 44852 仍运行。执行记录单独提交推送，实际结果以 Git 输出和最终回复为准。
+
+## 2026-10-19 16:39:53 北京时间 — 将玩家输入迁移到独立 PlayerController
+
+- 用户需求：由 PlayerController 接收输入，创建独立文件夹存放其 C++ 文件，并按解耦与封装要求重构。
+- 执行内容：新增 Source/ThirdPersonARPG/PlayerController/MyPlayerController.h 和 .cpp，集中管理运行时 Axis2D 移动动作、WASD 映射、SetupInputComponent 绑定、本地玩家映射注册及 EndPlay 清理。输入处理每次通过 GetPawn() 获取当前 Pawn，再使用 APawn::AddMovementInput 传递移动意图，不引用或转换为具体 MyCharacter；无 Pawn、禁用 Pawn 输入或忽略移动输入时不处理移动。保留相反按键抵消、斜向长度限制和控制器水平朝向转换。
+- 角色与启动配置：移除 MyCharacter 中所有输入状态、Enhanced Input 依赖、绑定及映射生命周期函数，仅保留摄像机和角色移动组件设置；摄像机成员改为 private 并保留蓝图只读访问，移除空 BeginPlay / Tick 覆盖但保留原有 Actor Tick 开关。新增 GameMode/ARPGGameMode.h 和 .cpp，指定 AMyPlayerController 与 AMyCharacter，并在 Config/DefaultEngine.ini 配置 GlobalDefaultGameMode，确保新控制器通过默认游戏模式启用。保持已有 Player0 自动控制设置及 NewMap 默认地图配置。
+- 模块与协作规范：EnhancedInput 改为模块私有依赖；增加 ModuleDirectory 私有头文件搜索路径；更新 AGENTS.md，记录由独立 PlayerController 处理输入、Character 不依赖具体按键及 Enhanced Input 类型的架构选择。
+- 涉及文件：AGENTS.md、Config/DefaultEngine.ini、MyCharacter.h / .cpp、ThirdPersonARPG.Build.cs、新增 PlayerController 与 GameMode 的四个文件、Docs/ExecutionLog.md；未修改用户蓝图、地图或其他二进制资源，未追踪构建产物。
+- 验证结果：git diff --check 通过；核对 DefaultInput.ini 已使用 EnhancedPlayerInput / EnhancedInputComponent；源码搜索确认 Character 中不再含 Enhanced Input 绑定，Controller 不依赖 MyCharacter。独立游戏目标 ThirdPersonARPG / Win64 / Development 完成全部 15 项动作并成功链接，Result: Succeeded、退出码 0；保留原有 Tick 行为后再完成 3 项增量动作，最终版本仍成功构建，退出码 0。两次游戏构建均使用 -NoUBA -MaxParallelActions=1。
+- 失败及修正：首次补丁因同一文件同时执行删除和新增被工具拒绝，未写入，改用单次文件更新完成。首次编辑器构建报 ARPGGameMode.cpp 无法找到模块内头文件 C1083，增加私有搜索路径后修正；重试时所有 C++ 与反射代码编译通过，但链接 UnrealEditor-ThirdPersonARPG.dll 再次 LNK1104，Result: Failed、退出码 1，当前 UE 进程 44852 占用 DLL。本任务按项目规则调用 see 处理附带 .cpp 路径，返回不支持媒体格式，源码通过正常文本方式核对。
+- 验证范围与后续事项：已验证最终独立游戏目标完整构建，未启动 PIE 或实际按键测试；编辑器模块仍需在用户保存并关闭 UE 后完成链接，当前运行中的编辑器尚未加载新控制器及 GameMode。此前旧 IA / IMA 的编辑器内存清理仍等待保存并关闭 UE，本次未删除其自动保存备份。仅提交本次明确处理的文件，提交推送结果以实际 Git 输出和最终回复为准。
+
+## 2026-10-19 16:39:53 北京时间 — 核对对话字号调整入口
+
+- 用户需求：将对话字体调大；该要求在代码重构过程中追加，不取消原重构任务。
+- 执行内容：读取并使用 OpenAI Docs 技能，检索并实际打开官方设置及 IDE 设置文档，核对独立客户端的 Settings / Appearance / UI font size 与 VS Code 兼容扩展的 chat.fontSize、chat.editor.fontSize。已询问用户具体客户端，并提供独立客户端设置入口及 18 px 的示例值。
+- 来源：https://learn.chatgpt.com/docs/reference/settings ； https://learn.chatgpt.com/docs/ide/settings 。
+- 验证结果与限制：当前没有可用的桌面界面控制连接，且用户尚未确认使用 Rider 面板、独立客户端或浏览器；未实际修改客户端字号，也未改写 IDE 或 Codex 配置。此项仅追加执行记录，无源码变更，无需单独编译。
+- 未完成事项：实际字号调整尚未完成；不能将 VS Code 或独立客户端设置入口直接视为 Rider 设置入口。

@@ -8,10 +8,6 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-class UInputAction;
-class UInputMappingContext;
-class UEnhancedInputLocalPlayerSubsystem;
-struct FInputActionValue;
 
 UCLASS()
 class THIRDPERSONARPG_API AMyCharacter : public ACharacter
@@ -19,38 +15,12 @@ class THIRDPERSONARPG_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AMyCharacter();
 
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UInputMappingContext> CharacterMappingContext;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> MoveAction;
-
-	void CreateInputMappingContext();
-	void Move(const FInputActionValue& Value);
-	void RemoveInputMappingContext();
-	TWeakObjectPtr<UEnhancedInputLocalPlayerSubsystem> MappingSubsystem;
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void PawnClientRestart() override;
-	virtual void UnPossessed() override;
-
 };
