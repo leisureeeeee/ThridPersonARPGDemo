@@ -81,3 +81,13 @@
 - 未完成事项：用户尚未指定要设为默认的关卡，本次提供操作方法，不执行配置替换。执行记录提交并推送，实际结果以 Git 输出及最终回复为准。
 - 提交前观察：用户工作过程中出现未跟踪资源 Content/NewMap.umap，保留原样，不纳入本次执行记录提交。
 - 执行限制：首次 git add 因沙箱禁止创建 .git/index.lock 失败，获准重试后暂存成功。
+
+## 2026-10-19 15:39:12 北京时间 — 将默认关卡切换为 NewMap 并删除自带 Demo 地图
+
+- 用户需求：将项目初始关卡换成 NewMap，并删除自带 Demo 关卡和地图。
+- 执行内容：将 Config/DefaultEngine.ini 的 GameDefaultMap 与 EditorStartupMap 均设置为 /Game/NewMap.NewMap；将用户已有 Content/NewMap.umap 纳入版本管理，不改写地图内容；删除 Content/ARPG_Samurai/Demo/Maps/DemoMap.umap 及其专属 DemoMap_BuiltData.uasset。保留 Demo 目录中的角色、武器、几何体和材质资源；不修改引擎安装中的 OpenWorld 模板。
+- 涉及文件：Config/DefaultEngine.ini、Content/NewMap.umap、上述两项 Demo 地图资源、Docs/ExecutionLog.md。
+- 验证结果：NewMap 的 UE 包标记为 C1-83-2A-9E；删除前对其他 .uasset / .umap 进行 UTF-8 与 UTF-16 字符串扫描，未发现 DemoMap 引用（不等同于引擎资产引用审计）；删除后 Content 中唯一 .umap 为 NewMap.umap；配置差异与 git diff --check 检查通过。
+- 运行验证范围：现有编辑器日志显示 2026-10-19 15:38:14 在 NewMap 中创建 PIE 世界并运行，15:38:22 结束；此为用户当前操作的日志证据。本次未重启编辑器、未验证重启自动加载和打包启动；无 C++ 修改，无需编译。
+- 执行限制：按项目规则用 see 处理附带 MyCharacter.h 路径，首次 Bash 受沙箱信号管道限制，获准重试后脚本报告 .h 不支持媒体解析；使用正常文本与文件检查完成任务。
+- 未完成事项：无待处理的请求内文件变更；当前已打开编辑器的内存设置可能需要重启后重新读取配置。仅提交本次明确涉及的文件，NewMap 按 .gitattributes 使用 Git LFS；提交推送结果以实际 Git 输出和最终回复为准。
