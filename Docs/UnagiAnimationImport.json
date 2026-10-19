@@ -1,0 +1,109 @@
+{
+  "engine_version": "5.8.3",
+  "mesh": "/Game/Asset/Unagi/SK_Unagi",
+  "skeleton": "/Game/Asset/Unagi/SKEL_Unagi",
+  "import_uniform_scale": 100,
+  "max_conversion_status": "blocked_missing_3ds_max",
+  "validation": "Imported class, frame count, duration and bone-track count read during import. No playback or gameplay tests.",
+  "clips": [
+    {
+      "source": "Content/039-雅/fbx/雅/1.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_01",
+      "frames": 100,
+      "seconds": 3.333333,
+      "bone_tracks": 234,
+      "source_sha256": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00",
+      "asset_sha256": "82c0df2b9906a8e85c0add5fa688ebcffd295b653f6f174223f0dba84515ea7e"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/2.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_02",
+      "frames": 39,
+      "seconds": 0.65,
+      "bone_tracks": 234,
+      "source_sha256": "4f9375422c95c154c27370d7a78d3c299120c3d51cbef9b4f2929ad4ed2256b5",
+      "asset_sha256": "994e26310aa62923ad333e4f166ef05c659365a2128ec312fac6e002d47a2979"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/3.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_03",
+      "frames": 199,
+      "seconds": 3.316667,
+      "bone_tracks": 234,
+      "source_sha256": "7b6907a95fb4f87494407c680cf1e642b0d71dac086545769724f2b40f6eb10d",
+      "asset_sha256": "19abad91067e6609bb8ff8e977a4357ae9ff05566cc8520f2d7a7a2611801964"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/4.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_04",
+      "frames": 97,
+      "seconds": 3.233333,
+      "bone_tracks": 234,
+      "source_sha256": "4a2f75a0c1e0cbaf82a5f0600b9e1c250d08e8e2e42184545ba4f643a911b431",
+      "asset_sha256": "da8c2c034118e53c430506faaae27a89cb1c33eb38b9fbc40432814e34e2d58e"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/5.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_05",
+      "frames": 45,
+      "seconds": 0.75,
+      "bone_tracks": 234,
+      "source_sha256": "18ae7c32928c1542998fcbf0d473b33cbf9c75b727894c19992bc90b4ccaccbf",
+      "asset_sha256": "d7c1926e46e39aa2d3c1b9be3d6a5143fecfe480545c1e86e1cf4381c0965738"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/6.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_06",
+      "frames": 53,
+      "seconds": 0.883333,
+      "bone_tracks": 234,
+      "source_sha256": "219140ba0bbcf42c21e6725da10b769c37811fae084f1e574499d6e909960f54",
+      "asset_sha256": "6682aa96ef6abd8b8bf941fea96b45262b4850c5bbd916be00027c14fb15fd98"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/7.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_07",
+      "frames": 27,
+      "seconds": 0.45,
+      "bone_tracks": 234,
+      "source_sha256": "7b409d7868774d459d8a21532fbb154f1fe50fe2bbf4e721512603254451f319",
+      "asset_sha256": "4cadcdff187abc3f39894e2089f3b77ee6f977241fb7ee90c6ff8ac272b4c0ef"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/8.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_08",
+      "frames": 23,
+      "seconds": 0.766667,
+      "bone_tracks": 234,
+      "source_sha256": "514637750440c9bc7dde43286b7de5b3b8cdb3e01205b2142f787fce89ea8947",
+      "asset_sha256": "6e4e32cb07ffc25ce66bfa23b8b60aa00e7d8166194e560b708a82260d56d3cc"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/9.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_09",
+      "frames": 233,
+      "seconds": 3.883333,
+      "bone_tracks": 234,
+      "source_sha256": "f00917bceeb2e04faf96f7776ea81e3c905166a6de5ca8634a153dd09e76b338",
+      "asset_sha256": "6edb8ea9dacbf1e4bf3095b2b84539755b2fe51ab176854888606705369e28d7"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/10.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_10",
+      "frames": 113,
+      "seconds": 1.883333,
+      "bone_tracks": 234,
+      "source_sha256": "bf6c598fcb4bc98eb2db7d2a03fb2e47d1ab02158a3cd6ce5bb8e583a5c4d924",
+      "asset_sha256": "fe558f1820484d502a1f222a40861df3fe5e0f78230c3c9ba0f27e1c7f08ce4a"
+    },
+    {
+      "source": "Content/039-雅/fbx/雅/11.fbx",
+      "asset": "/Game/Asset/Unagi/Animations/SourceFBX/AN_Unagi_11",
+      "frames": 51,
+      "seconds": 0.85,
+      "bone_tracks": 234,
+      "source_sha256": "f4705715963b20404553bb749c14164a15ec2d0622f361a907888887c97d2721",
+      "asset_sha256": "2b01e60f8bf98333dbfe7442917f0a173cebae6da8eb335376c9353156139632"
+    }
+  ]
+}

@@ -395,3 +395,15 @@
 - 失败记录：按项目 see 路径处理规则运行 scripts/see.sh 检查上下文 MyCharacter.cpp，返回 .cpp 非支持媒体格式，不影响文本说明。
 - 未完成事项：实际转换与播放待用户按步骤执行；本次操作说明完成。审阅状态和暂存差异后仅提交本次日志并推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-animations-using-fbx-in-unreal-engine ； https://help.autodesk.com/cloudhelp/2016/ENU/3DSMax/files/GUID-31EA2A4F-A126-498B-96E8-31811522738A.htm
+
+## 2026-10-19 23:31:26 北京时间 — 执行雅动画导入并准备 MAX 批量转换
+
+- 用户需求：代为将雅的 MAX 动画转换为 UE 可用动画序列，用户离开休息，按已有授权自主执行。
+- 实际完成：本机未找到可运行的 3ds Max / 3ds Max Batch，完整 MAX 转换受阻；先使用资源包已有 1～11.fbx，通过独立 UE 5.8.3 Python 命令行进程导入 11 个 Animation Sequence，存放 Content/Asset/Unagi/Animations/SourceFBX/AN_Unagi_01～11.uasset。每段关联当前 SKEL_Unagi，有 234 条骨骼轨道，时长约 0.45～3.883 秒。没有把现有 FBX 导入冒称 MAX 转换完成。
+- 实现与原理：新增 Tools/Unagi/Import-UnagiAnimations.ps1 和 import_unagi_animations.py，读取 SK_Unagi 保存的 Interchange 导入偏移和 100 倍缩放，构建仅导入骨骼动画的流程；关闭网格、材质、贴图、通用属性曲线及骨架曲线元数据写入，只保存新动画，现有目标跳过。新增 Export-UnagiAnimations.ps1 和 export_unagi_animations.py，为安装可用 Max 后逐帧烘焙控制器、导出 FBX 并调用 UE 导入准备可重跑流程；默认单份待机，显式参数可处理主目录 70 份，包含外层不同内容的备选场景时共 140 份，Ghost 场景独立骨架不混入主角。
+- 涉及文件：11 个新动画 uasset、Tools/Unagi 下四个脚本、Docs/UnagiAnimationConversion.md、Docs/UnagiAnimationImport.json、Docs/ExecutionLog.md。临时配置、完整运行日志、导出计划和依赖阻塞报告仅放 Saved/UnagiAnimationWork，未纳入版本管理。
+- 验证结果：UE 导入结果读取到 AnimSequence 类型、骨架关联、非零时长、帧区间数和 234 条轨道；最后导入进程成功退出且报告 complete，0 error(s)/0 warning(s)。前三段编号 01/04/08 保留成功的 30 Hz 版本，其余八段 60 Hz 保留半帧结束时间。保存了源 FBX 与生成资产 SHA-256 清单。原 SK_Unagi 与 SKEL_Unagi 导入前后 SHA-256 分别为 0e19e2b3072bffddde4b5fbbf510c02890c6c688a48b0cad44b835d5717bb9fb 和 acf59bd0e8e658bb2e70dfd426311ee67fbc8c19a439bf5e356dc9e4a96b93ea，保持一致；原 UE 编辑器进程 23872 仍在运行。静态检查 PowerShell 脚本语法通过，Python 脚本仅做语法检查；未新增或执行自动化/PIE/功能测试，未播放确认动作，未执行项目编译。引擎命令行启动自身曾调用 SDK 平台枚举，并非 C++ 编译。
+- 失败与修复：首次搜索命令的带空格路径引号错误，随后补查；首个 PowerShell 命令的逗号插件参数未加引号导致解析失败，修正后运行；环境清单遇 UE Array 无法 JSON 序列化，转 list 后成功。导入脚本初稿使用不存在的 unreal.duplicate_object、已废弃的旧骨骼层级属性，均在保存动画前失败，改用原生新流水线和 UE 5.8 属性后解决。初次导入的八段因 30 Hz 半帧边界被拒，改用 60 Hz 后全部成功。执行 MAX 导出入口实际返回缺失 3dsmaxbatch.exe，报告 blocked，并保留 140 场景计划；Max 端尚无运行验证。see 对上下文 MyCharacter.cpp 返回非媒体格式。工作区整体 git diff --check 报用户原有 DefaultEditor.ini 文件末尾空行，本次不修改；本次暂存文件另行检查。
+- 用户修改及依赖保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap、原有源资源、角色资产和 BP；不关闭编辑器、不覆盖用户资产、不安装商业软件、不上传源文件到转换服务。新动画依赖工作区原有但尚未跟踪的 SKEL_Unagi / SK_Unagi，本次不顺带暂存这些用户文件；跨工作区使用需具备这套依赖，说明文档已写明。
+- 未完成事项：缺少已安装且可用的 Max，故尚未将 MAX 中的命名动作烘焙导出；未来需先处理单份待机并确认骨架/单位，再批量执行。编号动作语义、循环、武器跟随和角色运行效果待用户在编辑器预览；未接入动画蓝图。实际导入部分完成，完整 MAX 转换保持受阻，未声称全部完成。仅暂存本次新增文件与记录，审阅暂存差异后提交推送，二进制使用现有 Git LFS 规则。
+- 官方来源：https://help.autodesk.com/cloudhelp/2018/ENU/3DSMax-Batch/files/GUID-48A78515-C24B-4E46-AC5F-884FBCF40D59.htm ； https://help.autodesk.com/cloudhelp/2024/ENU/3DSMax-Interoperability/files/GUID-3242579C-E37D-4A7C-BFA5-F4A2F22653E7.htm ； https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-animations-using-fbx-in-unreal-engine
