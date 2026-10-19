@@ -74,6 +74,17 @@ Skeletal Mesh 是人物表面网格及蒙皮，Skeleton 是骨骼名称和层级
 
 材质实例共享父材质定义好的节点逻辑，只覆盖纹理等参数；只有普通材质才编辑节点图。如果打开的是人物模型预览窗口，也不能在该预览区域添加材质节点。
 
+四个实际实例的对应关系：先勾选参数左侧的覆盖复选框，然后在 DiffuseColorMap（漫反射颜色贴图）与 NormalMap（法线贴图）资源框中选择下表纹理，完成后分别保存。
+
+| 材质实例 | 部位 | DiffuseColorMap（漫反射颜色贴图） | NormalMap（法线贴图） |
+| --- | --- | --- | --- |
+| `Material__25` | 头发 | `Unagi_Hair_D` | `Unagi_Hair_N` |
+| `Material__26` | 脸 | `Unagi_Face_D` | 保留父材质的默认平面法线 |
+| `Material__27` | 身体 | `Unagi_Body_D` | `Unagi_Body_N` |
+| `Material__28` | 武器 | `Unagi_Weapon_D` | `Unagi_Weapon_N` |
+
+四个实例的 DiffuseColorMapWeight（颜色贴图权重）均可先覆盖为 1。头发、身体、武器的 NormalMapWeight（法线贴图权重）覆盖为 1；脸没有配套 Face_N，先覆盖为 0，不要用身体或头发的法线代替。`_M` 纹理的通道含义尚未确认，暂不分配给其他参数。本表只提供基础颜色与法线配置，不代表已经还原源角色的卡通着色、头发透明或其他特殊效果。
+
 ### 普通材质中的身体贴图接线（仅自建普通材质时使用）
 
 下面是普通 Material（材质）的节点做法，不适用于上面四个已导入的 Material Instance（材质实例）。如果确实在有节点与连线的画布中拖拽无反应，可手动添加节点：在空白处按住 T 并单击左键，创建 Texture Sample（纹理采样）；选中它，在 Details（详情）的 Texture（纹理）资源框选择对应的 Body_D 或 Body_N。也可在画布空白处右键搜索 Texture Sample（纹理采样）添加。

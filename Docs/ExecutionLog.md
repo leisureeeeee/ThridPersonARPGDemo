@@ -304,3 +304,11 @@
 - 检查结果与限制：已确认导入文件的材质实例类型及父材质参数名称，并查阅 Epic 官方材质实例和手动添加纹理节点说明；未操作用户界面或验证实际渲染效果。首次大段资产元数据输出过长，改为只取类型和父材质信息；首次引擎资产文件搜索受忽略规则影响，改用 --no-ignore 找到对应父材质。
 - 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/ 的已有修改和未跟踪资产，只暂存两份文档。用户在 Material__27 实例参数中指定纹理并保存后观察效果，本次不声称已完成材质配置。审阅暂存差异后提交推送，结果以 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/instanced-materials-in-unreal-engine ，https://dev.epicgames.com/documentation/unreal-engine/artist-quick-start-in-unreal-engine 。
+
+## 2026-10-19 21:46:35 北京时间 — 列出其他材质实例的贴图配置
+
+- 用户需求：询问除身体以外的其他材质应如何配置。
+- 执行内容：基于此前已读取确认的 FBX 部位绑定、导入材质实例类型、父材质参数及贴图清单，补充四个实际实例的参数对照表：Material__25 对应 Hair_D/Hair_N，Material__26 对应 Face_D，Material__27 对应 Body_D/Body_N，Material__28 对应 Weapon_D/Weapon_N。说明先勾选覆盖框、颜色贴图权重设 1，头发/身体/武器法线权重设 1；脸没有配套 Face_N，保留默认平面法线并将法线权重设 0。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；不改写任何材质或贴图资产。_M 通道含义仍未确认，不推荐随意分配。
+- 验证结果与限制：仅核对已有静态检查结论和本次文档差异，未编译、测试、启动 UE 或操作参数；实际渲染、透明和卡通效果未验证，不声称材质已经配置完成。
+- 用户修改保护及后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/Asset/、Content/BP/；仅暂存两份文档，审阅暂存区后提交推送。本次说明任务无其他待办，资产设置及效果由用户自行操作验证，提交推送结果以实际 Git 输出及最终回复为准。
