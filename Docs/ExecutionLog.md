@@ -150,3 +150,22 @@
 - 来源：https://learn.chatgpt.com/docs/reference/settings ； https://learn.chatgpt.com/docs/ide/settings 。
 - 验证结果与限制：当前没有可用的桌面界面控制连接，且用户尚未确认使用 Rider 面板、独立客户端或浏览器；未实际修改客户端字号，也未改写 IDE 或 Codex 配置。此项仅追加执行记录，无源码变更，无需单独编译。
 - 未完成事项：实际字号调整尚未完成；不能将 VS Code 或独立客户端设置入口直接视为 Rider 设置入口。
+
+## 2026-10-19 16:49:52 北京时间 — 说明开局角色摄像机与复杂镜头架构
+
+- 用户需求：了解如何让开局玩家画面使用受控角色的摄像机，并进一步规划未来复杂摄像机操作的项目架构。
+- 执行内容：只读核对 MyCharacter、MyPlayerController、ARPGGameMode 及默认游戏模式配置；核对 UE 本机 Pawn、PlayerController、Actor::CalcCamera、CameraComponent、SpringArm 和 PlayerCameraManager 的视角链路；查阅 Epic 官方摄像机、自动目标管理、PlayerCameraManager、Lyra Camera Modes 和 Gameplay Camera System 文档。
+- 结果与原理：角色被控制后，默认自动摄像机管理通常将该 Pawn 用作 ViewTarget，再读取其激活摄像机；自动激活到该玩家的独立 CameraActor 可优先成为目标。SpringArm 使用 Pawn 视角朝向，FollowCamera 沿用弹簧臂变换；当前只有 WASD 输入，尚无鼠标视角输入绑定。
+- 架构建议：新增 Docs/CameraArchitecture.md（明确为未实现提案），划分 Controller 输入意图、CameraRigComponent 角色装置、CameraMode 构图模式及 PlayerCameraManager 最终视角；提出模式请求句柄与优先级、基础视角单一来源、平滑过渡、修饰器叠加和过场目标交接，按实际需求逐步落地。提供编辑器内的开局、跟随、碰撞、模式恢复与目标销毁验证方法。
+- 涉及文件：新增 Docs/CameraArchitecture.md，并追加 Docs/ExecutionLog.md；未改动运行时代码或用户资产。开始检查时用户已有 Content/NewMap.umap 修改和未跟踪 Content/BP，均保留且不纳入提交。
+- 验证结果与限制：文档建议与本机实现及官方一手文档交叉核对，差异检查通过；仅文档变更，无需编译，未实际运行摄像机验证。SetViewTargetWithBlend 的某次官方 API 页面访问失败，使用本机接口与相关官方摄像机文档核验，不依赖失败页面。按项目规则调用 see 处理附带 .cpp，报告不支持媒体格式。首次全量 git diff --check 因用户地图触发 LFS 过滤器而受沙箱 sh 信号管道限制，正常环境重试后退出码 0。
+- 来源：详见 Docs/CameraArchitecture.md 的官方链接；GameplayCameras 在本机插件描述与当前 UE 5.8 文档中均标记 Experimental，因此提案不要求立即切换基础设施。
+- 未完成事项：本次完成调研与设计建议，复杂摄像机模块尚未实现；开局实际 ViewTarget 仍需按文档在编辑器验证。文档与本记录单独提交推送，结果以 Git 输出及最终回复为准。
+
+## 2026-10-19 16:49:52 北京时间 — 将实现原理讲解设为持续协作要求
+
+- 用户需求：输出代码后说明如何实现、为什么这样实现；此后也要持续讲解原理，帮助用户学习游戏开发。
+- 执行内容：在 AGENTS.md 新增实现说明与学习支持规范，要求每次代码输出、实现或重构说明修改内容、UE 类型与生命周期、调用链、职责及依赖、取舍，并提供编辑器验证方法；区分已实现行为、提案与未验证假设。结合当前摄像机问题补充弹簧臂与摄像机旋转链说明。
+- 涉及文件：AGENTS.md、Docs/ExecutionLog.md；与本次摄像机设计提案一并提交，不额外改动 C++ 或资产。
+- 验证结果：检查新增规范与摄像机提案，git diff --check 通过；本次仅文档变更，无需编译。用户已有地图和蓝图修改保持原样。
+- 未完成事项：无；该讲解要求持续适用于之后的代码工作，提交推送结果以实际 Git 输出及最终回复为准。
