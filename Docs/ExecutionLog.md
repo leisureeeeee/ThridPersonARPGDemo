@@ -359,3 +359,12 @@
 - 验证结果：核对 Epic 官方插槽文档；see 本地 OCR 成功但文字有误识别，未操作 UE、未创建插槽、未编译或执行测试。首次尝试的 C:/Program Files/Git/bin/bash.exe 不存在，改用 E:/Git/bin/bash.exe 成功。
 - 未完成事项：用户需在编辑器添加插槽并确认武器握持位置；本次说明完成。仅暂存执行记录，审阅后提交推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
+## 2026-10-19 22:24:33 北京时间 — 判断人物自带武器与插槽的关系
+
+- 用户需求：查看人物预览截图，说明人物骨骼网格体包含武器时如何处理头顶悬空的刀。
+- 执行内容：按 see 技能运行 scripts/see.sh 并读取输出；本地 OCR 仅识别少量文字，结合用户明确说明、截图及既有源资源检查记录（FBX 含 Unagi_Weapon01～05），解释同一骨骼网格体内的武器几何不会因为新建手部插槽而移动。建议先预览同套源动画判断是否驱动武器专用骨骼；需要独立装备时在建模软件另存并拆分武器后挂接，不直接删除骨骼或重复添加武器。
+- 涉及文件：仅 Docs/ExecutionLog.md；只读查看 Docs/UnagiCharacterSetup.md、项目描述和 Git 状态，未修改角色代码、资产或配置。
+- 验证结果与限制：核对 Epic 插槽文档；未读取当前资产的蒙皮权重，不能从单张截图断定武器绑定哪根骨骼，也不能保证源动画一定修复悬空。未运行 UE、编译、动画预览或测试。
+- 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap 及所有未跟踪资源。仅暂存本次执行记录并审阅提交推送。
+- 未完成事项：具体武器骨骼及动画效果需在编辑器确认；本次判断说明完成。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
