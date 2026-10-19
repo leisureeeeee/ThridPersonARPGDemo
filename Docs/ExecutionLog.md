@@ -350,3 +350,12 @@
 - 验证结果与限制：只读检查文档和 Git 状态，未直接观察用户当前武器结构，未编译或测试。不能认定是缩放或骨骼绑定造成，先由用户确认人物网格预览是否自带悬空武器；给出两种结构对应步骤，不把添加插槽描述成能移动合并网格的一部分。
 - 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap 以及未跟踪资源；仅暂存本次两份文档，检查差异后提交推送。资产调整待确认实际结构后操作，本次说明工作完成。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine 。
+
+## 2026-10-19 22:21:44 北京时间 — 确认右手骨骼插槽创建位置
+
+- 用户需求：根据骨骼树截图确认是否在右手位置创建用于武器挂接的节点（用户称 bond）。
+- 执行内容：读取 see 技能并运行 scripts/see.sh，使用 Windows OCR 识别截图；结合截图中的 Bip001-R-Hand 与手指子骨骼，说明在右手骨骼上右键添加 Socket（插槽），命名 WeaponSocket，预览武器并调整偏移；区分已有 Bone（骨骼）与挂接插槽，以及预览资产与运行时挂接。
+- 涉及文件：仅 Docs/ExecutionLog.md；保留用户已有配置、地图及未跟踪资源。
+- 验证结果：核对 Epic 官方插槽文档；see 本地 OCR 成功但文字有误识别，未操作 UE、未创建插槽、未编译或执行测试。首次尝试的 C:/Program Files/Git/bin/bash.exe 不存在，改用 E:/Git/bin/bash.exe 成功。
+- 未完成事项：用户需在编辑器添加插槽并确认武器握持位置；本次说明完成。仅暂存执行记录，审阅后提交推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
