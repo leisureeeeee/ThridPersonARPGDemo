@@ -283,3 +283,13 @@
 - 涉及文件：AGENTS.md、Docs/ExecutionLog.md；不修改 C++、配置、资产或其他现有文档。
 - 验证结果：仅审阅规范文本及 Git 状态和暂存差异，无需且未进行编译或测试；保留用户 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/ 的已有修改或未跟踪内容。
 - 未完成事项：无，后续说明按该偏好执行。仅暂存两份规范和记录文件，审阅后提交推送，结果以实际 Git 输出及最终回复为准。
+
+## 2026-10-19 21:32:39 北京时间 — 说明身体材质贴图的具体接线步骤
+
+- 用户需求：不清楚进入材质编辑器后如何配置颜色和法线贴图，要求操作讲解；说明中的英文术语附中文翻译。
+- 执行内容：核对项目 r.Substrate=True、Epic 官方创建材质及 Substrate 概览，以及本机材质节点定义；补充资源指南的身体材质示例，按导入纹理、拖入节点、Body_D.RGB 接 Base Color（基础颜色）、Body_N.RGB 接 Normal（法线）、检查纹理压缩与 sRGB（颜色空间选项）、应用保存并赋回身体槽的顺序说明。_M 通道未确认，仍不建议直接连接。
+- 版本与界面差异：UE 5.8 开启 Substrate（新版材质系统）时，传统参数化输入仍受支持；未要求用户转换既有材质。文档另说明仅当根节点显示 Front Material（正面材质）时，使用表面节点的 Diffuse Albedo（漫反射反照率）和 Normal（法线）输入；打开材质实例时则设置已有纹理参数，不假定用户当前界面一定有连线图。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；未修改材质、贴图、模型、C++ 或项目设置。保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/ 的已有修改或未跟踪内容。
+- 验证结果与限制：只进行资料和源码静态核对及文档审阅，没有编译、运行测试、启动 UE、导入纹理或操作材质；用户具体节点图和最终效果未验证。首次在 Engine/Classes 下查找 Substrate 头文件路径不存在，随后通过文件列表定位到 Engine/Public/Materials/MaterialExpressionSubstrate.h 并核对节点输入。
+- 未完成事项：用户按示例连接贴图并观察效果；本次完成步骤与原理说明，不声称材质已经配置。仅暂存两份文档，审阅 Git 状态与暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/artist-03-create-materials-and-material-instances ，https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-substrate-materials-in-unreal-engine 。
