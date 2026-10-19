@@ -368,3 +368,11 @@
 - 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap 及所有未跟踪资源。仅暂存本次执行记录并审阅提交推送。
 - 未完成事项：具体武器骨骼及动画效果需在编辑器确认；本次判断说明完成。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
+
+## 2026-10-19 23:14:55 北京时间 — 解释 .max 文件
+
+- 用户需求：了解 .MAX 文件是什么。
+- 执行内容：说明它是 Autodesk 3ds Max 的原生场景文件，可保存模型、材质、骨骼、动画及场景设置；结合当前角色资源背景，说明通常在 3ds Max 编辑后导出 FBX 供 UE 使用，贴图可能需要额外文件，重命名扩展名不能转换格式。
+- 涉及文件：仅 Docs/ExecutionLog.md；保留已有配置、地图和未跟踪资源修改。
+- 验证结果：基础格式知识说明，未打开具体 .max 文件，未运行编译或测试；检查 Git 状态和本次日志差异后提交推送。
+- 未完成事项：本次解释完成，无资源转换或编辑操作。
