@@ -266,3 +266,12 @@
 - 验证结果与限制：仅核对官方文档和本次文档差异，没有编译、测试、启动 UE 或代为导入；用户实际看到的新旧导入窗口布局尚未知，说明中保留 Skeletal Mesh / Import Skeletal Meshes 名称差异，不声称已操作其界面。
 - 用户修改保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/ 的已有修改或未跟踪内容，只暂存本次两份文档。未完成事项：用户在 UE 中打开导入设置窗口后按步骤操作；本次说明任务完成，提交推送结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-skeletal-meshes-using-fbx-in-unreal-engine ，https://dev.epicgames.com/documentation/en-us/unreal-engine/fbx-import-options-reference-in-unreal-engine 。
+
+## 2026-10-19 21:30:12 北京时间 — 说明骨骼网格体材质槽与材质编辑器
+
+- 用户需求：确认配置材质是否在骨骼网格体里操作。
+- 执行内容：核对 Epic 官方 Skeletal Mesh Editor 文档，补充角色资源指南，区分骨骼网格体 Material Slots 的材质分配、Material Editor 的贴图连接及 Material Instance 的参数设置；说明 BP_Character 的 Mesh → Materials 可以覆盖模型默认材质，显示不一致时需检查旧覆盖。
+- 涉及文件：Docs/UnagiCharacterSetup.md、Docs/ExecutionLog.md；不修改 C++、材质、贴图、骨架、角色蓝图或用户配置。
+- 验证结果与限制：仅核对官方资料及文档差异，没有编译、运行测试、启动 UE 或实际操作材质；用户当前导入界面和生成的材质名称未知，使用示例名称说明入口，不声称资源已经配置。
+- 用户修改保护与后续：保留 Config/DefaultEditor.ini、Content/NewMap.umap、Content/039-雅/、Content/BP/；仅暂存本次两份文档，审阅暂存区后提交推送。操作由用户在模型和材质编辑器中进行，本次解释任务无其他待处理事项，提交推送结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-editor-in-unreal-engine 。

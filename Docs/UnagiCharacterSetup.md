@@ -55,6 +55,10 @@ Skeletal Mesh 是人物表面网格及蒙皮，Skeleton 是骨骼名称和层级
 
 ## 材质与贴图搭配
 
+**有两个操作位置：** 在骨骼网格体编辑器里指定“每个部位用哪个材质”，在材质编辑器里配置“材质使用哪些贴图和参数”。在内容浏览器双击导入后的 Skeletal Mesh（例如 SK_Unagi），在 Asset Details / 资产详情中找到 Material Slots / 材质槽，把身体、头发、脸、武器对应的 Material 或 Material Instance 赋给槽位；不要把 Skeleton 资产当成编辑材质的入口，也不要将 TGA 贴图直接作为材质槽的材质。
+
+如果对应材质尚未配置，双击该材质打开 Material Editor，配置颜色、法线等贴图连接；如果它是 Material Instance，则打开实例调整已暴露的贴图参数。完成后保存材质和模型。角色蓝图 BP_Character → Mesh → Materials 也可为该组件覆盖材质；如果模型预览正确但角色仍显示旧材质，要检查这里是否残留旧覆盖。模型资产的材质槽定义默认外观，蓝图组件的设置作用于该角色组件。
+
 FBX 中的材质绑定和 Diffuse 引用已读取确认：
 
 | 部位 | FBX 材质名 | 基础颜色 | 法线 |
