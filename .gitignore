@@ -1,0 +1,41 @@
+# Unreal Engine generated files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/*
+!Build/*/
+!Build/**/*.ico
+!Build/**/*.png
+!Build/**/PakBlacklist*.txt
+!Build/**/PakWhitelist*.txt
+
+# IDE state and generated project files
+.vs/
+.idea/
+.vscode/
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.code-workspace
+
+# Local secrets and machine-specific configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
