@@ -59,3 +59,14 @@
 - 远程核对：GitHub refs/heads/main 为 56db9d4ccbfcce6d77ad266563fc6e368e711ae5，与上传时本地 HEAD 完全一致；该历史包含项目初始提交 1668f43 与编译验证记录 56db9d4。
 - LFS 后续检查：沙箱内 dry-run 检查无法启动凭据提示程序而失败；获准在正常环境重试 git lfs push --dry-run origin main 后退出码 0、无待上传对象。
 - 收尾：将本次完整执行记录单独提交并正常推送；最终提交短哈希与最后一次远程核对结果见最终回复。原 GitHub 仓库建立与首次上传任务已完成，无代码待验证事项。
+
+## 2026-10-19 15:22:36 北京时间 — 排查 RiderLink 无法连接 Unreal
+
+- 用户需求：解释 RiderLink 为什么无法连接 Unreal Editor。
+- 执行内容：只读核对 Rider 2026.2 前后端日志、项目 UE 日志、运行进程、引擎 RiderLink 描述文件和二进制模块清单，并查阅 JetBrains 官方 RiderLink 文档；未修改游戏代码、项目配置或引擎插件。
+- 关键证据：Rider idea.1.log 在 2026-10-19 15:02:36–15:02:37 记录插件 Result: Succeeded、BUILD SUCCESSFUL 和 AutomationTool ExitCode=0；引擎目录 Engine/Plugins/Marketplace/Developer/RiderLink 下插件版本为 2026.2.3.1、EnabledByDefault=true，DLL 与模块清单齐全；插件与 UE 的 BuildId 同为 55116800。
+- 连接状态：检查时 Rider 正在运行，两次进程查询均未发现 UnrealEditor；项目最近 UE 日志在北京时间 13:03:26 以 ShaderCompileWorker failed / Crash inside the platform compiler 结束，失败项涉及 Lumen 硬件光追反射着色器；日志只见 RiderSourceCodeAccess 挂载，时间早于 RiderLink 安装完成，不能据此判断新安装插件加载失败。
+- 结论与建议：当前直接阻塞是没有运行中的 UE 编辑器可供连接；先打开本项目的 Unreal Editor 并等待启动完成，再检查 Rider 连接。如果启动再次遇到着色器失败，应继续定位该独立问题；目前没有证据要求重装 RiderLink。
+- 涉及文件：本次仅追加 Docs/ExecutionLog.md；Saved/Logs/ThirdPersonARPG.log、Rider 本机日志和引擎插件文件仅用于只读诊断，不提交缓存、构建产物或本机配置。
+- 验证结果与限制：插件构建及版本匹配已通过现有日志和文件核验；未启动编辑器，未验证实际 IPC 握手；未更改代码，无需重新编译。着色器编译失败的根因尚未确定，不将其直接归因于内存、驱动或 RiderLink。
+- 未完成事项：等待编辑器正常启动后验证连接；本记录按项目规范单独提交并推送，最终提交及推送结果以 Git 输出和回复为准。
