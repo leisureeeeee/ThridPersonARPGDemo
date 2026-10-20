@@ -4,23 +4,23 @@
 
 ## 最小职责划分
 
-现有 PlayerController 继续处理输入，CharacterMovement 继续控制实际位移；新增 `UARPGAnimInstance` 读取角色实际水平速度，Animation Blueprint（动画蓝图）只负责混合姿势。第一版不加入起停动画、运动匹配、急转、IK 或独立运动组件。
+现有 PlayerController 继续处理输入，CharacterMovement 继续控制实际位移；新增 `UMyCharacterAnimInstance` 读取角色实际水平速度，Animation Blueprint（动画蓝图）只负责混合姿势。第一版不加入起停动画、运动匹配、急转、IK 或独立运动组件。
 
 `APawn::GetVelocity()` 的单位是 cm/s。使用实际速度而不是是否按住 WASD，角色减速时仍可播放行走，撞墙停下时不会仅因按键仍被按住而继续播放走路。
 
 ## 待添加示例
 
-建议位置：`Source/ThirdPersonARPG/Animation/ARPGAnimInstance.h`。
+建议位置：`Source/ThirdPersonARPG/Animation/MyCharacterAnimInstance.h`。
 
 ```cpp
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "ARPGAnimInstance.generated.h"
+#include "MyCharacterAnimInstance.generated.h"
 
 UCLASS()
-class THIRDPERSONARPG_API UARPGAnimInstance : public UAnimInstance
+class THIRDPERSONARPG_API UMyCharacterAnimInstance : public UAnimInstance
 {
     GENERATED_BODY()
 
@@ -38,13 +38,13 @@ private:
 };
 ```
 
-建议位置：`Source/ThirdPersonARPG/Animation/ARPGAnimInstance.cpp`。
+建议位置：`Source/ThirdPersonARPG/Animation/MyCharacterAnimInstance.cpp`。
 
 ```cpp
-#include "Animation/ARPGAnimInstance.h"
+#include "Animation/MyCharacterAnimInstance.h"
 #include "GameFramework/Pawn.h"
 
-void UARPGAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
     Super::NativeUpdateAnimation(DeltaSeconds);
 
@@ -61,7 +61,7 @@ void UARPGAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 ## 编译与编辑器接线
 
 1. 添加上述文件后，由用户编译并让编辑器加载新类。新增反射类需要 UHT 生成代码，不把保存 .cpp 当作已经加载新类型。若编辑器中没有出现新类，保存工作后关闭编辑器，以 Development Editor（开发编辑器）目标构建再重新打开。不要强制结束有未保存内容的编辑器。
-2. 创建 `ABP_ARPG_UE4`：选择 UE4 人偶 Skeleton（骨架），将 Parent Class（父类）设为 `ARPGAnimInstance`。也可创建后在 Class Settings（类设置）修改父类。
+2. 创建 `ABP_ARPG_UE4`：选择 UE4 人偶 Skeleton（骨架），将 Parent Class（父类）设为 `MyCharacterAnimInstance`。也可创建后在 Class Settings（类设置）修改父类。
 3. 在 AnimGraph（动画图表）中添加 State Machine（状态机），命名 `Locomotion`，连接到 Output Pose（输出姿势）。
 4. 状态机中建立 Idle（待机）和 Walk（行走）两个状态，入口连 Idle。Idle 内播放 `AS_Idle_Seq`，Walk 内播放 `AS_Walk_Loop_F_0_Seq`，均启用 Loop Animation（循环动画）。普通/战斗待机应与对应行走组配套，本例先使用普通组。
 5. Idle → Walk 过渡使用 `bShouldMove`；Walk → Idle 使用 `!bShouldMove`。从 My Blueprint（我的蓝图）显示继承变量，拖入变量读取即可；显示名可能是 Should Move。过渡混合时间可先尝试 0.15 秒，这是调试起点。
