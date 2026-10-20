@@ -25,6 +25,31 @@ Epic 示例从 [Fab 官方项目页](https://www.fab.com/listings/880e319a-a59e-
 
 MoCap Online 采用作者自己的许可，并非 CC0；使用时保留并遵守作者当前说明和[标准许可](https://mocaponline.com/pages/standard-license)。Epic 资源按其提供的授权使用。
 
+## 补充：太刀与武士专用资源检索
+
+2026-10-20 按用户要求进一步检索 Katana（武士刀）、Samurai（武士）相关素材。本轮仅核对作者或官方商店的产品说明和预览入口，没有购买、下载或导入新的资源；未直接观看完整演示视频。下表不保证每个动作包都有收刀/持刀两套独立步行循环：有拔收刀过渡，不等于有两套移动。
+
+| 资源与作者 | 免费/收费 | 产品说明确认的动作 | 对当前需求的缺口 |
+| --- | --- | --- | --- |
+| [Low-Poly Samurai Trial Pack — Oedo TIME!](https://oedo-time.itch.io/free-3d-model-low-poly-samurai-trial-pack-with-run-animation) | 免费，可自愿付费 | 武士角色、太刀/剑鞘、循环跑步、拔刀；含 FBX | 没有 Walk（行走）；作者说明跑步时隐藏剑和鞘，不能当作持刀走路套装 |
+| [samuraisha — konared](https://www.turbosquid.com/3d-models/3d-animation-character/1109534) | 产品页标为 Free（免费） | 武士角色 FBX、行走/跑步/冲刺/潜行/待机/攻击等；说明提供帧区间 | 旧资源，未下载检查骨架或动画质量；没有确认两套独立持刀/收刀步态，也没有列明拔收刀过渡 |
+| [Edo Samurai Basic Motions — Oedo TIME!](https://oedo-time.itch.io/edo-samurai-basic-motions-humanoid) | 当前最低 US$4.99 | 五种动作：待机、行走、忍者跑、鞠躬、受击；FBX，原地版本 | 持太刀战斗待机仍是计划更新，不能当成已包含功能；不是两套太刀移动合集 |
+| [Katana Animation Set — Hammerhead](https://www.fab.com/listings/7b673da8-07ad-48aa-992f-300aa91ac83b) | 收费，页面动态价格未读取到 | 55 个手工动作，八方向走跑、拔刀/收刀、待机、攻击、防御等；UE4 人体骨架，根运动/原地两版 | 清单只有一组方向走跑，没有明确列出第二套收刀步行；[作者视频预览](https://youtu.be/f7QCXpSTzs4) |
+| [Two-Handed Katana Samurai Animset Pro — scabbard](https://www.fab.com/listings/37f33500-f1f1-4a9d-b3c7-7aff97d0ec77) | 作者商店列表当前 US$29.99 起 | 112 个动作，其中 27 个移动动作，含行走/跑步/蹲走/冲刺；2 个武器展开/收回状态切换动作 | 切换动作描述没有证明实际剑鞘拔插细节，也没有明确两套收刀/持刀步行；[作者视频预览](https://youtu.be/ifV_UZNtFkg) |
+| [Katana Animation Pack — 9CG](https://www.fab.com/listings/81c4944e-f7e5-4990-b659-d4aa8218a011) | 收费，页面动态价格未读取到 | 多方向普通/防御行走、多方向跑步及大量攻击动作，面向动作 RPG | normal（普通）在此不能直接解读为 sheathed（已收刀）；[作者视频预览](https://youtu.be/8ZepZ0PmOqM) |
+| [Katana Combat Animation V1 — GameDevHero](https://www.fab.com/listings/e19b9415-43ea-43f2-8730-469a859c7ec2) | 收费 | 180 动作、UE5 人体骨架、FBX、拔刀/收刀、全方向走跑，原地/根运动版本 | 没有核实两套独立步态；[作者发布说明](https://forums.unrealengine.com/t/gamedevhero-katana-combat-animation-v1/2690221)、[作者视频预览](https://youtu.be/uM3FsZGK9Eg) |
+
+本轮没有找到已确认免费且完整包含两套太刀步行、拔收刀过渡的套装。可先看免费 samuraisha 的动作表现，以及 Hammerhead / scabbard 的演示，再按需要选择；收费资源应在选购前确认收刀移动是否独立提供。所有金额为本次检索所见美元标价，最终以下载/购买时作者页面、许可档位及税费为准。
+
+用户随后询问价格并要求直接给链接，补充核对如下：
+
+- GameDevHero 的 [itch.io 太刀包](https://gamedev-hero.itch.io/katana-combat-animation)及[购买页](https://gamedev-hero.itch.io/katana-combat-animation/purchase)当前均标 US$14.99；搜索缓存中的 US$12.99 为旧值，不作为当前报价。
+- scabbard 套装在 [Fab 作者商品列表](https://www.fab.com/sellers/scabbard)的搜索索引中标 US$29.99 起；9CG 太刀包在 [Fab 作者商品列表](https://www.fab.com/sellers/9CG?lang=en)的搜索索引中标 US$59.99 起。当前抓取的动态作者页未返回价格，二者作为参考标价，不声称已完成结账价核验。
+- Hammerhead 太刀包旧索引中常规价为 US$44.99，也出现过 US$22.49 促销，缓存较旧且当前动态商品页没有读到金额；不把历史促销当作现价，用户需打开商品页确认。
+- Oedo 基础包作者商品页当前为 US$4.99 起，仅五种基础动作；持太刀战斗待机仍属计划功能。
+
+筛选时排除了仅有武器模型或武器自身位移动画、二维精灵、Roblox 专用动作、免费版没有动画的商品；没有采用第三方转载站将收费包标为免费的说法。另发现 [ActionForge](https://actionforge.app/) 为采用 CC0 动画的浏览器调整工具，但当前可读取页面没有提供可核对的太刀步行清单，因此没有将它作为已验证的太刀动作包推荐。
+
 ## 已核对的持剑免费包文件
 
 已从作者 itch.io 下载 `MCO_TC_Sword_Free_Pack_01.zip`，58,107,313 字节，放在：
