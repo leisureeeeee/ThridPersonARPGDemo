@@ -16,7 +16,7 @@ class THIRDPERSONARPG_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	AMyCharacter();
+	AMyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	virtual void PostInitializeComponents() override;

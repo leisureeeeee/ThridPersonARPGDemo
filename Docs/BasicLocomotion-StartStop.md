@@ -93,3 +93,7 @@ Idle（待机） → Start（起步） → Walk（行走） → Stop（停步）
 ## 9. 当前停步实现已改为距离同步（2026-10-21）
 
 Stop 固定 1.5 倍速和自动剩余时间退出已被替代：C++ 根据制动距离选择 StopAnimationTime，Stop 序列评估器按该时间输出姿势；站稳后用约 0.12 秒完成恢复尾段，通过 bStopAnimationComplete 回待机。其余五条过渡保留。当前实现与限制、编译状态及重新生成采样的方法见 StopDistanceMatching.md。
+
+## 10. 起步与连续移动已整合（2026-10-21）
+
+Start 改为实际位移驱动的序列评估器，Start→Walk 读取 bStartAnimationComplete；Walk 的播放速率读取 WalkPlayRate。新地面移动组件负责大角度制动/转向/再起步，动画层读取 IsPivoting 后复用原有可打断起停流程。当前 bShouldMove 不仅要求有水平输入意图，还要求不处于掉头阶段且角色处于地面。完整说明及限制见 GroundLocomotion.md，旧章节中固定时长起步及 Live Coding 依赖说明仅反映之前阶段；本轮已完成完整构建并重新加载。
