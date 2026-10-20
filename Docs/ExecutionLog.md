@@ -660,3 +660,16 @@
 - 涉及文件：补充 Docs/UnagiClothingDiagnosis.md 的第 4 步，追加本记录；保留用户已修改网格、配置、地图及未跟踪资源。
 - 验证结果：完成本机源码与已有骨骼数据核对，未在编辑器拖动、保存资产、播放、编译或执行测试；see 对上下文 MyCharacter.h 返回非媒体格式。
 - 未完成事项：本次具体操作说明完成，实际衣物角度和动态适配仍待实施与观察。只暂存两份文档，检查状态及暂存差异后提交推送。
+
+## 2026-10-20 21:32:40 北京时间 — 接通 Unreal MCP 与 VibeUE
+
+- 用户需求：在安装 VibeUE 后接通本机 MCP，让当前 Codex 可以操作 UE。
+- 检查结果：VibeUE 5.0 已安装在 UE 5.8 Marketplace 插件目录，预编译模块与引擎 BuildId 均为 55116800。当前无 UnrealEditor 进程，8000 端口未监听；ThirdPersonARPG 已有用户未提交的 ModelContextProtocol、MCPClientToolset 启用项。读取本项目 AGENTS.md 并保留现有全部资产、配置和未跟踪修改。
+- 配置内容：在 ThirdPersonARPG.uproject 增加 AllToolsets、VibeUE；保留用户已有 ModelContextProtocol 和 MCPClientToolset。新增 Config/DefaultEditorPerProjectUserSettings.ini，启用 MCP 自动启动、8000 端口、/mcp 路径和按需工具发现。新增 Docs/UnrealMCP.md，解释服务、客户端配置、重新连接方式及资产操作边界。
+- 客户端：先备份个人 Codex 配置，再执行 codex mcp add unreal --url http://127.0.0.1:8000/mcp。已确认服务器 enabled、streamable_http；未设置公网监听或凭据，不将个人配置纳入仓库。
+- 运行结果：用现有 DX11 启动方式打开 ThirdPersonARPG，并加 -ModelContextProtocolStartServer。服务返回 11 个顶层工具，发现 VibeUE 工具集；通过 execute_python_code 只读返回 /Game/NewMap.NewMap、actor_count=9、vibeue_blueprints=true。没有编辑或保存地图、模型、蓝图等资产，没有编译、PIE、自动化或功能测试。连接检查仅验证用户要求接通的 MCP 通信。
+- 失败及修正：沙箱 Git 访问项目目录被拒绝，随后改用主机权限；官方文档 .md 地址返回不支持的媒体类型，改读 HTML。第一次 MCP 探针使用旧协议头，与 UE 协商的 2025-11-25 不一致，按实际协商版本修正；初次只读项目名查询遇到 SystemLibrary.get_project_name 不存在，随后仅使用已确认可用的世界与 Actor 接口，最终查询成功。未将失败结果作为成功证据。
+- 备份与材料：工作区 .ue-mcp-setup/backup-20261020-213001 保存修改前项目描述与个人配置；.ue-mcp-setup 下保存工具发现和连接结果，不追踪凭据、缓存或启动日志。
+- 版本管理：仅暂存本次新增的 AllToolsets/VibeUE 描述符内容、默认 MCP 设置、说明文档和本执行记录；描述符中用户已有的 ModelContextProtocol/MCPClientToolset 改动继续保持未暂存，其他用户资产和配置不提交。
+- 未完成事项：服务端连接验证完成，当前聊天需在客户端重新连接 MCP 或重启 Codex 后加载新工具列表。后续通过该连接操作的是当前实际打开的 UE 项目。
+- 来源：https://dev.epicgames.com/documentation/unreal-engine/unreal-mcp-in-unreal-editor?application_version=5.8 ；https://learn.chatgpt.com/docs/extend/mcp
