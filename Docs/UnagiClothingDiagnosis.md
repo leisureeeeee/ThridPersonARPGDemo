@@ -41,7 +41,7 @@
 
 1. 打开 `Asset/Unagi/Rig/RTG_UE4_To_Unagi`，选择 Target（目标），确认当前编辑的是雅。具体位置在重定向器的 Hierarchy（层级）面板顶部：Source（源）/Target（目标）切换按钮下方就是 Current Retarget Pose（当前重定向姿势）下拉框；选择目标后，这一栏表示雅的目标姿势。它不在导出动画序列或 IK Rig 资产的详情中。
 2. 在 Retarget Pose（重定向姿势）工具中选择 Create（创建）或 Duplicate Current（复制当前姿势），命名为 `Unagi_ClothesFix`；将它设为 Current Retarget Pose（当前重定向姿势）。保留已有姿势用于对照。
-3. 进入 Edit Retarget Pose（编辑重定向姿势）模式。在 Hierarchy（层级）的过滤菜单中取消 Hide Bones Not in a Chain（隐藏不在链中的骨骼）和 Hide Bones Not Retargeted（隐藏未重定向的骨骼），让衣物专用骨骼可见。
+3. 在重定向器顶部工具栏靠左找到模式切换按钮：播放时显示 Running Retarget（正在运行重定向），点击一次后变成 Editing Retarget Pose（正在编辑重定向姿势）；如果已显示后者，就已在编辑模式。UE 5.8 这里是同一个按钮随状态改变文字，不必寻找始终叫 Edit Retarget Pose 的独立按钮。在 Hierarchy（层级）的过滤菜单中取消 Hide Bones Not in a Chain（隐藏不在链中的骨骼）和 Hide Bones Not Retargeted（隐藏未重定向的骨骼），让衣物专用骨骼可见。
 4. 先查找并选择 `Bn_SleeveUP`，使用旋转工具，小幅调整一个局部轴，观察它实际影响哪块衣物；方向不对就撤销并换轴。逐段核对 `Furisode1_01`、`Furisode2_01` 及其子骨骼。不要直接照抄固定的 90 度角，当前尚未测定这些骨骼的局部轴与合适偏移。
 5. 如果突出的部分没有变化，再逐个定位 `Bone015` / `Furisode3_01`、`Furisode_B_01_ROOT` / `Furisode_B_01` 和 `MaJia*` 链。通过选中骨骼和小幅旋转确认影响区域，只调整确认相关的衣物骨骼，不以改变人体脊柱或肩膀来掩盖衣物问题。
 6. 退出姿势编辑，切回 Run Retarget（运行重定向），由用户观察待机、抬臂和走路动作。先确认衣袖根部跟随且衣物不大面积横穿身体，再导出新的动画副本；不要覆盖原动画来尝试修复。修改重定向器的姿势不会自动更新之前已导出的动画。

@@ -641,3 +641,12 @@
 - 涉及文件：补充 Docs/UnagiClothingDiagnosis.md 的入口定位，追加 Docs/ExecutionLog.md；未修改代码、二进制资产、用户配置或未保存状态。
 - 实际验证：静态核对本机 UI 源码，未操作编辑器、播放、编译或执行测试。see 对上下文 MyCharacter.h 返回非媒体格式；一次猜测的 IKRetargetEditorToolbar.cpp 路径不存在，实际菜单位置已由可读的层级和姿势编辑器源码确认。
 - 未完成事项：本次入口说明完成，衣物姿势实际调整仍未执行。只暂存本次两份文档，检查 Git 状态及暂存差异后提交推送。
+
+## 2026-10-20 15:03:22 北京时间 — 定位编辑重定向姿势的模式按钮
+
+- 用户需求：继续追问编辑重定向姿势入口。
+- 执行内容：读取本机 IKRetargetEditor.cpp 的 FillToolbar 与 IKRetargetEditorController.cpp 的 GetRetargeterModeLabel、SetRetargetModeToPreviousMode 相关实现；确认顶部资产工具栏之后的同一个模式按钮，根据当前状态显示 Running Retarget 或 Editing Retarget Pose，点击切换到前一模式。创建新姿势操作也会进入编辑模式。
+- 说明修正：此前仅用命令名称 Edit Retarget Pose 说明入口不够具体；补充准确的动态按钮文字、顶部位置和已处于编辑模式时的判断，避免让用户继续寻找独立按钮。选择 Target 后在该模式编辑雅的骨骼。
+- 涉及文件：更新 Docs/UnagiClothingDiagnosis.md 的第三步，追加 Docs/ExecutionLog.md；未修改资产、代码、配置或用户未保存状态。
+- 验证结果：完成本机 UI 源码静态核对，未操作编辑器、编译、播放或执行测试。see 对上下文 MyCharacter.h 返回非媒体格式。
+- 未完成事项：本次入口说明完成，实际衣物姿势与动态仍未调整。只暂存两份文档，检查状态与暂存差异后提交推送。
