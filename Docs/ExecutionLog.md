@@ -594,3 +594,14 @@
 - 验证结果：完成磁盘和日志静态核对，核对 Epic 动画序列编辑器预览设置文档；未编译、播放或执行自动化、PIE、功能测试。按 see 规则处理上下文 MyCharacter.h 返回 .h 不支持媒体格式。两处旧 Persona 源码路径检索失败，改用官方当前文档核对预览设置。
 - 未完成事项：不可见的确切原因仍待当前导出资产数据或截图；本次已给出最小检查步骤，未声称修复成功。仅暂存本条记录，审阅差异后提交推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-sequence-editor-in-unreal-engine
+
+## 2026-10-20 14:31:45 北京时间 — 根据截图缩小导出动画人物不可见的范围
+
+- 用户需求：提供导出动画编辑器完整截图，继续排查人物不可见。
+- 执行内容：按 see 技能运行 scripts/see.sh 并读取 Windows OCR 结果；结合截图确认当前打开 AS_Idle_Combat_Seq（带未保存标记），动画轨道数 234，预览网格体已选 SK_Unagi_NoWeapon，骨架显示 SKEL_Unagi_NoWeapon，视口有 24,046 三角形、21,311 顶点及约 114×48×172 尺寸统计，但画面仅显示地面，底部显示 10 项未保存。OCR 有误识别，不将其单独视为完整语义判断。
+- 进一步核对：只读检查现有源文件与自动保存资产。SK_Unagi_NoWeapon_Auto3.uasset 明确引用 SKEL_Unagi_NoWeapon，且两份自动保存资产均有雅的 Bip001 系列骨骼名称；不能因该骨架不同于先前创建时的 SKEL_Unagi 就断言当前模型与动画不兼容。当前导出动画仍未保存到 Content，尚无法读取实际逐帧变换。
+- 诊断边界：截图足以确认预览网格体已选和模型统计存在，234 条轨道并不证明关键帧变换有效；目前不能确定是显示开关/相机还是导出动画位置、缩放或其他骨骼变换问题。没有证据断定网格丢失、轨道为空或新骨架本身损坏。
+- 操作指导与缺失信息：已通过异步问题询问导出前重定向器内雅是否可见并正常运动，当前尚未收到回复。建议展开右侧预览场景设置中的 Animation（动画），将 Preview Controller（预览控制器）切换 Reference Pose（参考姿势），在视口按 F 聚焦；若出现人物则重点检查导出动画变换，若仍不可见再核对视口 Mesh（网格体）显示开关与相机。若需读取实际导出轨道，先仅保存新动画及其必要依赖，不自动保存用户全部内容，不直接覆盖或重建原动画。
+- 本机实现核对：PersonaPreviewSceneRefPoseController.h 的显示名为 Reference Pose，InitializeView 调用 ShowReferencePose；PreviewSceneCustomizations.cpp 在 Animation 分类提供 Preview Controller 下拉框；AnimViewportShowCommands.cpp 提供 Mesh 显示开关。未把切换参考姿势等同于修复或实际验证成功。
+- 涉及文件及实际结果：仅追加 Docs/ExecutionLog.md。未更改 C++、模型、骨架、动画、配置或编辑器内未保存状态，未编译、播放或执行自动化、PIE、功能测试。一次 rg 调用误传 PowerShell 的 -ErrorAction 参数失败，随后改正检索并成功定位菜单定义。
+- 未完成事项：截图分析完成，但不可见的确切原因与修复尚待参考姿势结果、导出前预览状态或保存后的动画数据。只暂存本条日志，审阅状态和暂存差异后提交推送。
