@@ -435,3 +435,13 @@
 - 失败与修复：首次不烘焙场景变换时 UE 按匿名几何命名，无法按 Weapon 对象筛选；改为烘焙场景旋转/缩放后保留对象名，随后再居中。当前 Python 无 StaticMeshFactoryNew，改为复制本次内存临时网格并重建。命令行进程无法获得 StaticMeshEditorSubsystem，改用网格描述读取 UV 元数据。初次保存重导入元数据时未指定 Outer，重新加载后为 None；修正为以新网格为 Outer 创建 FbxStaticMeshImportData，补存本次五个新资产后再次读取成功。see 对上下文 MyCharacter.cpp 返回非媒体格式；不影响源数据读取。
 - 用户修改与版本管理：保留用户原有 Config/DefaultEditor.ini、Content/NewMap.umap、源资源和未跟踪角色资产。新网格复用现有但未跟踪的 Material__28/贴图，本次不顺带暂存这些用户文件；独立工作区需具备材质或另行赋材质。FBX 和 uasset 使用已有 Git LFS 通配规则，不追踪缓存或凭据。提交前检查状态和本次暂存差异，仅提交本次文件并推送。
 - 未完成事项：本次模型提取完成；对象之间是部件还是不同版本尚未视觉确认，未将其宣称为五种完整武器。当前人物内原武器保留，后续挂接前需处理重复显示并调整握柄偏移；未配置战斗碰撞或装备逻辑。操作步骤和限制已写入说明。
+
+## 2026-10-20 09:59:20 北京时间 — 调研 MAX 动画转换替代途径
+
+- 用户需求：了解 MAX 文件转换是否还有其他办法，结合当前需要提取雅角色动画的上下文回答。
+- 执行内容：查阅 Autodesk 官方支持、官方试用页、Biped/动画烘焙文档，以及 Blender 第三方 MAX 导入插件 io_scene_max 的当前 README。提出向资源作者索取完整动画 FBX、交由有 Max 的人代烘焙导出、使用官方通常 30 天试用版，以及将第三方 Blender 插件作为单份样本的实验路线。
+- 结论与限制：Autodesk 说明没有免费的官方 MAX 场景转 FBX 工具，可通过授权 Max 或试用 Max 导出；原生转换可在其他机器执行，并非一定要本机安装。第三方插件确实存在，但其 README 未证明可完整还原本套角色的骨骼动画或 Biped/约束控制器，因此不保证成功。解释已有 FBX 武器几何提取与 MAX 控制器求值/烘焙不同；不把动作重定向或替代动画说成原始 MAX 转换。
+- 涉及文件：仅 Docs/ExecutionLog.md；保留全部已有配置、地图、源资源和未跟踪角色资产。
+- 验证结果：只读联网资料核对，未安装插件或商业软件、未上传资产、未运行转换、编译或测试。Blender 扩展平台页面抓取返回 402，改用插件作者的 GitHub README 核对插件存在，未因此推断动画兼容性。see 对上下文 MyCharacter.cpp 返回非媒体格式。
+- 未完成事项：本次替代方案解释完成；第三方插件能否处理本套动作仍未经实测。仅暂存本次记录并审阅后提交推送。
+- 来源：https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/Is-it-possible-to-convert-3ds-Max-scene-files-to-FBX-without-having-3ds-Max-installed.html ； https://www.autodesk.com/products/3ds-max/free-trial ； https://github.com/nrgsille76/io_scene_max/blob/main/README.md ； https://download.autodesk.com/us/fbx/3ds_max_help/fbx_3dsmax_online/files/WS1a9193826455f5ff-6d855556117c4584e5420a5.htm
