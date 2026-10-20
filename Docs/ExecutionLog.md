@@ -529,3 +529,15 @@
 - 用户验证步骤：恢复完整源依赖后先确认原动画能驱动 UE4 人偶；导出重定向副本后在动画编辑器选 SK_Unagi_NoWeapon 预览并拖动时间轴，预期躯干与四肢随动作变化，再检查双手握姿、脚底和武器。当前诊断完成，实际资源恢复及重定向尚未实施。
 - 版本管理：只暂存本次执行记录，检查状态、暂存差异和差异空白检查后提交推送；实际结果以 Git 输出和最终回复为准。
 - 官方来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletons-in-unreal-engine ；https://dev.epicgames.com/documentation/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine?lang=en-US
+
+## 2026-10-20 13:46:29 北京时间 — 说明如何为雅角色建立 IK Rig
+
+- 用户需求：了解如何建立 IK Rig，继续解决 UE4 人偶太刀动画向雅角色的重定向问题。
+- 执行内容：核对 Epic 官方 IK Rig 双足重定向与 IK 重定向文档，以及本机 UE 5.8 IKRigSkeletonCommands.cpp 的菜单定义。提供内容浏览器创建 IK Rig、选择 SK_Unagi_NoWeapon、设置骨盆、添加运动链和保存的操作说明；补充源 UE4 人偶也需建立独立 IK Rig，且必须先恢复源动画依赖。
+- 版本差异：本机 UE 5.8 菜单定义为 Set Pelvis（设置骨盆）和 New Retarget Chain...（新建重定向链）；部分旧版教程仍称 Set Retarget Root（设置重定向根），本次以本机实现和新版官方说明为准。雅选择 Bip001-Pelvis，源 UE4 选择 pelvis，不将最顶层 Root 误作骨盆。
+- 链配置：建议先建立 Spine、LeftArm、RightArm、LeftLeg、RightLeg、Neck、Head 七条基本链；雅对应 Bip001-Spine 到 Bip001-Spine2、Bip001-L-UpperArm 到 Bip001-L-Hand、Bip001-R-UpperArm 到 Bip001-R-Hand、Bip001-L-Thigh 到 Bip001-L-Foot、Bip001-R-Thigh 到 Bip001-R-Foot，以及单骨的 Bip001-Neck 和 Bip001-Head。源人偶使用同名链，对应 spine_01 到 spine_03、upperarm_l/r 到 hand_l/r、thigh_l/r 到 foot_l/r、neck_01 和 head。说明链名用于映射，无需改动原骨骼名称；基础链可先不添加 IK Goal（IK目标）或求解器，锁骨与手指等后续按效果补齐。
+- 验证步骤与原理：保存后核对预览模型、骨盆标记、七条链的起止骨骼和有效层级；IK Rig 描述骨盆及人体运动链，本身不会让动画自动播放，需要后续 IK Retargeter 连接源与目标并预览导出。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；未改动 MyCharacter.h、其他 C++、资产、配置或编辑器内状态，保留全部用户原有修改。
+- 实际验证与限制：核对本机源码及官方文档，未在编辑器创建资产，未编译、播放或执行自动化、PIE、功能测试。按 see 技能运行 scripts/see.sh 处理上下文 MyCharacter.h，返回 .h 不支持媒体格式；不影响操作说明。
+- 未完成事项：本次教程说明完成，源依赖恢复、实际 IK Rig 创建和后续重定向仍由用户在编辑器操作。仅暂存本次记录，审阅状态及暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/retargeting-bipeds-with-ik-rig-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine
