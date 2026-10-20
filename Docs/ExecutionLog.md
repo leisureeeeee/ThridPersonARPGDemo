@@ -682,3 +682,12 @@
 - 实际结果：当前世界 /Game/NewMap.NewMap，共 9 个 Actor，API 返回当前选中 Actor 列表为空。场景包含 DirectionalLight、SkyAtmosphere、SkyLight、ExponentialHeightFog、VolumetricCloud、PlayerStart、SM_SkySphere、Floor、BP_Character。截图显示方格地面、角色及天空环境。
 - 验证与范围：MCP 查询和截图均成功；没有修改或保存场景、资产，没有编译、PIE 或功能测试。截图保存在忽略的 Saved/VibeUE/Captures/capture-editor-20261020-213758.png。初次工具目录尚未加载 unreal，环境加载命名空间后发现并调用成功。
 - 版本管理：仅提交本条执行记录，保留用户所有资产和配置改动。此前向远程 main 的推送被自动审批拒绝，尚未收到用户对该发布目标的明确授权，本次不重试推送；不影响本机连接。
+
+## 2026-10-20 21:53:07 北京时间 — 实时检查雅的衣发动态与重定向配置
+
+- 用户需求：检查雅的衣服和头发没有摆动、UE4 人偶重定向动作效果差的问题。读取 AGENTS.md 与历史诊断，通过 UE MCP 获取场景组件、网格物理和动画配置、骨骼层级、两套 IK 绑定/重定向器、操作栈、当前姿势与参考骨位置，并抓取当前窗口截图。
+- 已确认：角色网格仍为 SK_Unagi_NoWeapon/234 骨骼；场景组件动画模式是动画蓝图但 AnimClass 为空，无当前动画实例。网格无物理资产、布料资产、后处理动画蓝图；项目的独立 1_PhysicsAsset 未分配到该网格。头发、衣袖、裙摆多段骨骼均存在。
+- 重定向：RTG_UE4_To_Unagi 的目标 IK_Unagi 只有 9 条同名映射人体链，目标无求解器和手脚 IK 目标，Run IK Rig 禁用且链列表为空，无手指脚趾链。目标保存过 为Unagi_CLothesFix 姿势但当前激活 Default Pose；抽查偏移为单位旋转。新 IK_To2 的目标 IK_Unagi111 没有重定向骨盆、运动链或操作栈。左上臂参考方向仅差约 2.2 度，不能将所有问题简单归为 A/T 姿势错误，也未逐段验证动作。
+- 产物：新增 Docs/UnagiLiveAudit-20261020.md，区分证据、限制及先人体重定向/动画驱动、后衣袖支点和次级运动的修复顺序。未修改任何 uasset、地图、骨架、动画蓝图或重定向器，未播放、PIE、模拟、编译或执行功能测试。
+- 接口失败记录：BoneChain 无 ik_goal 字段，改为已发现的控制器 getter；一次只读探针括号语法错误后修正；组件无 get_bone_names，发现实际接口后改为 get_num_bones/get_bone_name。操作设置的个别字段已弃用，独立 PhysicsAsset 内部字段未暴露，均未用失败输出推断内部数据。
+- 未完成事项：本次检查完成；实际重定向和衣发动态修复尚未执行。只本地提交本次报告和执行记录；先前远程推送审批被拒绝且用户尚未授权具体 main 发布，本次不绕过或重试推送。
