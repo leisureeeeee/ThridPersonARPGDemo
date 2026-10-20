@@ -583,3 +583,14 @@
 - 下一步操作：使用与 IK_UE4Mannequin 对应的可播放 UE4 源版本，打开 Asset/Unagi/Rig/RTG_UE4_To_Unagi，核对源 IK_UE4Mannequin、目标 IK_Unagi；在 Asset Browser（资产浏览器）选目标走路起步源动画，使用 Run Retarget（运行重定向）预览。雅动作生效后调整参考姿势并 Export Selected Animations（导出所选动画）另存目标版本。若源动画不出现在列表，先检查它实际关联的 UE4 骨架与源绑定所用 ARPG_Samurai 人偶骨架是否一致。
 - 涉及文件与验证：仅追加 Docs/ExecutionLog.md；未保存、替换、复制或重定向动画，未操作用户未保存内容。保留所有现有用户修改。完成目录、引用和日志静态核对；未播放、编译或执行自动化、PIE、功能测试。按 see 技能调用 scripts/see.sh 处理用户 .uasset 路径，返回不支持媒体格式。
 - 未完成事项：本次现象解释与下一步指导完成，源副本确认及走路起步重定向导出尚未执行。仅暂存本次日志并检查差异后提交推送。
+
+## 2026-10-20 14:28:08 北京时间 — 排查重定向导出动画中人物不可见
+
+- 用户需求：报告导出后的动画序列中连人物骨骼网格体也看不见。
+- 执行内容：检查 Git 状态、近期 uasset、Asset/Unagi/Animations 目录及当前编辑器导出日志。日志显示北京时间 14:26 和 14:27 经 Duplicate and Retarget 创建 AS_Idle_Combat_Seq、AS_Idle_Combat_Seq1，并打开后者；磁盘 Animations 目录仅有 SourceFBX，未发现这两个新资产，因而不能从文件核对其实际目标骨架、预览模型或骨骼变换。不保存或覆盖用户编辑器内的新资源。
+- 判断与边界：人物不可见可能来自预览网格体未指定/不兼容、视口未聚焦或导出变换异常，当前证据不足以确定。日志的 No animation curves found 只表明没有可重定向的动画曲线，不能独立证明骨骼轨道导出失败；部分压缩日志亦不能代替实际轨道和姿势检查。
+- 用户操作建议：在新导出动画中打开 Window（窗口）下的 Preview Scene Settings（预览场景设置），检查 Preview Mesh（预览网格体）并选择 SK_Unagi_NoWeapon（人物模型，不是 SKEL 骨架）；暂停并在预览视口按 F 聚焦。若人物仍不显示，查看新动画 Skeleton（骨架）与目标人物模型实际骨架是否一致，并提供包含预览网格体、骨架和视口的截图，或仅保存新导出资产后继续读取核对。不能将重新替换原动画骨架当作此处修复。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；保留全部用户已有代码、地图、配置、资产及未保存状态，未更改或导出动画。
+- 验证结果：完成磁盘和日志静态核对，核对 Epic 动画序列编辑器预览设置文档；未编译、播放或执行自动化、PIE、功能测试。按 see 规则处理上下文 MyCharacter.h 返回 .h 不支持媒体格式。两处旧 Persona 源码路径检索失败，改用官方当前文档核对预览设置。
+- 未完成事项：不可见的确切原因仍待当前导出资产数据或截图；本次已给出最小检查步骤，未声称修复成功。仅暂存本条记录，审阅差异后提交推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-sequence-editor-in-unreal-engine
