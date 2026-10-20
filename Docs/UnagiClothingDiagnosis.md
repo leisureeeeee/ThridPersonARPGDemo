@@ -35,6 +35,25 @@
 
 骨骼动态或布料模拟不是本次已实现内容。参考姿势、衣物支点与约束尚未经实际编辑器操作确认；具体方案需要以用户后续要求和实际动态效果决定。本次未添加布料、创建物理资产、修改动画蓝图或更改骨架。
 
+## 在 UE 5.8 中先修正静态衣物姿势
+
+以下是操作指导，本次没有替用户执行或验证最终效果。
+
+1. 打开 `Asset/Unagi/Rig/RTG_UE4_To_Unagi`，选择 Target（目标），确认当前编辑的是雅。
+2. 在 Retarget Pose（重定向姿势）工具中选择 Create（创建）或 Duplicate Current（复制当前姿势），命名为 `Unagi_ClothesFix`；将它设为 Current Retarget Pose（当前重定向姿势）。保留已有姿势用于对照。
+3. 进入 Edit Retarget Pose（编辑重定向姿势）模式。在 Hierarchy（层级）的过滤菜单中取消 Hide Bones Not in a Chain（隐藏不在链中的骨骼）和 Hide Bones Not Retargeted（隐藏未重定向的骨骼），让衣物专用骨骼可见。
+4. 先查找并选择 `Bn_SleeveUP`，使用旋转工具，小幅调整一个局部轴，观察它实际影响哪块衣物；方向不对就撤销并换轴。逐段核对 `Furisode1_01`、`Furisode2_01` 及其子骨骼。不要直接照抄固定的 90 度角，当前尚未测定这些骨骼的局部轴与合适偏移。
+5. 如果突出的部分没有变化，再逐个定位 `Bone015` / `Furisode3_01`、`Furisode_B_01_ROOT` / `Furisode_B_01` 和 `MaJia*` 链。通过选中骨骼和小幅旋转确认影响区域，只调整确认相关的衣物骨骼，不以改变人体脊柱或肩膀来掩盖衣物问题。
+6. 退出姿势编辑，切回 Run Retarget（运行重定向），由用户观察待机、抬臂和走路动作。先确认衣袖根部跟随且衣物不大面积横穿身体，再导出新的动画副本；不要覆盖原动画来尝试修复。修改重定向器的姿势不会自动更新之前已导出的动画。
+
+本机实现确认：旋转目标姿势选中骨骼不要求该骨骼已属于重定向链；控制器将旋转偏移记录在独立 Retarget Pose 中，重定向处理以目标重定向姿势作为输出初始姿势。因此这条路径可用于检查未映射衣物骨骼的基础姿态，但本次没有确认任何具体旋转角度或逐动作结果。
+
+如果衣物在静止姿势正常、抬臂时又明显脱离手臂，应该转入 Control Rig（控制绑定）或其他骨骼控制，为相关支点建立保持适当偏移的跟随关系。例如 `Bone015` 当前挂在 `Bip001` 下，不能仅靠固定姿势期待它获得手臂的所有运动；也不能不经确认就改它的骨架父级。
+
+基础姿势和支点正常后，才为 `Furisode*`、`MaJia*` 等适用链添加 AnimDynamics（动画动力学）及限制；它会用自己的简化刚体求解，并不依赖角色的 Physics Asset（物理资产），但也不会自动提供完整的衣物碰撞。若采用 RigidBody（刚体）或需要身体碰撞的布料方案，则另外配置相应物理/碰撞资产。宽袖细致布面效果可再采用 Chaos Cloth（混沌布料），不要把骨骼轻量动态等同于完整布料模拟。
+
+参考：[重定向姿势与层级过滤](https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine)、[骨骼控制](https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-skeletal-controls-in-unreal-engine)。
+
 ## 检查方式与限制
 
 Windows `computer-use` 工具的实时窗口连接失败，错误为 native pipe 不存在；按技能要求重试并重置后仍失败，没有操作用户窗口。最终画面判断来自用户新发的截图，已按 see 技能运行并读取结果；本地 OCR 没有识别到文字，不能替代动态视觉验证。

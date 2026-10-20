@@ -620,3 +620,15 @@
 - 未完成事项：本次异常分析与原因解释完成；具体衣物骨骼适配和物理动态仍待实施并由用户确认效果。只暂存两份本次文档，审阅状态和暂存差异后提交推送。
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-animdynamics-in-unreal-engine?lang=en-US ；https://dev.epicgames.com/documentation/en-us/unreal-engine/clothing-tool-in-unreal-engine---properties-reference
 - 版本管理补记：主提交 d4d8d14 的首次推送因 GitHub HTTPS 的 SSL_ERROR_SYSCALL 失败，未丢弃本地提交；立即重试成功，远程 main 已收到该提交。本补记另作同任务日志提交，后续推送结果以 Git 输出及最终回复为准。
+
+## 2026-10-20 14:54:16 北京时间 — 说明衣物姿势与跟随的修正方法
+
+- 用户需求：询问如何修正雅重定向后衣物向外展开的问题。
+- 执行内容：核对 Epic 当前重定向姿势、骨骼控制、Transform Bone（变换骨骼）和 AnimDynamics（动画动力学）文档，以及本机 IKRetargetCommands.cpp、IKRetargetEditPoseMode.cpp、IKRetargeterController.cpp 和 IKRetargetProcessor.cpp。确认可新建目标重定向姿势，旋转选中的衣物骨骼并保存独立偏移；旋转操作不要求骨骼已属于重定向链，输出初始化使用目标重定向姿势。
+- 指导内容：先在 RTG_UE4_To_Unagi 选择 Target（目标），创建/复制 Unagi_ClothesFix 姿势，进入编辑模式并关闭隐藏未映射/未成链骨骼过滤；从 Bn_SleeveUP、Furisode1/2 开始用小幅旋转确认影响区域，必要时核对 Bone015/Furisode3、Furisode_B 与 MaJia 链。没有给出未经测量的固定角度，不改原骨架层级、人体姿势或蒙皮。
+- 原理与边界：重定向姿势可用于矫正未映射衣物骨骼的基础局部姿态，但不代替随动作变化的支点控制。Bone015 挂在 Bip001 下，若静态正确而抬臂又异常，应增加保持适当偏移的控制绑定/骨骼跟随，再处理动态。UE4 源没有雅衣物骨骼，仅添加同名目标运动链不能生成衣物动作；已经导出的动画不会随重定向器姿势修改自动更新。
+- 后续验证步骤：由用户切回运行重定向，观察待机、抬臂和走路时衣物根部跟随、下垂及穿插情况；满意后另导出新副本。基础姿势正常后再选择 AnimDynamics 等轻量骨骼动态或 Chaos Cloth 布料，明确 AnimDynamics 使用自有简化物理体、不要求角色物理资产，也不自动提供完整衣物碰撞。
+- 涉及文件：补充 Docs/UnagiClothingDiagnosis.md 的具体 UE 5.8 操作段，追加 Docs/ExecutionLog.md；没有修改任何 C++、模型、骨架、动画、蓝图或配置，保留用户已修改 SK_Unagi_NoWeapon、地图和全部未跟踪资产。
+- 实际验证与失败记录：完成文档与本机源码静态核对，没有在编辑器旋转衣物、创建姿势或验证最终表现；未编译、播放或执行自动化、PIE、功能测试。see 对上下文 MyCharacter.h 返回 .h 非媒体格式；官方单独后处理动画蓝图页面打开失败，未据此编造其节点或菜单，改用可读的骨骼控制/动力学文档说明边界。
+- 未完成事项：本次修正方法说明完成，实际角度、支点驱动和动态仍需实施与观察。仅暂存两份本次文档，审阅状态及暂存差异后提交推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine ；https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-skeletal-controls-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprint-animdynamics-in-unreal-engine
