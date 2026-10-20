@@ -541,3 +541,11 @@
 - 实际验证与限制：核对本机源码及官方文档，未在编辑器创建资产，未编译、播放或执行自动化、PIE、功能测试。按 see 技能运行 scripts/see.sh 处理上下文 MyCharacter.h，返回 .h 不支持媒体格式；不影响操作说明。
 - 未完成事项：本次教程说明完成，源依赖恢复、实际 IK Rig 创建和后续重定向仍由用户在编辑器操作。仅暂存本次记录，审阅状态及暂存差异后提交推送，结果以实际 Git 输出及最终回复为准。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/retargeting-bipeds-with-ik-rig-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine
+
+## 2026-10-20 13:53:22 北京时间 — 确认 IK 绑定菜单选项
+
+- 用户需求：根据截图确认创建 IK Rig 应选择哪一个菜单项。
+- 执行内容：按 see 技能运行 scripts/see.sh 并读取生成的 Markdown；本地 Windows OCR 成功但识别不完整，结合用户截图确认上方为 IK绑定、下方为 IK重定向器。说明当前应点击上方 IK绑定，再选 SK_Unagi_NoWeapon 并命名 IK_Unagi；下方用于之后连接源与目标绑定。
+- 涉及文件：仅 Docs/ExecutionLog.md；未改代码、配置、资产或用户已有修改。
+- 验证结果：完成截图菜单辨认，未操作编辑器、创建资产、编译或执行测试。
+- 未完成事项：本次选项说明完成，实际点击和创建由用户继续操作。仅暂存本次记录，审阅后提交推送。
