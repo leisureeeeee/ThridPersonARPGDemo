@@ -445,3 +445,12 @@
 - 验证结果：只读联网资料核对，未安装插件或商业软件、未上传资产、未运行转换、编译或测试。Blender 扩展平台页面抓取返回 402，改用插件作者的 GitHub README 核对插件存在，未因此推断动画兼容性。see 对上下文 MyCharacter.cpp 返回非媒体格式。
 - 未完成事项：本次替代方案解释完成；第三方插件能否处理本套动作仍未经实测。仅暂存本次记录并审阅后提交推送。
 - 来源：https://www.autodesk.com/support/technical/article/caas/sfdcarticles/sfdcarticles/Is-it-possible-to-convert-3ds-Max-scene-files-to-FBX-without-having-3ds-Max-installed.html ； https://www.autodesk.com/products/3ds-max/free-trial ； https://github.com/nrgsille76/io_scene_max/blob/main/README.md ； https://download.autodesk.com/us/fbx/3ds_max_help/fbx_3dsmax_online/files/WS1a9193826455f5ff-6d855556117c4584e5420a5.htm
+
+## 2026-10-20 10:03:26 北京时间 — 说明独立装备所需的无武器人物模型
+
+- 用户需求：确认是否还需要一份不带武器建模的人物模型。
+- 执行内容：核对当前人物资产和五份已提取武器及说明；解释独立装备架构下应准备人物无武器几何的副本，保留身体/脸/头发、原蒙皮与骨骼层级，共用现有骨架；武器作为独立静态网格体组件挂到手部插槽，以便切换和收放，避免与人物内嵌武器重复显示。
+- 实现边界说明：无需重新制作人物模型，只需从源场景导出不含武器网格的角色版本，例如 SK_Unagi_NoWeapon；建议先保留全部现有骨骼，包括武器相关骨骼，避免不必要地改变动画依赖。原 SK_Unagi 保留。此为后续方案说明，并未执行去武器导出或导入，不声称新人物模型已存在。
+- 涉及文件：仅 Docs/ExecutionLog.md；只读资产目录和 Docs/UnagiWeaponExtraction.md，保留全部用户已有修改。
+- 验证结果：目录中当前仅见原 SK_Unagi，没有无武器人物副本；未修改资源、未编译或执行测试。see 对上下文 MyCharacter.cpp 返回非媒体格式。
+- 未完成事项：本次设计确认完成；无武器人物副本、手部挂接和动画预览尚未实施。仅暂存日志，检查状态和暂存差异后提交推送。
