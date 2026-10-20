@@ -675,3 +675,10 @@
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/unreal-mcp-in-unreal-editor?application_version=5.8 ；https://learn.chatgpt.com/docs/extend/mcp
 
 - 版本管理结果补记：配置提交 684d5d4 已在本机完成。向 GitHub origin/main 的组合提交/推送请求被自动审批拒绝，理由是尚未获得用户对具体远程 main 发布及共享分支变更的明确授权；未推送、未绕过审核。随后仅执行可回退的本地提交成功。推送保留待用户批准，不影响已验证的本机 MCP 服务与客户端配置。
+
+## 2026-10-20 21:38:26 北京时间 — 通过 UE MCP 查看当前关卡
+
+- 用户需求：通过 UE MCP 查看当前关卡。客户端已加载 mcp__unreal 工具；直接调用 execute_python_code 只读获取编辑器世界、Actor 列表和选择状态，再调用 capture_image(source=editor) 取得视口截图。
+- 实际结果：当前世界 /Game/NewMap.NewMap，共 9 个 Actor，API 返回当前选中 Actor 列表为空。场景包含 DirectionalLight、SkyAtmosphere、SkyLight、ExponentialHeightFog、VolumetricCloud、PlayerStart、SM_SkySphere、Floor、BP_Character。截图显示方格地面、角色及天空环境。
+- 验证与范围：MCP 查询和截图均成功；没有修改或保存场景、资产，没有编译、PIE 或功能测试。截图保存在忽略的 Saved/VibeUE/Captures/capture-editor-20261020-213758.png。初次工具目录尚未加载 unreal，环境加载命名空间后发现并调用成功。
+- 版本管理：仅提交本条执行记录，保留用户所有资产和配置改动。此前向远程 main 的推送被自动审批拒绝，尚未收到用户对该发布目标的明确授权，本次不重试推送；不影响本机连接。
