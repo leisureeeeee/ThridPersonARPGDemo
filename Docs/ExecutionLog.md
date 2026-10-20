@@ -475,3 +475,14 @@
 - 验证结果：查阅 Epic UE 5.8 动画变量、混合空间和状态机文档；用户验证步骤包含待机、移动、减速、后续跳跃及骨架/动画类排查，均未由本次任务实际执行。未编译、未运行自动化/PIE/功能测试。初次读取控制器目录使用旧路径失败，随后通过整个 Source/ThirdPersonARPG 的 rg 检索定位实际 PlayerController 目录；see 对上下文 MyCharacter.cpp 返回非媒体格式。
 - 未完成事项：本次教学说明完成；动作预览归类、BS_Unagi_Locomotion/ABP_Unagi 的创建与接入、跳跃输入及运行验证尚未实施。仅暂存本次两份文档，检查状态和暂存差异后提交推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/how-to-get-animation-variables-in-animation-blueprints-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/blend-spaces-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/state-machines-in-unreal-engine
+
+## 2026-10-20 13:07:56 北京时间 — 核对两套持剑移动的素材并查找免费资源
+
+- 用户需求：判断现有动作能否实现剑在鞘中走路、持剑走路两套状态；缺少时查找网络资源，优先免费。执行中用户补充先不讨论现有资源，先发资源链接；已立即给出作者/官方三个链接，并停止进一步资产接入工作。
+- 执行内容：只读枚举 MAX 名称及已导入清单；通过独立 UE Python 命令行进程对 AN_Unagi_01～11 各取 21 个时间点的骨骼姿势，绘制骨架正交投影接触表并查看。01 主体关键点在采样中静止，02～11 主要表现为突进、挥动和恢复，目前未确认两套完整行走循环；未将抽样观察说成逐帧完整人物预览或断言全部 MAX 没有对应动作。没有转换 MAX 或保存动画资产。
+- 网络核对：检查 MoCap Online 作者 itch.io、官网及许可、Epic 官方游戏动画示例和 Fab、Quaternius 作者页面。已从作者免费入口下载 MCO_TC_Sword_Free_Pack_01.zip（58,107,313 字节）到 Saved/AnimationResourceResearch，只查看目录和说明；确认含 KBS_Ready_Idle_001、KBS_Walk_F_001_IP、KBS_Run_F_001_IP 等 FBX。未导入、重定向或重新分发外部资源；包内没有补齐拔刀/收刀过渡。Quaternius 标准版免费，未把整个 120+ 动作库或付费专业/源文件版本称作免费。
+- 涉及文件：新增 Docs/SwordLocomotionResources.md，更新 Docs/BasicLocomotionSetup.md 中素材检查进度，追加本记录。说明区分稳定步态、武器装配和拔收刀过渡，保留原角色多骨武器蒙皮兼容限制。临时姿势、图片、脚本和资源包只留在被忽略的 Saved 中；未改 C++、动画、蓝图、地图或配置。
+- 验证结果：只读姿势采样进程退出 0，日志 0 errors/0 warnings；资源页面及免费包目录已核对。未编译，未执行自动化、PIE 或功能测试，未验证外部动画在当前角色上的效果。保留用户既有 Config/DefaultEditor.ini、Content/NewMap.umap 及未跟踪角色资源的全部修改。
+- 失败与处理：按 see 技能对上下文 MyCharacter.cpp 调用 scripts/see.sh，返回非媒体格式；对接触表图片调用 see，因未配置外部视觉接口，仅返回本机 OCR，未把 OCR 当作姿态语义证据，随后实际查看图片。Python 缺少绘图库，改用 System.Drawing 生成临时图片。部分网络地址抓取失败或超时，改查官方文档/Fab和作者站点；未依赖第三方转载站下载。初次用 apply_patch 定位日志标题失败，未改动文件，随后直接按 UTF-8 追加。
+- 未完成事项：本次查找与链接交付完成。按用户最新要求先供浏览选择，未继续安装、导入、重定向或制作两套动画。后续选定资源后仍需人体骨架重定向、握姿/剑鞘处理和游戏内效果检查。提交前检查状态与暂存差异，仅提交本次三份文档，并推送既有 main 分支；结果以 Git 输出和最终回复为准。
+- 来源：https://mocaponline.itch.io/free-3d-sword-animation-pack ；https://mocaponline.com/products/tc-sword ；https://mocaponline.com/pages/standard-license ；https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016 ；https://dev.epicgames.com/documentation/en-us/unreal-engine/game-animation-sample-project-in-unreal-engine ；https://quaternius.itch.io/universal-animation-library ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine

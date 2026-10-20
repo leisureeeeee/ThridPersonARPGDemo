@@ -26,7 +26,7 @@
 
 最小起点是同一骨架上的 Idle（待机）、Walk（行走）、Run（跑步）三个循环动作。第一阶段只接这三个，跳跃作为后续阶段。
 
-现有 `Asset/Unagi/Animations/SourceFBX/AN_Unagi_01`～`11` 已成功导入，但尚未播放确定动作含义；不要根据编号认定待机或跑步。先双击预览，确认后再按动作重命名。不要用短攻击动作凑成移动循环。
+现有 `Asset/Unagi/Animations/SourceFBX/AN_Unagi_01`～`11` 已成功导入。2026-10-20 补充只读骨骼姿势采样后，01 的主体关键点在采样中静止，02～11 主要呈现突进、挥动和恢复等姿势变化，尚未确认所需的两套行走循环；这不等于完成了逐帧的完整角色预览。不要根据编号认定待机或跑步，也不要用短攻击动作凑成移动循环。详见 [收刀与持剑移动的素材评估和免费资源](SwordLocomotionResources.md)。
 
 若缺少相应片段，可以通过 Max 导出原包 `Unagi_Idle.max`、`Unagi_Walk.max`、`Unagi_Run.max`，或者把其他骨架的动作通过 IK Retargeter（IK 重定向器）转换给当前角色。Max 转换目前仍缺可用 Max；也不能直接把旧 Mannequin（人体模型）的动作赋给不兼容的 `SKEL_Unagi`。
 
