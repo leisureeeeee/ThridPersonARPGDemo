@@ -1,0 +1,430 @@
+{
+  "status": "complete",
+  "weapons": [
+    {
+      "source_object": "Unagi_Weapon01",
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon01",
+      "fbx": "SourceAssets/Unagi/Weapons/Unagi_Weapon01.fbx",
+      "vertices": 350,
+      "triangles": 205,
+      "uv0_bounds": [
+        [
+          0.173095703125,
+          0.00390625
+        ],
+        [
+          0.99169921875,
+          0.708251953125
+        ]
+      ],
+      "center_removed_cm": [
+        0.34986114501953125,
+        1.0567020177841187,
+        188.3818817138672
+      ],
+      "dimensions_cm": [
+        111.0126953125,
+        6.237579584121704,
+        12.342041015625
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "fbx_sha256": "9d6f90f36bd13e3b41ffc32db52fa238ffadcaaff87a9afc53bdbf5d81955797"
+    },
+    {
+      "source_object": "Unagi_Weapon02",
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon02",
+      "fbx": "SourceAssets/Unagi/Weapons/Unagi_Weapon02.fbx",
+      "vertices": 2403,
+      "triangles": 1296,
+      "uv0_bounds": [
+        [
+          0.0011844635009765625,
+          0.0029296875
+        ],
+        [
+          0.9970703125,
+          0.9962520599365234
+        ]
+      ],
+      "center_removed_cm": [
+        15.824286460876465,
+        0.7028449773788452,
+        188.0102310180664
+      ],
+      "dimensions_cm": [
+        84.6744327545166,
+        6.936314821243286,
+        22.308486938476562
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "fbx_sha256": "a81154bf2b4583c56aeb61fdf7fd0c5deaafd63c9fd2b1e07655483ea350667c"
+    },
+    {
+      "source_object": "Unagi_Weapon03",
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon03",
+      "fbx": "SourceAssets/Unagi/Weapons/Unagi_Weapon03.fbx",
+      "vertices": 654,
+      "triangles": 330,
+      "uv0_bounds": [
+        [
+          0.175537109375,
+          0.009765625
+        ],
+        [
+          0.91455078125,
+          0.92645263671875
+        ]
+      ],
+      "center_removed_cm": [
+        23.804058074951172,
+        2.2990890741348267,
+        189.70807647705078
+      ],
+      "dimensions_cm": [
+        95.91828155517578,
+        6.467485189437866,
+        21.989273071289062
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "fbx_sha256": "c5304ab06f77cbb775f5f9fbfb7304d9110a468cedfc94f39f507ab35d42215d"
+    },
+    {
+      "source_object": "Unagi_Weapon04",
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon04",
+      "fbx": "SourceAssets/Unagi/Weapons/Unagi_Weapon04.fbx",
+      "vertices": 665,
+      "triangles": 544,
+      "uv0_bounds": [
+        [
+          0.1781005859375,
+          0.00537109375
+        ],
+        [
+          0.9521484375,
+          0.99359130859375
+        ]
+      ],
+      "center_removed_cm": [
+        -41.01434803009033,
+        0.27811896800994873,
+        192.28089141845703
+      ],
+      "dimensions_cm": [
+        34.2940731048584,
+        7.016594648361206,
+        10.076828002929688
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "fbx_sha256": "dadcba993a0ddf2762a663781075f22e7b7cc625ecfa30f059c5bcf59fd631c8"
+    },
+    {
+      "source_object": "Unagi_Weapon05",
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon05",
+      "fbx": "SourceAssets/Unagi/Weapons/Unagi_Weapon05.fbx",
+      "vertices": 138,
+      "triangles": 72,
+      "uv0_bounds": [
+        [
+          0.26318359375,
+          0.07861328125
+        ],
+        [
+          0.54638671875,
+          0.75244140625
+        ]
+      ],
+      "center_removed_cm": [
+        -53.81126022338867,
+        0.939103253185749,
+        176.21788024902344
+      ],
+      "dimensions_cm": [
+        5.4840850830078125,
+        1.7853150218725204,
+        27.207275390625
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "fbx_sha256": "e996fa28db03524e4c79ec1560b962650aa9b405e6a49266b43c0f2652c93725"
+    }
+  ],
+  "source": "Content/039-雅/fbx/雅/1.fbx",
+  "import_uniform_scale": 100,
+  "pivot": "Each mesh bounding-box center; not a verified grip point",
+  "protected_sha256_before": {
+    "Content/039-雅/fbx/雅/1.fbx": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00",
+    "Content/Asset/Unagi/SK_Unagi.uasset": "0e19e2b3072bffddde4b5fbbf510c02890c6c688a48b0cad44b835d5717bb9fb",
+    "Content/Asset/Unagi/SKEL_Unagi.uasset": "acf59bd0e8e658bb2e70dfd426311ee67fbc8c19a439bf5e356dc9e4a96b93ea",
+    "Content/Asset/Unagi/Material__28.uasset": "e3203635ec31ccaf07e7e76cd2bf23d55956e3aacb79d8b4e8f22ece087a7f1f"
+  },
+  "scratch_objects": [
+    {
+      "name": "Unagi_Hair",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Weapon01",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Weapon02",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Weapon04",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Weapon05",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Weapon03",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Body",
+      "class": "StaticMesh"
+    },
+    {
+      "name": "Unagi_Face",
+      "class": "StaticMesh"
+    }
+  ],
+  "protected_sha256_after": {
+    "Content/039-雅/fbx/雅/1.fbx": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00",
+    "Content/Asset/Unagi/SK_Unagi.uasset": "0e19e2b3072bffddde4b5fbbf510c02890c6c688a48b0cad44b835d5717bb9fb",
+    "Content/Asset/Unagi/SKEL_Unagi.uasset": "acf59bd0e8e658bb2e70dfd426311ee67fbc8c19a439bf5e356dc9e4a96b93ea",
+    "Content/Asset/Unagi/Material__28.uasset": "e3203635ec31ccaf07e7e76cd2bf23d55956e3aacb79d8b4e8f22ece087a7f1f"
+  },
+  "engine_version": "5.8.3",
+  "static_inspection": [
+    {
+      "file": "SourceAssets/Unagi/Weapons/Unagi_Weapon01.fbx",
+      "version": 7700,
+      "mesh_geometry_count": 1,
+      "model_types": [
+        "Mesh"
+      ],
+      "deformer_count": 0,
+      "vertices": 350,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions": [
+        111.012695,
+        6.237579,
+        12.342041
+      ],
+      "geometry_layers": [
+        "LayerElementNormal",
+        "LayerElementBinormal",
+        "LayerElementTangent",
+        "LayerElementColor",
+        "LayerElementUV",
+        "LayerElementSmoothing",
+        "LayerElementMaterial"
+      ]
+    },
+    {
+      "file": "SourceAssets/Unagi/Weapons/Unagi_Weapon02.fbx",
+      "version": 7700,
+      "mesh_geometry_count": 1,
+      "model_types": [
+        "Mesh"
+      ],
+      "deformer_count": 0,
+      "vertices": 2403,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions": [
+        84.674431,
+        6.936315,
+        22.308487
+      ],
+      "geometry_layers": [
+        "LayerElementNormal",
+        "LayerElementBinormal",
+        "LayerElementTangent",
+        "LayerElementColor",
+        "LayerElementUV",
+        "LayerElementSmoothing",
+        "LayerElementMaterial"
+      ]
+    },
+    {
+      "file": "SourceAssets/Unagi/Weapons/Unagi_Weapon03.fbx",
+      "version": 7700,
+      "mesh_geometry_count": 1,
+      "model_types": [
+        "Mesh"
+      ],
+      "deformer_count": 0,
+      "vertices": 654,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions": [
+        95.918282,
+        6.467485,
+        21.989273
+      ],
+      "geometry_layers": [
+        "LayerElementNormal",
+        "LayerElementBinormal",
+        "LayerElementTangent",
+        "LayerElementColor",
+        "LayerElementUV",
+        "LayerElementSmoothing",
+        "LayerElementMaterial"
+      ]
+    },
+    {
+      "file": "SourceAssets/Unagi/Weapons/Unagi_Weapon04.fbx",
+      "version": 7700,
+      "mesh_geometry_count": 1,
+      "model_types": [
+        "Mesh"
+      ],
+      "deformer_count": 0,
+      "vertices": 665,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions": [
+        34.294075,
+        7.016595,
+        10.076828
+      ],
+      "geometry_layers": [
+        "LayerElementNormal",
+        "LayerElementBinormal",
+        "LayerElementTangent",
+        "LayerElementColor",
+        "LayerElementUV",
+        "LayerElementSmoothing",
+        "LayerElementMaterial"
+      ]
+    },
+    {
+      "file": "SourceAssets/Unagi/Weapons/Unagi_Weapon05.fbx",
+      "version": 7700,
+      "mesh_geometry_count": 1,
+      "model_types": [
+        "Mesh"
+      ],
+      "deformer_count": 0,
+      "vertices": 138,
+      "center": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions": [
+        5.484085,
+        1.785315,
+        27.207275
+      ],
+      "geometry_layers": [
+        "LayerElementNormal",
+        "LayerElementBinormal",
+        "LayerElementTangent",
+        "LayerElementColor",
+        "LayerElementUV",
+        "LayerElementSmoothing",
+        "LayerElementMaterial"
+      ]
+    }
+  ],
+  "saved_assets": [
+    {
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon01",
+      "class": "StaticMesh",
+      "vertices": 350,
+      "triangles": 205,
+      "center_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "sources": [
+        "SourceAssets/Unagi/Weapons/Unagi_Weapon01.fbx"
+      ],
+      "asset_sha256": "2dfa1693d8b38d252f21091704d8c09879f860ca1044741a8e9455c859f62e4a"
+    },
+    {
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon02",
+      "class": "StaticMesh",
+      "vertices": 2403,
+      "triangles": 1296,
+      "center_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "sources": [
+        "SourceAssets/Unagi/Weapons/Unagi_Weapon02.fbx"
+      ],
+      "asset_sha256": "940293087e84dcf36e885b63baf1a2f80e45a1903b5671022f0b6da8df0882d5"
+    },
+    {
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon03",
+      "class": "StaticMesh",
+      "vertices": 654,
+      "triangles": 330,
+      "center_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "sources": [
+        "SourceAssets/Unagi/Weapons/Unagi_Weapon03.fbx"
+      ],
+      "asset_sha256": "72bc30d2aaab14098e865ddee59d1d026788e88b7106ecedb436780f6664b7e5"
+    },
+    {
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon04",
+      "class": "StaticMesh",
+      "vertices": 665,
+      "triangles": 544,
+      "center_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "sources": [
+        "SourceAssets/Unagi/Weapons/Unagi_Weapon04.fbx"
+      ],
+      "asset_sha256": "79fbb8116b526fe13a26340735a3333e4d4e49ee988d73c09f4742df5ac7bb13"
+    },
+    {
+      "asset": "/Game/Asset/Unagi/Weapons/SM_Unagi_Weapon05",
+      "class": "StaticMesh",
+      "vertices": 138,
+      "triangles": 72,
+      "center_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "material": "/Game/Asset/Unagi/Material__28.Material__28",
+      "sources": [
+        "SourceAssets/Unagi/Weapons/Unagi_Weapon05.fbx"
+      ],
+      "asset_sha256": "1a11c1b0d31a0a90f6f983540c364c24a31c443d195bf1b52f35b616b3a94d18"
+    }
+  ],
+  "validation": "Static inspection of exported FBX geometry/layers and reloaded saved UE mesh data. No visual/gameplay/PIE/automation tests or C++ compilation."
+}

@@ -424,3 +424,14 @@
 - 涉及文件：仅 Docs/ExecutionLog.md；只读源 FBX 和 Docs/UnagiCharacterSetup.md，未导入、提取或修改资产，保留全部用户已有修改。
 - 验证结果：已读到真实 Mesh 类型、Geometry 连接及顶点数组长度；未视觉预览、编译或执行测试。按 see 技能调用 scripts/see.sh 处理上下文 MyCharacter.cpp，返回 .cpp 非媒体格式。
 - 未完成事项：本次确认完成；未执行武器拆分，具体武器外观、蒙皮与绑定方式仍需进一步检查。仅暂存日志并审阅提交推送。
+
+## 2026-10-20 09:49:54 北京时间 — 从已有 FBX 提取五个独立武器模型
+
+- 用户需求：从雅角色已有 FBX 拆出武器模型。
+- 实际完成：从 Content/039-雅/fbx/雅/1.fbx 的 Unagi_Weapon01～05 提取五个静态网格，保存至 Content/Asset/Unagi/Weapons/SM_Unagi_Weapon01～05.uasset；同时导出五份独立 FBX 至 SourceAssets/Unagi/Weapons。顶点数依次 350/2403/654/665/138，三角形数 205/1296/330/544/72，最大尺寸约 111.0/84.7/95.9/34.3/27.2 厘米。
+- 实现与原理：新增 Tools/Unagi/extract_unagi_weapons.py，通过独立 UE Python 命令行进程使用 Interchange 将场景网格分开读取为静态网格，保留源对象名，应用当前角色同样的 100 倍导入比例。读取 Mesh Description，平移顶点使各网格包围盒中心归零，保留 UV/法线/材质槽，复用现有 Material__28；输出为不含骨骼的刚性模型，后续可通过静态网格体组件挂到角色插槽。原武器中心约高 176～192 厘米，居中避免沿用人物原点产生大偏移；居中轴心不等于握柄轴心，原中心偏移已记录。
+- 涉及文件：五个新 uasset、五个新 FBX、提取脚本、Docs/UnagiWeaponExtraction.md、Docs/UnagiWeaponExtraction.json、Docs/ExecutionLog.md。原有角色、骨架、材质、源 FBX、地图及配置不修改。临时场景网格只在命令行进程内存中处理，未保存人物/脸/头发副本，日志和临时数据留 Saved/UnagiWeaponWork。
+- 验证结果：解析五份导出 FBX 7700，每份一个 Mesh 模型与一个几何对象、零 Deformer，具备 UV/法线/切线/材质层，顶点与三角形数量符合源对象，中心为零。独立进程从磁盘重新读取五个 uasset，均为 StaticMesh，顶点/三角形/中心、材质关联和单独 FBX 的重导入路径正确；最后读取进程退出 0，0 error(s)/0 warning(s)。原 1.fbx、SK_Unagi、SKEL_Unagi、Material__28 处理前后 SHA-256 相同；清单含完整哈希和尺寸。未执行 C++ 编译、自动化/PIE/功能测试、视觉预览或手部挂接验证。
+- 失败与修复：首次不烘焙场景变换时 UE 按匿名几何命名，无法按 Weapon 对象筛选；改为烘焙场景旋转/缩放后保留对象名，随后再居中。当前 Python 无 StaticMeshFactoryNew，改为复制本次内存临时网格并重建。命令行进程无法获得 StaticMeshEditorSubsystem，改用网格描述读取 UV 元数据。初次保存重导入元数据时未指定 Outer，重新加载后为 None；修正为以新网格为 Outer 创建 FbxStaticMeshImportData，补存本次五个新资产后再次读取成功。see 对上下文 MyCharacter.cpp 返回非媒体格式；不影响源数据读取。
+- 用户修改与版本管理：保留用户原有 Config/DefaultEditor.ini、Content/NewMap.umap、源资源和未跟踪角色资产。新网格复用现有但未跟踪的 Material__28/贴图，本次不顺带暂存这些用户文件；独立工作区需具备材质或另行赋材质。FBX 和 uasset 使用已有 Git LFS 通配规则，不追踪缓存或凭据。提交前检查状态和本次暂存差异，仅提交本次文件并推送。
+- 未完成事项：本次模型提取完成；对象之间是部件还是不同版本尚未视觉确认，未将其宣称为五种完整武器。当前人物内原武器保留，后续挂接前需处理重复显示并调整握柄偏移；未配置战斗碰撞或装备逻辑。操作步骤和限制已写入说明。
