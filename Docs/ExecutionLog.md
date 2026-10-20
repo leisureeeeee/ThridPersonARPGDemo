@@ -771,3 +771,11 @@
 - 说明：双击进入状态而非过渡箭头，在资产浏览器搜索并拖入动画序列，生成 Sequence Player 后连接到状态的输出动画姿势节点；Idle 使用 AS_Idle_Seq，Walk 使用 AS_Walk_Loop_F_0_Seq，均开启循环动画，返回状态机确认入口与双向过渡后编译保存。
 - 范围：仅提供编辑器操作指导，没有查看实时状态图或替用户连线，没有修改源码、蓝图、动画或配置，未编译、播放或执行测试。
 - 涉及文件与版本管理：仅追加本执行记录并本地提交；远程 main 推送沿用此前审批阻塞，不重试。
+
+## 2026-10-20 23:26:38 北京时间 — 核对动画蓝图并说明角色绑定步骤
+
+- 用户需求：在给 Idle/Walk 添加动画之后询问下一步。
+- MCP 只读结果：动画蓝图 /Game/BP/MyCharatcer/BP_CharacterAnim 的父类和原生父类均为 MyCharacterAnimInstance，目标骨架为 ARPG_Samurai 的 UE4_Mannequin_Skeleton。编辑器场景 BP_Character_C_1 的网格为 SK_Mannequin，动画模式为 Animation Blueprint，但 AnimClass 直接设为原生 MyCharacterAnimInstance，当前动画实例也是原生类实例。
+- 说明：下一步在 BP_Character 的 Mesh 中将 Anim Class 设为 BP_CharacterAnim，保留动画蓝图父类 MyCharacterAnimInstance。C++ 类提供速度/移动数据，动画蓝图提供已组装的状态机和姿势；直接绑定原生数据类不会使用该动画蓝图状态机。
+- 用户验证步骤：编译保存动画蓝图和角色蓝图后，由用户运行检查站立待机、WASD 行走与停止回待机。当前仅核对编辑器实例属性，未读取/验证状态机内部接线，未启动 PIE、播放、编译或测试。
+- 涉及文件及版本管理：仅追加执行记录并本地提交，没有修改任何代码、蓝图、动画、地图或配置；远程 main 推送沿用此前审批阻塞，不重试。
