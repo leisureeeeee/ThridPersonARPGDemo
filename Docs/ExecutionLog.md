@@ -516,3 +516,16 @@
 - 失败与处理：初次 UE 脚本使用不存在的 unreal.duplicate_object，在导入前失败，改用新建管线并复制原坐标/网格相关设置，随后成功。首次只读重载脚本直接访问 asset_import_data 属性失败，改为 get_editor_property 后成功；此前已完成骨骼、材质、变形目标检查。部分引擎头文件检索路径不存在，随后定位到实际共享设置和骨骼网格编辑子系统头文件；不影响资源结果。see 对上下文 MyCharacter.cpp 返回非媒体格式。
 - 版本管理：仅提交本次新 FBX、新 uasset、三个 Python 脚本、局部忽略文件、两份新说明/清单、更新的武器说明和本执行记录。新二进制使用既有 Git LFS 规则；保留 Config/DefaultEditor.ini、Content/NewMap.umap、源资源及未跟踪原角色/材质/骨架和蓝图等全部用户改动。原材质/骨架依赖当前仍未跟踪，本次不擅自纳入，其他工作区需具备这些依赖或重新导入 FBX。提交前检查状态与暂存差异，再提交并推送。
 - 未完成事项：本次无武器人物导出和 UE 资产创建完成；用户可在内容浏览器打开 SK_Unagi_NoWeapon，预期只显示人物。后续独立武器仍需处理多骨蒙皮、握姿及挂接，原动画实际表现、平滑组/法线受光效果和角色替换由用户在编辑器中确认。本次未声称完成独立武器动态装配或游戏内验证。临时进程报告和日志位于被忽略的 Saved/UnagiNoWeaponWork 与 Saved/UnagiNoWeapon*.log；提交推送结果以 Git 输出及最终回复为准。
+
+## 2026-10-20 13:43:43 北京时间 — 排查太刀待机切换动画无法驱动雅角色
+
+- 用户需求：检查 /Game/Katana_Animations/Animations/Sequence/01_Idle/AS_Idle_To_Idle_Combat_Seq 使用 sk_UNAGI 后不动的原因。
+- 执行内容：只读检查该动画、同目录另一待机切换动画、SKEL_Unagi、已有 UE4_Mannequin_Skeleton 的二进制可读名称与引用；检查当前编辑器日志及 UE 5.8 本机 AnimSequence.cpp 的 RemapTracksToNewSkeleton 实现，核对 Epic 骨架与 IK 重定向文档。未改变编辑器内的未保存状态。
+- 确认结果：目标动画磁盘资产仍引用 /Game/Katana_Animations/Demo/Mannequin_UE4/Character/Mesh/UE4_Mannequin_Skeleton，实际目录只有 Animations，缺少该骨架。编辑器日志北京时间 13:39:23 明确报告目标 USkeleton 缺失、Skeleton == nullptr，13:39:28 报源依赖包在磁盘/iostore 不存在。动画可读骨骼名称为 pelvis、spine_01、upperarm_l、thigh_l；雅骨架为 Bip001-Pelvis、Bip001-Spine、Bip001-L-UpperArm、Bip001-L-Thigh，不能直接通过替换骨架获得动作转换。
+- 原理与建议：先在单独副本中恢复原动画及源 UE4 人偶骨架/预览网格，优先从完整原工程通过 Migrate（迁移）连同依赖引入；再为 UE4 人偶和雅分别建立 IK Rig（IK绑定），用 IK Retargeter（IK重定向器）匹配人体运动链并导出关联 SKEL_Unagi 的新动画。原 SK_Unagi 和已创建 SK_Unagi_NoWeapon 共用雅骨架，去除武器几何本身不是此处人体动画骨骼名称不匹配的原因。
+- 风险与限制：本机引擎实现存在移除目标骨架中不存在的动画轨道的处理；日志在替换骨架后压缩内存估算由 1.16 MB 降至 0.11 MB，提示需检查轨道，但未读取当前内存轨道数量，不能据此断言已丢失多少轨道。磁盘资产仍含原骨骼名与源引用，不等于编辑器内未保存状态。若已保存错误替换，应从原资源另取副本后重定向，不能承诺仅换回骨架即可恢复。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；其余资产、配置、地图、蓝图和全部用户已有修改均保留，未保存、覆盖、导入或重定向动画。
+- 验证结果：完成资产引用/名称、日志和源码静态核对；未编译，未执行自动化、PIE、功能测试或播放验证。按 see 技能运行 scripts/see.sh 处理用户资产路径，返回 .uasset 不支持媒体解析，随后使用本地二进制静态检查。
+- 用户验证步骤：恢复完整源依赖后先确认原动画能驱动 UE4 人偶；导出重定向副本后在动画编辑器选 SK_Unagi_NoWeapon 预览并拖动时间轴，预期躯干与四肢随动作变化，再检查双手握姿、脚底和武器。当前诊断完成，实际资源恢复及重定向尚未实施。
+- 版本管理：只暂存本次执行记录，检查状态、暂存差异和差异空白检查后提交推送；实际结果以 Git 输出和最终回复为准。
+- 官方来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletons-in-unreal-engine ；https://dev.epicgames.com/documentation/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine?lang=en-US
