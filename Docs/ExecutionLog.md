@@ -739,3 +739,12 @@
 - 涉及文件：Source/ThirdPersonARPG/AnimInstance/MyCharacterAnimInstance.h、.cpp，Docs/IdleWalkGuide.md、Docs/ExecutionLog.md。保留所有既有资产、地图、配置及未跟踪资源修改，仅提交本次动画实例文件和两份文档。
 - 验证：核对 UAnimInstance 原生更新接口及 APawn::GetVelocity 声明，检查差异/空白；按项目规则未编译或执行 PIE、动画播放和自动化测试。新增反射属性需要用户编译并重新加载后才能在蓝图中使用，不宣称运行验证通过。
 - 未完成事项：用户编译后将动画蓝图父类设置为 MyCharacterAnimInstance，接入 Should Move 的双向过渡并绑定 Mesh；动画速度匹配、起停和急转仍留后续。远程 main 推送沿用此前审批阻塞，本次仅本地提交，不绕过或重试。
+
+## 2026-10-20 23:13:10 北京时间 — 解释 GameFeatureData 资产扫描配置提示
+
+- 用户需求：解释资产管理器缺少 GameFeatureData 扫描条目、询问是否添加到 PrimaryAssetTypesToScan 的提示。
+- 检查：读取项目描述符和 Config，当前启用 AllToolsets，项目配置未检出 GameFeatureData 扫描项；核对本机 AllToolsets.uplugin 引用 GameFeaturesToolset，GameFeaturesToolset.uplugin 启用 GameFeatures，确认间接依赖链。查阅 Epic 官方 UAssetManagerSettings 与 UGameFeatureData API 文档，确认主资产扫描类型列表的作用。
+- 说明：Game Features 子系统需要资产管理器识别其 GameFeatureData 主资产类型；可使用提示中的添加操作补充项目资产管理器设置。该配置与 MyCharacterAnimInstance 的速度读取代码无直接关系，当前待机行走功能无需改成游戏功能插件架构。
+- 限制：本机引擎安装未提供 GameFeaturesSubsystem.cpp，未核对提示修复按钮的实际实现或默认扫描规则，未声称其具体生成配置已验证；没有点击提示或修改配置。只检查磁盘配置，未重新查询编辑器内存配置。
+- 涉及文件与验证：仅追加本记录；没有更改代码、资产或插件开关，未编译、PIE 或运行测试。实际插件依赖和配置检查完成。
+- 版本管理：仅本地提交本条记录；远程 main 推送沿用此前审批阻塞，不重试。
