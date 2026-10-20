@@ -549,3 +549,18 @@
 - 涉及文件：仅 Docs/ExecutionLog.md；未改代码、配置、资产或用户已有修改。
 - 验证结果：完成截图菜单辨认，未操作编辑器、创建资产、编译或执行测试。
 - 未完成事项：本次选项说明完成，实际点击和创建由用户继续操作。仅暂存本次记录，审阅后提交推送。
+
+## 2026-10-20 14:10:34 北京时间 — 创建雅与 UE4 人偶 IK 绑定及重定向器
+
+- 用户需求：在明确 IK 绑定菜单后，要求代为完成创建和配置。
+- 实际完成：新建 /Game/Asset/Unagi/Rig/IK_Unagi、IK_UE4Mannequin、RTG_UE4_To_Unagi 三个资产。目标使用已有 SK_Unagi_NoWeapon / SKEL_Unagi，源复用 ARPG_Samurai 下现有 SK_Mannequin / UE4_Mannequin_Skeleton；两边各配置九条同名链（脊柱、双锁骨、双臂、双腿、颈、头），骨盆分别为 Bip001-Pelvis 和 pelvis。链起止骨骼及父子层级先从实际模型核对，没有重命名模型骨骼。
+- 实现与原理：新增 Tools/Unagi/create_unagi_ik_rigs.py，使用 UE Python 的资产工厂和 IKRigController、IKRetargeterController 创建与配置资源，仅保存三个新包，拒绝覆盖既有输出。IK Rig 描述人体骨盆及运动链，IK Retargeter 通过同名链传递动作；配置骨盆/FK/根运动/曲线映射操作，没有 IK 目标与求解器，暂时关闭 Run IK Rig 操作。两边根运动骨骼使用各自真实层级首节点 root 和 Avatar_Female_Size02_Unagi_Model，区别于骨盆。没有把资源路径或输入/动画逻辑加入 Character 类。
+- 涉及文件：三个新 uasset、Tools/Unagi/create_unagi_ik_rigs.py、Docs/UnagiIKRigSetup.md、Docs/UnagiIKRigSetup.json、Docs/ExecutionLog.md。说明文档提供链表、模型引用、创建方式、限制与编辑器检查步骤，JSON 保存实际读回配置和新资产哈希。
+- 资源完整性核对：创建 UE 5.8.3 命令行进程退出 0，0 errors/0 warnings；另起只读进程从磁盘重载三份资产，核对模型、骨盆、根运动节点、每份九条链和九条源目标映射，退出 0，0 errors/0 warnings。创建与读回的新资产 SHA-256 相同，17 个受保护既有文件的 SHA-256 前后相同。原 UE 编辑器进程 11648 保持运行，未关闭或操作未保存内容。
+- 失败与修复：前两次创建尝试在保存任何资产前，因把链端点 BoneReference 结构直接转为字符串导致核对失败；第二次补充诊断信息确认类型，随后改用控制器的骨骼名称访问器，第三次创建成功。不覆盖既有文件，无失败产生的资产需要清理。see 对上下文 MyCharacter.h 返回 .h 非媒体格式；改用源码和 UE Python API 完成。UE 命令行启动自行执行 SDK 平台枚举，并未编译项目 C++。
+- 实际验证范围：上述为创建及保存数据完整性核对；未编译、未播放动画、未运行自动化、PIE 或其他功能测试，未导出重定向动画，未替换角色或接入动画蓝图。
+- 当前限制：原太刀动画引用的 Katana_Animations/Demo/Mannequin_UE4/.../UE4_Mannequin_Skeleton 仍缺失；复用另一路径的人偶建立 IK 绑定不会自动修复原动画引用。本次没有加载并强制替换这些动画，也没有承诺该待机切换动画现在已能驱动雅。后续应先恢复完整源依赖或未错误替换的副本，再检查重定向参考姿势、导出新动作。当前仍使用默认参考姿势，未配置手指、脚趾及武器链，脚底/根运动/握姿效果需视觉确认。
+- 用户检查步骤：在内容浏览器 Asset/Unagi/Rig 打开 IK_Unagi，预期见无武器雅、正确骨盆和九条运动链；打开 IK_UE4Mannequin 核对人偶和同名链；打开 RTG_UE4_To_Unagi 核对源目标引用及 FK 链映射。实际动画播放、参考姿势对齐和导出步骤见新增说明文档，留待用户测试或进一步授权制作动作。
+- 用户修改保护与版本管理：保留 Config/DefaultEditor.ini、Content/NewMap.umap、原人物/骨架/材质、原太刀动画及全部原有未跟踪文件。只暂存本次七个明确文件，新 uasset 使用既有 Git LFS 规则。原 SKEL_Unagi 及材质依赖仍未跟踪，不擅自纳入；其他工作区使用需具备这些依赖。检查 Git 状态、暂存差异和差异检查后提交推送，结果以 Git 输出及最终回复为准。
+- 未完成事项：本次委托的 IK 绑定与关联重定向器配置完成；原太刀动画依赖恢复及动画适配/表现验收尚未完成，未将配置完成等同于原动画问题完全解决。
+- 来源：https://dev.epicgames.com/documentation/unreal-engine/using-python-to-create-and-edit-ik-rigs-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine ；本机 UE 5.8 IKRigController.h / IKRetargeterController.h 与对应实现。

@@ -1,0 +1,157 @@
+{
+  "status": "complete",
+  "source": {
+    "asset": "/Game/Asset/Unagi/Rig/IK_UE4Mannequin.IK_UE4Mannequin",
+    "mesh": "/Game/ARPG_Samurai/Demo/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin",
+    "skeleton": "/Game/ARPG_Samurai/Demo/Mannequin/Character/Mesh/UE4_Mannequin_Skeleton.UE4_Mannequin_Skeleton",
+    "pelvis": "pelvis",
+    "root_motion_bone": "root",
+    "chains": {
+      "Spine": {
+        "start": "spine_01",
+        "end": "spine_03"
+      },
+      "LeftClavicle": {
+        "start": "clavicle_l",
+        "end": "clavicle_l"
+      },
+      "RightClavicle": {
+        "start": "clavicle_r",
+        "end": "clavicle_r"
+      },
+      "LeftArm": {
+        "start": "upperarm_l",
+        "end": "hand_l"
+      },
+      "RightArm": {
+        "start": "upperarm_r",
+        "end": "hand_r"
+      },
+      "LeftLeg": {
+        "start": "thigh_l",
+        "end": "foot_l"
+      },
+      "RightLeg": {
+        "start": "thigh_r",
+        "end": "foot_r"
+      },
+      "Neck": {
+        "start": "neck_01",
+        "end": "neck_01"
+      },
+      "Head": {
+        "start": "head",
+        "end": "head"
+      }
+    },
+    "solver_count": 0
+  },
+  "target": {
+    "asset": "/Game/Asset/Unagi/Rig/IK_Unagi.IK_Unagi",
+    "mesh": "/Game/Asset/Unagi/SK_Unagi_NoWeapon.SK_Unagi_NoWeapon",
+    "skeleton": "/Game/Asset/Unagi/SKEL_Unagi.SKEL_Unagi",
+    "pelvis": "Bip001-Pelvis",
+    "root_motion_bone": "Avatar_Female_Size02_Unagi_Model",
+    "chains": {
+      "Spine": {
+        "start": "Bip001-Spine",
+        "end": "Bip001-Spine2"
+      },
+      "LeftClavicle": {
+        "start": "Bip001-L-Clavicle",
+        "end": "Bip001-L-Clavicle"
+      },
+      "RightClavicle": {
+        "start": "Bip001-R-Clavicle",
+        "end": "Bip001-R-Clavicle"
+      },
+      "LeftArm": {
+        "start": "Bip001-L-UpperArm",
+        "end": "Bip001-L-Hand"
+      },
+      "RightArm": {
+        "start": "Bip001-R-UpperArm",
+        "end": "Bip001-R-Hand"
+      },
+      "LeftLeg": {
+        "start": "Bip001-L-Thigh",
+        "end": "Bip001-L-Foot"
+      },
+      "RightLeg": {
+        "start": "Bip001-R-Thigh",
+        "end": "Bip001-R-Foot"
+      },
+      "Neck": {
+        "start": "Bip001-Neck",
+        "end": "Bip001-Neck"
+      },
+      "Head": {
+        "start": "Bip001-Head",
+        "end": "Bip001-Head"
+      }
+    },
+    "solver_count": 0
+  },
+  "retargeter": {
+    "asset": "/Game/Asset/Unagi/Rig/RTG_UE4_To_Unagi.RTG_UE4_To_Unagi",
+    "source_rig": "/Game/Asset/Unagi/Rig/IK_UE4Mannequin.IK_UE4Mannequin",
+    "target_rig": "/Game/Asset/Unagi/Rig/IK_Unagi.IK_Unagi",
+    "chain_mapping": {
+      "Spine": "Spine",
+      "LeftClavicle": "LeftClavicle",
+      "RightClavicle": "RightClavicle",
+      "LeftArm": "LeftArm",
+      "RightArm": "RightArm",
+      "LeftLeg": "LeftLeg",
+      "RightLeg": "RightLeg",
+      "Neck": "Neck",
+      "Head": "Head"
+    },
+    "operations": [
+      {
+        "name": "Pelvis Motion",
+        "controller": "IKRetargetPelvisMotionController",
+        "enabled": true
+      },
+      {
+        "name": "FK Chains",
+        "controller": "IKRetargetFKChainsController",
+        "enabled": true
+      },
+      {
+        "name": "Run IK Rig",
+        "controller": "IKRetargetRunIKRigController",
+        "enabled": false
+      },
+      {
+        "name": "Root Motion",
+        "controller": "IKRetargetRootMotionController",
+        "enabled": true
+      },
+      {
+        "name": "Remap Curves",
+        "controller": "IKRetargetCurveRemapController",
+        "enabled": true
+      }
+    ],
+    "pose_alignment": "default reference poses; visual adjustment pending",
+    "animation_exported": false
+  },
+  "output_sha256": {
+    "/Game/Asset/Unagi/Rig/IK_UE4Mannequin": "17406b6a31d2c66f1c09882030fdb84bc1655b06647157ba0c946c6f17b701d3",
+    "/Game/Asset/Unagi/Rig/IK_Unagi": "013d9f38b16adbbf8a85d8fdf27bb935b1d616e86be113fddf9a96dc6f9afe12",
+    "/Game/Asset/Unagi/Rig/RTG_UE4_To_Unagi": "9cd327663d766bb312d03a05fb0f32a9593925a134f289e58e323df0d633277b"
+  },
+  "created_date_beijing": "2026-10-20",
+  "saved_reloaded_sha256_match": true,
+  "protected_existing_file_count": 17,
+  "protected_existing_files_unchanged": true,
+  "creation_log_errors": 0,
+  "creation_log_warnings": 0,
+  "readback_log_errors": 0,
+  "readback_log_warnings": 0,
+  "animation_playback_performed": false,
+  "animation_exported": false,
+  "project_compiled": false,
+  "katana_original_skeleton_dependency_restored": false
+}
