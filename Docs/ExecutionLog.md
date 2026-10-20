@@ -673,3 +673,5 @@
 - 版本管理：仅暂存本次新增的 AllToolsets/VibeUE 描述符内容、默认 MCP 设置、说明文档和本执行记录；描述符中用户已有的 ModelContextProtocol/MCPClientToolset 改动继续保持未暂存，其他用户资产和配置不提交。
 - 未完成事项：服务端连接验证完成，当前聊天需在客户端重新连接 MCP 或重启 Codex 后加载新工具列表。后续通过该连接操作的是当前实际打开的 UE 项目。
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/unreal-mcp-in-unreal-editor?application_version=5.8 ；https://learn.chatgpt.com/docs/extend/mcp
+
+- 版本管理结果补记：配置提交 684d5d4 已在本机完成。向 GitHub origin/main 的组合提交/推送请求被自动审批拒绝，理由是尚未获得用户对具体远程 main 发布及共享分支变更的明确授权；未推送、未绕过审核。随后仅执行可回退的本地提交成功。推送保留待用户批准，不影响已验证的本机 MCP 服务与客户端配置。
