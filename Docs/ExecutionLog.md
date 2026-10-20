@@ -564,3 +564,12 @@
 - 用户修改保护与版本管理：保留 Config/DefaultEditor.ini、Content/NewMap.umap、原人物/骨架/材质、原太刀动画及全部原有未跟踪文件。只暂存本次七个明确文件，新 uasset 使用既有 Git LFS 规则。原 SKEL_Unagi 及材质依赖仍未跟踪，不擅自纳入；其他工作区使用需具备这些依赖。检查 Git 状态、暂存差异和差异检查后提交推送，结果以 Git 输出及最终回复为准。
 - 未完成事项：本次委托的 IK 绑定与关联重定向器配置完成；原太刀动画依赖恢复及动画适配/表现验收尚未完成，未将配置完成等同于原动画问题完全解决。
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/using-python-to-create-and-edit-ik-rigs-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine ；本机 UE 5.8 IKRigController.h / IKRetargeterController.h 与对应实现。
+
+## 2026-10-20 14:14:53 北京时间 — 说明 IK 绑定配置后的下一步
+
+- 用户需求：询问创建绑定与重定向器之后需要做什么。
+- 执行内容：只读检查 Git 状态、已创建绑定目录、四段太刀待机动画的磁盘引用和当前 UE 编辑器日志。确认新建三个资产存在，但四段动画仍引用 Katana_Animations/Demo/Mannequin_UE4/.../UE4_Mannequin_Skeleton，该源骨架文件仍不存在；日志显示用户近期打开过绑定和待机动画，未据此推断播放成功或编辑器内引用已保存。
+- 操作建议：当前优先找到太刀动画的完整原始包，检查 Demo/Mannequin_UE4/Character/Mesh 中的骨架及源人偶；提供原始包或解压目录路径后可继续检查和恢复依赖，避免再次将源动画直接换为雅骨架。源人偶能播放后，再在 RTG_UE4_To_Unagi 中核对源目标、预览重定向、调整参考姿势并导出目标动画。暂不修改 MyCharacter.h 或角色蓝图。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；保留用户全部已有代码、配置、地图及未跟踪资源，未修改资产或编辑器状态。
+- 验证结果：完成目录、引用和日志静态检查，未编译或执行播放、自动化、PIE、功能测试。see 对上下文 MyCharacter.h 返回 .h 不支持的媒体格式。
+- 未完成事项：本次下一步说明完成；尚未定位完整原始包，源骨架依赖恢复与太刀动画转换仍待处理。仅暂存本次记录，核对状态和暂存差异后提交推送。
