@@ -605,3 +605,17 @@
 - 本机实现核对：PersonaPreviewSceneRefPoseController.h 的显示名为 Reference Pose，InitializeView 调用 ShowReferencePose；PreviewSceneCustomizations.cpp 在 Animation 分类提供 Preview Controller 下拉框；AnimViewportShowCommands.cpp 提供 Mesh 显示开关。未把切换参考姿势等同于修复或实际验证成功。
 - 涉及文件及实际结果：仅追加 Docs/ExecutionLog.md。未更改 C++、模型、骨架、动画、配置或编辑器内未保存状态，未编译、播放或执行自动化、PIE、功能测试。一次 rg 调用误传 PowerShell 的 -ErrorAction 参数失败，随后改正检索并成功定位菜单定义。
 - 未完成事项：截图分析完成，但不可见的确切原因与修复尚待参考姿势结果、导出前预览状态或保存后的动画数据。只暂存本条日志，审阅状态和暂存差异后提交推送。
+
+## 2026-10-20 14:39:51 北京时间 — 排查雅播放重定向动画时衣物异常展开
+
+- 用户需求：询问能否查看当前 UE 窗口，说明雅已能播放动画但衣物看起来没有重力；执行中补充源人偶与雅的当前截图，作为同一排查任务的进一步证据。
+- 画面核对：按 see 技能处理上下文路径及后续截图，截图本地 OCR 无文字，结合用户图像可见雅人体已随动作摆姿，青色大块衣物向外支起。以这张截图为视觉证据，未声称已直接看到实时窗口或动态过程。
+- 窗口工具结果：读取 computer-use 技能及指导，发现 node_repl 可调用，初始化 @oai/sky 后请求窗口列表；工具报 native pipe 不存在（os error 2）。按技能要求延迟重试、重置会话重新初始化后仍失败，停止窗口操作；未点击、暂停播放、保存或改变用户窗口。一次 PowerShell 通配路径 rg 失败，随后改用 -g 搜索成功；一次日志写入的外层 JavaScript 换行语法错误导致工具未执行，随后修正。
+- 资产检查：使用 Saved/UnagiClothingInspection/inspect.py 在独立 UE Python 命令行进程只读加载当前已保存 SK_Unagi_NoWeapon，确认实际骨架为 SKEL_Unagi_NoWeapon，234 根骨骼，physics_asset=None、mesh_clothing_assets=[]、post_process_anim_blueprint=None。进程退出 0，0 errors/0 warnings；网格、新骨架和重定向器三份受保护文件的 SHA-256 前后相同。该元数据检查不排除某个用户角色实例另外配置组件或预览覆盖，但当前网格自身无布料或后处理物理设置。
+- 蒙皮证据：从 SourceAssets/Unagi/Character/Unagi_NoWeapon.fbx 的 Objects/Connections 及 Skin/Cluster 权重只读确认 Unagi_Body 实际受 Furisode*、MaJia*、Bn_SleeveUP、SleeveDown001、Bone015 等骨骼影响；例如 Furisode1_02 为 338 个正权重顶点、Furisode3_02 为 324 个、MaJia1_02 为 226 个。单个顶点可多骨影响，未将数量相加当成唯一顶点数。
+- 层级证据与原理：Bn_SleeveUP 位于 Bip001-R-UpperArm 下；Furisode1/2 链挂在 Bn_SleeveUP；Furisode3 链经 Bone015 挂到 Bip001；Furisode_B 和多条 MaJia 链挂在 Bip001-Spine2。先前创建的九条 IK 运动链只覆盖人体，没有配置这些衣物链，也未添加布料或骨骼动态。未驱动骨骼仍继承父级，但不会自动获得原衣物专门局部动作；UE4 人偶没有这些衣物骨骼，简单添加同名目标链不能生成源动作。截图表现与衣物专用骨骼未适配相符，但尚未逐帧确认具体异常支点，不能仅归因为重力。
+- 完成内容：新增 Docs/UnagiClothingDiagnosis.md，记录实际配置、权重与父级证据、实现范围、诊断限制及后续顺序。建议先核对衣物支点、基础姿势和跟随，再按需要配置 Control Rig（控制绑定）、AnimDynamics（动画动力学）或 Chaos Cloth（混沌布料）的约束/固定区域与碰撞；没有执行这些后续实现，也没有擅自修改骨架父级或蒙皮。
+- 涉及文件与保护：仅本次新增 Docs/UnagiClothingDiagnosis.md 和追加 Docs/ExecutionLog.md；临时只读脚本、元数据报告和权重报告留在忽略的 Saved/UnagiClothingInspection。保留用户已修改 SK_Unagi_NoWeapon、配置、地图、新骨架及全部未跟踪资源，不将这些文件纳入本次提交。
+- 验证范围：核对 Epic 当前 AnimDynamics 和布料工具属性说明；只读元数据、源文件及静态图检查，不执行项目编译、动画播放、自动化、PIE 或功能测试。未创建物理资产、动画蓝图或新布料，未声称衣物问题已修复。
+- 未完成事项：本次异常分析与原因解释完成；具体衣物骨骼适配和物理动态仍待实施并由用户确认效果。只暂存两份本次文档，审阅状态和暂存差异后提交推送。
+- 来源：https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-animdynamics-in-unreal-engine?lang=en-US ；https://dev.epicgames.com/documentation/en-us/unreal-engine/clothing-tool-in-unreal-engine---properties-reference
