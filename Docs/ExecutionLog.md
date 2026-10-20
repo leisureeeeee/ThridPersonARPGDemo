@@ -407,3 +407,11 @@
 - 用户修改及依赖保护：保留 Config/DefaultEditor.ini、Content/NewMap.umap、原有源资源、角色资产和 BP；不关闭编辑器、不覆盖用户资产、不安装商业软件、不上传源文件到转换服务。新动画依赖工作区原有但尚未跟踪的 SKEL_Unagi / SK_Unagi，本次不顺带暂存这些用户文件；跨工作区使用需具备这套依赖，说明文档已写明。
 - 未完成事项：缺少已安装且可用的 Max，故尚未将 MAX 中的命名动作烘焙导出；未来需先处理单份待机并确认骨架/单位，再批量执行。编号动作语义、循环、武器跟随和角色运行效果待用户在编辑器预览；未接入动画蓝图。实际导入部分完成，完整 MAX 转换保持受阻，未声称全部完成。仅暂存本次新增文件与记录，审阅暂存差异后提交推送，二进制使用现有 Git LFS 规则。
 - 官方来源：https://help.autodesk.com/cloudhelp/2018/ENU/3DSMax-Batch/files/GUID-48A78515-C24B-4E46-AC5F-884FBCF40D59.htm ； https://help.autodesk.com/cloudhelp/2024/ENU/3DSMax-Interoperability/files/GUID-3242579C-E37D-4A7C-BFA5-F4A2F22653E7.htm ； https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-animations-using-fbx-in-unreal-engine
+
+## 2026-10-20 08:59:36 北京时间 — 核对其余 MAX 文件转换状态
+
+- 用户需求：询问其他 MAX 文件的处理情况。
+- 执行内容：核对 Git 状态、既有导出报告、默认 Max 安装目录、PATH 及 Max 进程；未找到可用 Max，既有导出报告仍为 blocked（缺失 3dsmaxbatch.exe），未发现 Saved/UnagiMaxExport 导出文件。说明全部 MAX 原文件保留，上一任务的 11 段动画来自现有编号 FBX，并非由 MAX 转换得到。
+- 涉及文件：仅 Docs/ExecutionLog.md；保留用户配置、地图、源资源和现有未跟踪角色资产。
+- 验证结果：本次为状态核对，未导出 MAX、未导入新动画、未编译或执行测试；默认目录和 PATH 未检出不代表排除自定义安装路径。按 see 技能调用 scripts/see.sh 处理上下文 MyCharacter.cpp，返回 .cpp 不支持媒体解析。
+- 未完成事项：MAX 原生求值和烘焙仍需本机安装且授权可用的 3ds Max；此前已准备批量转换脚本。本次状态说明完成，审阅本次日志差异后提交推送。
