@@ -464,3 +464,14 @@
 - 验证结果：已读取真实原始蒙皮数据；核对 Epic 模块化角色文档的 Leader Pose/Copy Pose 行为及骨骼层级限制、插槽相对父骨骼的含义。未播放动画、未导出新骨骼武器、未创建无武器人物、未编译或执行测试。see 对上下文 MyCharacter.cpp 返回非媒体格式。
 - 未完成事项：本次兼容性解释和文档纠正完成；人物副本、保留蒙皮的独立武器、姿势共享和逐动作预览仍待实施。仅暂存本次文档并审阅后提交推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-modular-characters-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
+
+## 2026-10-20 12:54:25 北京时间 — 说明当前人物基础移动动画的接入步骤
+
+- 用户需求：了解如何为人物的基础运动配置动画。
+- 执行内容：读取 MyCharacter.cpp/.h、控制器相关移动输入检索结果及现有动画清单，核对角色朝运动方向转身的设置；新增 Docs/BasicLocomotionSetup.md，按现有素材确认、Speed 一维混合空间、动画蓝图读取水平速度、角色网格指定动画类、后续离地状态机的顺序提供中文界面操作步骤。
+- 原理说明：控制器接收输入，角色移动组件产生真实位移和速度，网格所属 AnimInstance 读取状态并通过混合空间/状态机输出骨骼姿势。动画不绑定具体按键；用 Vector Length XY 排除跳跃垂直速度，用 Is Falling 判断上升/下落和离地。给出 0/150/600 厘米每秒示例采样点并明确需按真实速度和步频校准，键盘持续满速不会因混合空间自动出现稳定慢走。
+- 当前限制：现有 11 段编号动画尚未预览确认动作类型，不假设已经具备 Idle/Walk/Run；Max 对应动作导出仍受环境阻塞。当前控制器源码未发现跳跃输入绑定，空中动画状态不等于实现起跳。说明原版多骨武器动画与静态武器的区别，基础移动可先使用完整原角色。
+- 涉及文件：仅新增 Docs/BasicLocomotionSetup.md 并更新 Docs/ExecutionLog.md；未修改 C++、动画资产、蓝图、输入、配置或地图，保留全部已有用户修改。
+- 验证结果：查阅 Epic UE 5.8 动画变量、混合空间和状态机文档；用户验证步骤包含待机、移动、减速、后续跳跃及骨架/动画类排查，均未由本次任务实际执行。未编译、未运行自动化/PIE/功能测试。初次读取控制器目录使用旧路径失败，随后通过整个 Source/ThirdPersonARPG 的 rg 检索定位实际 PlayerController 目录；see 对上下文 MyCharacter.cpp 返回非媒体格式。
+- 未完成事项：本次教学说明完成；动作预览归类、BS_Unagi_Locomotion/ABP_Unagi 的创建与接入、跳跃输入及运行验证尚未实施。仅暂存本次两份文档，检查状态和暂存差异后提交推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/how-to-get-animation-variables-in-animation-blueprints-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/blend-spaces-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/state-machines-in-unreal-engine
