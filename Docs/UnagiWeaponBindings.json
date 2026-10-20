@@ -1,0 +1,168 @@
+{
+  "weapons": [
+    {
+      "mesh": "Unagi_Weapon01",
+      "skin_clusters": [
+        {
+          "bones": [
+            "Bn_katana_hilt"
+          ],
+          "weighted_vertices": 286,
+          "weight_min": 1.0,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_katana_hilt2"
+          ],
+          "weighted_vertices": 64,
+          "weight_min": 1.0,
+          "weight_max": 1.0
+        }
+      ]
+    },
+    {
+      "mesh": "Unagi_Weapon02",
+      "skin_clusters": [
+        {
+          "bones": [
+            "Bn_Weapon"
+          ],
+          "weighted_vertices": 2271,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardB_01"
+          ],
+          "weighted_vertices": 30,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardA_01"
+          ],
+          "weighted_vertices": 30,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardA_02"
+          ],
+          "weighted_vertices": 24,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardB_02"
+          ],
+          "weighted_vertices": 24,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardB_03"
+          ],
+          "weighted_vertices": 24,
+          "weight_min": 1.0,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_scabbardA_03"
+          ],
+          "weighted_vertices": 24,
+          "weight_min": 1.0,
+          "weight_max": 1.0
+        }
+      ]
+    },
+    {
+      "mesh": "Unagi_Weapon04",
+      "skin_clusters": [
+        {
+          "bones": [
+            "Bn_katana_hilt"
+          ],
+          "weighted_vertices": 665,
+          "weight_min": 1.0,
+          "weight_max": 1.0
+        }
+      ]
+    },
+    {
+      "mesh": "Unagi_Weapon05",
+      "skin_clusters": [
+        {
+          "bones": [
+            "Bn_katana_burst01"
+          ],
+          "weighted_vertices": 72,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_katana_burst02"
+          ],
+          "weighted_vertices": 64,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_katana_burst03"
+          ],
+          "weighted_vertices": 36,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_katana_burst04"
+          ],
+          "weighted_vertices": 30,
+          "weight_min": 0.5,
+          "weight_max": 1.0
+        }
+      ]
+    },
+    {
+      "mesh": "Unagi_Weapon03",
+      "skin_clusters": [
+        {
+          "bones": [
+            "Bn_katana_burst"
+          ],
+          "weighted_vertices": 654,
+          "weight_min": 0.09999996423721313,
+          "weight_max": 1.0
+        },
+        {
+          "bones": [
+            "Bn_katana_burst_eye"
+          ],
+          "weighted_vertices": 65,
+          "weight_min": 0.024439767003059387,
+          "weight_max": 0.9000000357627869
+        }
+      ]
+    }
+  ],
+  "weapon_bone_parents": [
+    {
+      "bone": "Bn_Weapon",
+      "parents": [
+        "Bip001",
+        ""
+      ]
+    }
+  ],
+  "source": "Content/039-雅/fbx/雅/1.fbx",
+  "scope": "Original FBX Skin/Cluster weights and OO connections only; no animation playback or functional tests."
+}

@@ -156,6 +156,12 @@ FBX 中的材质绑定和 Diffuse 引用已读取确认：
 
 官方参考：[Skeletal Mesh Sockets（骨骼网格体插槽）](https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine)。
 
+### 原版武器动画的蒙皮复核补充
+
+2026-10-20 直接检查 `1.fbx` 后确认：五个武器对象中，01/02/03/05 均受多根骨骼驱动，部分含混合权重；04 全部顶点受 `Bn_katana_hilt` 单骨驱动。不能将整套武器都视为简单的右手静态挂件。已提取的 `SM_Unagi_Weapon01`～`05` 保留几何和材质，没有保留原蒙皮动画。
+
+若要保留自带动画的原武器效果，应在保留原骨架与蒙皮的前提下，把人物本体和武器拆为兼容的 Skeletal Mesh（骨骼网格体），再配置姿势共享；不要从居中的静态网格反推原始蒙皮。人物无武器副本、保留蒙皮的独立武器和姿势共享尚未实施，详见 [武器提取说明](UnagiWeaponExtraction.md) 和 `UnagiWeaponBindings.json`。上文普通手部插槽示例仅适用于相应的刚性武器方案。
+
 ## 动画搭配的两条路线
 
 **用雅自带动作：** 模型建立后，再从编号 FBX 导入动画，关闭 Import Mesh、选择 `SKEL_Unagi`、开启 Import Animations，避免重复生成 11 份模型和骨架。逐个预览后按实际动作重命名；如果编号文件没有待机/走/跑，就用 Max 打开对应 `Unagi_Idle.max`、`Unagi_Walk.max`、`Unagi_Run.max`，以相同骨骼层级导出 FBX、烘焙动画并使用一致单位。为 `SKEL_Unagi` 创建 `ABP_Unagi`，通过速度驱动 Idle/Walk/Run 的 BlendSpace/状态机，最后赋给角色 Mesh 的 Anim Class。没有 Max 时，需要可用的已导出 FBX 或走重定向路线。

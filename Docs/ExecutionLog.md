@@ -454,3 +454,13 @@
 - 涉及文件：仅 Docs/ExecutionLog.md；只读资产目录和 Docs/UnagiWeaponExtraction.md，保留全部用户已有修改。
 - 验证结果：目录中当前仅见原 SK_Unagi，没有无武器人物副本；未修改资源、未编译或执行测试。see 对上下文 MyCharacter.cpp 返回非媒体格式。
 - 未完成事项：本次设计确认完成；无武器人物副本、手部挂接和动画预览尚未实施。仅暂存日志，检查状态和暂存差异后提交推送。
+
+## 2026-10-20 10:06:19 北京时间 — 复核武器拆分与原版动画兼容方式
+
+- 用户需求：担心人物去除武器并独立装备后，是否还能配合原本自带的动画。
+- 执行内容：直接解析原 1.fbx 的 Skin/Cluster 蒙皮连接与权重。确认 Weapon01 绑定 Bn_katana_hilt/hilt2 两骨；02 绑定 Bn_Weapon 和六根 scabbard 骨，含混合权重；03 绑定 burst/burst_eye 两骨，含混合权重；04 的 665 顶点全部以权重 1 绑定 Bn_katana_hilt；05 绑定 burst01～04 四骨，含混合权重。武器不是全部单骨刚性道具，不能统一改为右手静态挂接后承诺原动画效果。
+- 结论与纠正：人物只去武器几何并保留兼容骨架/参考姿势/蒙皮，可以继续沿用人物动作；本次之前生成的五份静态网格只保留几何、材质及 UV，不含原武器蒙皮，可能丢失多骨局部运动。明确纠正先前全部采用静态网格挂右手的过度简化建议。原版效果的后续方案是保留蒙皮的武器骨骼网格体、保留并评估所需骨骼的人物副本、按兼容层级共享姿势。姿势共享尚未配置，不保证未经预览的显隐、握持和变形效果。
+- 涉及文件：新增 Docs/UnagiWeaponBindings.json，更新 Docs/UnagiWeaponExtraction.md、Docs/UnagiCharacterSetup.md 和 Docs/ExecutionLog.md；仅修正文档与事实清单，没有修改原角色、静态武器、动画或蓝图，保留用户已有修改。
+- 验证结果：已读取真实原始蒙皮数据；核对 Epic 模块化角色文档的 Leader Pose/Copy Pose 行为及骨骼层级限制、插槽相对父骨骼的含义。未播放动画、未导出新骨骼武器、未创建无武器人物、未编译或执行测试。see 对上下文 MyCharacter.cpp 返回非媒体格式。
+- 未完成事项：本次兼容性解释和文档纠正完成；人物副本、保留蒙皮的独立武器、姿势共享和逐动作预览仍待实施。仅暂存本次文档并审阅后提交推送。
+- 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/working-with-modular-characters-in-unreal-engine ； https://dev.epicgames.com/documentation/en-us/unreal-engine/skeletal-mesh-sockets-in-unreal-engine
