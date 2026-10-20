@@ -619,3 +619,4 @@
 - 验证范围：核对 Epic 当前 AnimDynamics 和布料工具属性说明；只读元数据、源文件及静态图检查，不执行项目编译、动画播放、自动化、PIE 或功能测试。未创建物理资产、动画蓝图或新布料，未声称衣物问题已修复。
 - 未完成事项：本次异常分析与原因解释完成；具体衣物骨骼适配和物理动态仍待实施并由用户确认效果。只暂存两份本次文档，审阅状态和暂存差异后提交推送。
 - 来源：https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-animdynamics-in-unreal-engine?lang=en-US ；https://dev.epicgames.com/documentation/en-us/unreal-engine/clothing-tool-in-unreal-engine---properties-reference
+- 版本管理补记：主提交 d4d8d14 的首次推送因 GitHub HTTPS 的 SSL_ERROR_SYSCALL 失败，未丢弃本地提交；立即重试成功，远程 main 已收到该提交。本补记另作同任务日志提交，后续推送结果以 Git 输出及最终回复为准。
