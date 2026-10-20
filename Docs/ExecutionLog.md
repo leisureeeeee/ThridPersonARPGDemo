@@ -728,3 +728,14 @@
 - 说明：区分类和运行时实例；多个角色可共用同一动画实例类并各自持有独立状态。待机、行走和攻击不必拆成不同实例类；敌人或不同骨架的动画需求显著不同时再创建独立类，武器差异可后续通过数据或链接动画层处理。
 - 范围与验证：仅更新教程及本执行记录，未新增或修改 Source、蓝图或二进制资产，未编译或测试；现有用户修改保持不变。
 - 版本管理：仅本地提交两份文档；沿用项目此前远程 main 推送的审批阻塞，不重试。
+
+
+## 2026-10-20 23:03:30 北京时间 — 实现 MyCharacterAnimInstance 的待机行走数据
+
+- 用户需求：已创建动画实例文件，请求直接编写 C++ 代码；保持此前约定的最小待机/行走范围和 UE4 人偶骨架前提。
+- 执行内容：读取本项目 AGENTS.md，定位并阅读用户新建的 AnimInstance/MyCharacterAnimInstance.h 与 .cpp（均为向导空壳），核对源目录无更深 AGENTS.md；读取 Build.cs 和本机 AnimInstance/Pawn 头文件，检查 Git 状态与暂存区。
+- 实现：重写 NativeUpdateAnimation，先调用父类，通过 TryGetPawnOwner 获取当前 Pawn，以 GetVelocity().Size2D 采集 GroundSpeed，超过 3 cm/s 后设置 bShouldMove。无有效 Pawn 时清零，成员 private、Transient、蓝图只读；不依赖具体角色、控制器、按键或动画资源路径，不改变移动行为。
+- 文档：更新 Docs/IdleWalkGuide.md，指向实际 AnimInstance 目录，区分已实现的数据采集与尚待编译、动画蓝图绑定步骤；说明生命周期、职责、反射加载、中文编辑器接线和用户验证方法。
+- 涉及文件：Source/ThirdPersonARPG/AnimInstance/MyCharacterAnimInstance.h、.cpp，Docs/IdleWalkGuide.md、Docs/ExecutionLog.md。保留所有既有资产、地图、配置及未跟踪资源修改，仅提交本次动画实例文件和两份文档。
+- 验证：核对 UAnimInstance 原生更新接口及 APawn::GetVelocity 声明，检查差异/空白；按项目规则未编译或执行 PIE、动画播放和自动化测试。新增反射属性需要用户编译并重新加载后才能在蓝图中使用，不宣称运行验证通过。
+- 未完成事项：用户编译后将动画蓝图父类设置为 MyCharacterAnimInstance，接入 Should Move 的双向过渡并绑定 Mesh；动画速度匹配、起停和急转仍留后续。远程 main 推送沿用此前审批阻塞，本次仅本地提交，不绕过或重试。
