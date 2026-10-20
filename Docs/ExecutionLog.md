@@ -789,3 +789,13 @@
 - 接口限制：AnimationBlueprintLibrary 在本环境未暴露；根运动提取接口返回单位变换，而 get_pose_at_time 显示原始 root 位移，未将前者当作不存在根位移的证据；过渡图按中文显示名查询未返回节点，本次未据此判断过渡条件错误。
 - 涉及文件与验证：更新 Docs/IdleWalkGuide.md 的定位证据与修复步骤，追加本记录。仅资产属性、骨骼姿势和源码只读检查，没有修改或保存 uasset/地图/配置，没有编译、启动 PIE、动画播放或执行自动化测试；尚未验证用户操作后的运行结果。
 - 后续：根锁后再独立匹配脚步与移速，行走源根轨迹平均约 167.27 cm/s，而现有移速上限为 600 cm/s。只本地提交两份文档；远程 main 推送沿用此前审批阻塞，不重试。
+
+## 2026-10-20 23:48:17 北京时间 — 定位移动中动画停帧的非循环播放器
+
+- 用户需求：确认根锁处理后原突进/回退问题已解决，继续反馈保持 W 再按 A/D 时动画突然停住但角色仍移动。
+- 静态检查：C++ 动画实例仍按真实速度大于 3 cm/s 更新 bShouldMove，没有按转向停止动画的逻辑；输入代码保持相机水平方向移动。
+- MCP 结果：行走序列时长 1.0666667 秒，Force Root Lock=true、Enable Root Motion=false、资产 loop=false。进一步通过原生 BlueprintTools 定位 Walk 内的 AnimGraphNode_SequencePlayer_1，ObjectTools 按发现的属性读取 node，确认 bLoopAnimation=false、playRate=1、playRateBasis=1。已确定当前播放器只播放一遍后停在末帧，角色位移不依赖动画播放进度，符合停帧滑行现象；未运行复现，不能断言按 A/D 是直接触发条件。
+- 接法说明：打开 BP_CharacterAnim 的 locomotion→Walk，选中行走序列播放器，勾选 Loop Animation 后由用户编译保存；保持 Force Root Lock 开启。循环标记需要检查状态内播放器，不能仅依据动画文件名中含 Loop 判断。
+- 接口处理：本轮开始 Unreal 工具暂不可用，随后重新加载可用；VibeUE 的图枚举接口返回空，改用原生 BlueprintTools.get_graph/find_nodes 与 ObjectTools.list_properties/get_properties 读取实际节点，未将空结果视为图不存在。
+- 涉及文件与验证：仅追加本执行记录，没有修改蓝图、动画、代码或配置，没有启动 PIE、播放、编译或功能测试；修复后的持续播放仍待用户运行确认。
+- 版本管理：仅本地提交本条记录；远程 main 推送沿用此前审批阻塞，不重试。
