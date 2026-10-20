@@ -6,7 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "MyCharacterAnimInstance.generated.h"
 
-/** Supplies movement data for the character's idle and walk animation states. */
+/** Supplies velocity and movement intent for interruptible idle/start/walk/stop animation. */
 UCLASS()
 class THIRDPERSONARPG_API UMyCharacterAnimInstance : public UAnimInstance
 {
@@ -20,6 +20,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
 	float GroundSpeed = 0.0f;
 
+	// Horizontal movement intent, not residual velocity while braking.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
 	bool bShouldMove = false;
 };
