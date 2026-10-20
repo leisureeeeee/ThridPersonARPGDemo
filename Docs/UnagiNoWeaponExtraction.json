@@ -1,0 +1,225 @@
+{
+  "source": "Content/039-雅/fbx/雅/1.fbx",
+  "output": "SourceAssets/Unagi/Character/Unagi_NoWeapon.fbx",
+  "fbx_version": 7400,
+  "source_sha256": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00",
+  "output_sha256": "97cf8db41c872b8575fdfc0d4c033f138320f2e46a32dc5263b5b61124f56b16",
+  "remaining_meshes": [
+    {
+      "name": "Unagi_Hair",
+      "vertices": 2705,
+      "polygons": 5302,
+      "geometry_fingerprint": "689d5365132f2e7436bed2569727deb6272ec0ac8c7ee0e685e1b27cc5e88e86"
+    },
+    {
+      "name": "Unagi_Body",
+      "vertices": 8258,
+      "polygons": 15788,
+      "geometry_fingerprint": "132f440775000ed33ce0137fc7a77480e954130b345788948311459cf55eb5ef"
+    },
+    {
+      "name": "Unagi_Face",
+      "vertices": 4026,
+      "polygons": 2956,
+      "geometry_fingerprint": "af5f447bf35fdac8e29da8960a86a43b331640fc024e25310e8e70e6905e2f59"
+    }
+  ],
+  "removed_objects": [
+    {
+      "id": 1911940748128,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1911940748864,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1911940750336,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1911940751072,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1911940751808,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1911976671216,
+      "type": "Geometry",
+      "subtype": "Mesh"
+    },
+    {
+      "id": 1911976678384,
+      "type": "Geometry",
+      "subtype": "Mesh"
+    },
+    {
+      "id": 1911976680624,
+      "type": "Geometry",
+      "subtype": "Mesh"
+    },
+    {
+      "id": 1911976682864,
+      "type": "Geometry",
+      "subtype": "Mesh"
+    },
+    {
+      "id": 1911976683312,
+      "type": "Geometry",
+      "subtype": "Mesh"
+    },
+    {
+      "id": 1912081088288,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081089024,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081089760,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081090496,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081091232,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081091968,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081092704,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081093440,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081094176,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081094912,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912081095648,
+      "type": "Deformer",
+      "subtype": "Cluster"
+    },
+    {
+      "id": 1912460136112,
+      "type": "Deformer",
+      "subtype": "Skin"
+    },
+    {
+      "id": 1912460136992,
+      "type": "Deformer",
+      "subtype": "Skin"
+    },
+    {
+      "id": 1912460142800,
+      "type": "Deformer",
+      "subtype": "Skin"
+    },
+    {
+      "id": 1912460144384,
+      "type": "Deformer",
+      "subtype": "Skin"
+    },
+    {
+      "id": 1912460145088,
+      "type": "Deformer",
+      "subtype": "Skin"
+    }
+  ],
+  "weapon_transform_nodes_kept": [
+    "Unagi_Weapon01",
+    "Unagi_Weapon02",
+    "Unagi_Weapon03",
+    "Unagi_Weapon04",
+    "Unagi_Weapon05"
+  ],
+  "retained_model_nodes": 234,
+  "unchanged_retained_objects": 1943,
+  "retained_object_properties_exact": true,
+  "source_units_unchanged": true,
+  "import_uniform_scale_for_this_project": 100,
+  "animation_objects_unchanged": true,
+  "notes": "Only weapon mesh/skin removed; all model transforms, body skins, morphs and source animation retained. Textures are not embedded.",
+  "protected_sha256_before": {
+    "Content/Asset/Unagi/SK_Unagi.uasset": "0e19e2b3072bffddde4b5fbbf510c02890c6c688a48b0cad44b835d5717bb9fb",
+    "Content/Asset/Unagi/SKEL_Unagi.uasset": "acf59bd0e8e658bb2e70dfd426311ee67fbc8c19a439bf5e356dc9e4a96b93ea",
+    "Content/Asset/Unagi/1_PhysicsAsset.uasset": "ce80e6e5277ce37d487fbb7dbe9791515804b945d491029f7f7196524f187e58",
+    "Content/Asset/Unagi/Material__25.uasset": "ae97e7f2e96ac1418005ad9c6ada5fa9a72c0e366f4e4d8e1ca9162b5713bb18",
+    "Content/Asset/Unagi/Material__26.uasset": "1016f6513e27d6dd1a36aa0723cba1a07bdaae245d26ddc58a878320189d2290",
+    "Content/Asset/Unagi/Material__27.uasset": "d18bc5ab22ea10b8e5a601172432927c78fb30635e9552a94583d965c347fac1",
+    "Content/Asset/Unagi/Material__28.uasset": "e3203635ec31ccaf07e7e76cd2bf23d55956e3aacb79d8b4e8f22ece087a7f1f",
+    "Content/039-雅/fbx/雅/1.fbx": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00"
+  },
+  "protected_sha256_after": {
+    "Content/Asset/Unagi/SK_Unagi.uasset": "0e19e2b3072bffddde4b5fbbf510c02890c6c688a48b0cad44b835d5717bb9fb",
+    "Content/Asset/Unagi/SKEL_Unagi.uasset": "acf59bd0e8e658bb2e70dfd426311ee67fbc8c19a439bf5e356dc9e4a96b93ea",
+    "Content/Asset/Unagi/1_PhysicsAsset.uasset": "ce80e6e5277ce37d487fbb7dbe9791515804b945d491029f7f7196524f187e58",
+    "Content/Asset/Unagi/Material__25.uasset": "ae97e7f2e96ac1418005ad9c6ada5fa9a72c0e366f4e4d8e1ca9162b5713bb18",
+    "Content/Asset/Unagi/Material__26.uasset": "1016f6513e27d6dd1a36aa0723cba1a07bdaae245d26ddc58a878320189d2290",
+    "Content/Asset/Unagi/Material__27.uasset": "d18bc5ab22ea10b8e5a601172432927c78fb30635e9552a94583d965c347fac1",
+    "Content/Asset/Unagi/Material__28.uasset": "e3203635ec31ccaf07e7e76cd2bf23d55956e3aacb79d8b4e8f22ece087a7f1f",
+    "Content/039-雅/fbx/雅/1.fbx": "81378fb3fc71b365f38df8908da95db1db429d2e38b8288a36f36d3a571d3a00"
+  },
+  "ue_asset": {
+    "asset": "/Game/Asset/Unagi/SK_Unagi_NoWeapon",
+    "bone_count": 234,
+    "bones_and_parents_match_original": true,
+    "morph_target_count": 40,
+    "materials": [
+      "/Game/Asset/Unagi/Material__25.Material__25",
+      "/Game/Asset/Unagi/Material__27.Material__27",
+      "/Game/Asset/Unagi/Material__26.Material__26"
+    ],
+    "dimensions_cm": [
+      114.00464630126953,
+      47.829580307006836,
+      172.24250185489655
+    ],
+    "physics_asset": null,
+    "reimport_sources": [
+      "SourceAssets/Unagi/Character/Unagi_NoWeapon.fbx"
+    ],
+    "uasset_sha256": "9c37ae0e9f0db721dd8903a6db3aa45ec4d3a7c7fb11b58a8d16e14cd4898f4c",
+    "saved_asset_read_process": {
+      "exit_code": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "import_process": {
+      "exit_code": 0,
+      "errors": 0,
+      "warnings": 3,
+      "warning_reason": "Missing smoothing groups on source Hair, Body and Face meshes; some zero-length normal messages during tangent calculation."
+    }
+  }
+}
