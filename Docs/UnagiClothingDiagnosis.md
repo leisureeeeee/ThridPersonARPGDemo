@@ -39,7 +39,7 @@
 
 以下是操作指导，本次没有替用户执行或验证最终效果。
 
-1. 打开 `Asset/Unagi/Rig/RTG_UE4_To_Unagi`，选择 Target（目标），确认当前编辑的是雅。
+1. 打开 `Asset/Unagi/Rig/RTG_UE4_To_Unagi`，选择 Target（目标），确认当前编辑的是雅。具体位置在重定向器的 Hierarchy（层级）面板顶部：Source（源）/Target（目标）切换按钮下方就是 Current Retarget Pose（当前重定向姿势）下拉框；选择目标后，这一栏表示雅的目标姿势。它不在导出动画序列或 IK Rig 资产的详情中。
 2. 在 Retarget Pose（重定向姿势）工具中选择 Create（创建）或 Duplicate Current（复制当前姿势），命名为 `Unagi_ClothesFix`；将它设为 Current Retarget Pose（当前重定向姿势）。保留已有姿势用于对照。
 3. 进入 Edit Retarget Pose（编辑重定向姿势）模式。在 Hierarchy（层级）的过滤菜单中取消 Hide Bones Not in a Chain（隐藏不在链中的骨骼）和 Hide Bones Not Retargeted（隐藏未重定向的骨骼），让衣物专用骨骼可见。
 4. 先查找并选择 `Bn_SleeveUP`，使用旋转工具，小幅调整一个局部轴，观察它实际影响哪块衣物；方向不对就撤销并换轴。逐段核对 `Furisode1_01`、`Furisode2_01` 及其子骨骼。不要直接照抄固定的 90 度角，当前尚未测定这些骨骼的局部轴与合适偏移。

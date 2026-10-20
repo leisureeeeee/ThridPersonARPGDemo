@@ -632,3 +632,12 @@
 - 实际验证与失败记录：完成文档与本机源码静态核对，没有在编辑器旋转衣物、创建姿势或验证最终表现；未编译、播放或执行自动化、PIE、功能测试。see 对上下文 MyCharacter.h 返回 .h 非媒体格式；官方单独后处理动画蓝图页面打开失败，未据此编造其节点或菜单，改用可读的骨骼控制/动力学文档说明边界。
 - 未完成事项：本次修正方法说明完成，实际角度、支点驱动和动态仍需实施与观察。仅暂存两份本次文档，审阅状态及暂存差异后提交推送。
 - 来源：https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine ；https://dev.epicgames.com/documentation/unreal-engine/animation-blueprint-skeletal-controls-in-unreal-engine ；https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-blueprint-animdynamics-in-unreal-engine
+
+## 2026-10-20 14:58:24 北京时间 — 定位目标重定向姿势入口
+
+- 用户需求：继续衣物修正步骤，追问目标重定向姿势在哪里。
+- 执行内容：核对本机 SIKRetargetHierarchy.cpp 与 SIKRetargetPoseEditor.cpp 的实际界面结构；确认重定向器 Hierarchy（层级）面板顶部为 Source（源）/Target（目标）切换，紧下方是 Current Retarget Pose（当前重定向姿势）下拉框、姿势混合值及 Create（创建）等工具。顶部模式定义包含 Editing Retarget Pose（编辑重定向姿势）与 Running Retarget（运行重定向）。
+- 用户操作说明：从内容浏览器 Asset/Unagi/Rig 打开 RTG_UE4_To_Unagi，在层级面板选目标，再找到当前重定向姿势并创建 Unagi_ClothesFix；进入编辑姿势模式后再选衣物骨骼旋转。明确此入口位于 IK 重定向器，当前导出的动画序列窗口不能按此路径编辑重定向姿势。
+- 涉及文件：补充 Docs/UnagiClothingDiagnosis.md 的入口定位，追加 Docs/ExecutionLog.md；未修改代码、二进制资产、用户配置或未保存状态。
+- 实际验证：静态核对本机 UI 源码，未操作编辑器、播放、编译或执行测试。see 对上下文 MyCharacter.h 返回非媒体格式；一次猜测的 IKRetargetEditorToolbar.cpp 路径不存在，实际菜单位置已由可读的层级和姿势编辑器源码确认。
+- 未完成事项：本次入口说明完成，衣物姿势实际调整仍未执行。只暂存本次两份文档，检查 Git 状态及暂存差异后提交推送。
