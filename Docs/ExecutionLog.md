@@ -486,3 +486,11 @@
 - 失败与处理：按 see 技能对上下文 MyCharacter.cpp 调用 scripts/see.sh，返回非媒体格式；对接触表图片调用 see，因未配置外部视觉接口，仅返回本机 OCR，未把 OCR 当作姿态语义证据，随后实际查看图片。Python 缺少绘图库，改用 System.Drawing 生成临时图片。部分网络地址抓取失败或超时，改查官方文档/Fab和作者站点；未依赖第三方转载站下载。初次用 apply_patch 定位日志标题失败，未改动文件，随后直接按 UTF-8 追加。
 - 未完成事项：本次查找与链接交付完成。按用户最新要求先供浏览选择，未继续安装、导入、重定向或制作两套动画。后续选定资源后仍需人体骨架重定向、握姿/剑鞘处理和游戏内效果检查。提交前检查状态与暂存差异，仅提交本次三份文档，并推送既有 main 分支；结果以 Git 输出和最终回复为准。
 - 来源：https://mocaponline.itch.io/free-3d-sword-animation-pack ；https://mocaponline.com/products/tc-sword ；https://mocaponline.com/pages/standard-license ；https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016 ；https://dev.epicgames.com/documentation/en-us/unreal-engine/game-animation-sample-project-in-unreal-engine ；https://quaternius.itch.io/universal-animation-library ；https://dev.epicgames.com/documentation/en-us/unreal-engine/ik-rig-animation-retargeting-in-unreal-engine
+
+## 2026-10-20 13:11:02 北京时间 — 提供太刀动画的英文检索关键词
+
+- 用户需求：了解搜索太刀相关动画应使用哪些英文关键词。
+- 执行内容：给出 Katana（武士刀）与 Samurai（武士）检索词，围绕收刀行走、持刀行走、移动动作合集、拔刀/收刀、攻击组合整理可直接复制的英文短语；补充 free（免费）、UE5、FBX、in place（原地）、loop（循环）等筛选词，并区分 drawn（已拔出的状态）和 draw（拔刀动作）。
+- 涉及文件：仅追加 Docs/ExecutionLog.md；没有修改代码、资源、地图或配置，保留用户全部既有改动。
+- 验证结果：本次为稳定术语说明，没有新发起网络检索或保证某个关键词一定能找到免费完整资源；未编译、未运行自动化、PIE 或功能测试。按项目 see 规则对上下文 MyCharacter.cpp 调用 scripts/see.sh，返回 .cpp 不支持的媒体格式，未影响术语说明。
+- 未完成事项：无；用户可先用关键词浏览筛选。仅暂存本次执行记录，检查 Git 状态和暂存差异后提交并推送，结果以实际 Git 输出及最终回复为准。
