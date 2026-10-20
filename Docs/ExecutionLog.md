@@ -799,3 +799,13 @@
 - 接口处理：本轮开始 Unreal 工具暂不可用，随后重新加载可用；VibeUE 的图枚举接口返回空，改用原生 BlueprintTools.get_graph/find_nodes 与 ObjectTools.list_properties/get_properties 读取实际节点，未将空结果视为图不存在。
 - 涉及文件与验证：仅追加本执行记录，没有修改蓝图、动画、代码或配置，没有启动 PIE、播放、编译或功能测试；修复后的持续播放仍待用户运行确认。
 - 版本管理：仅本地提交本条记录；远程 main 推送沿用此前审批阻塞，不重试。
+
+## 2026-10-20 23:53:28 北京时间 — 用 C++ 对齐基础行走速度
+
+- 用户需求：让助手实现下一步，用户负责效果测试，完成后说明所做内容；本轮范围是基础行走步速匹配。
+- MCP 只读基线：场景角色 MaxWalkSpeed=600、MaxAcceleration=2048；行走序列时长 1.0666667 秒，RateScale=1、ForceRootLock=true；Walk 节点循环=true、PlayRate=1、Basis=1，Idle 节点循环=false。没有启动 PIE 或播放。
+- 实现：在 AMyCharacter 构造函数设置现有 CharacterMovement.MaxWalkSpeed=167 cm/s，依据此前原始 root 位移约 178.419815 cm / 1.0666667 s ≈ 167.27 cm/s 取整。保留现有加速度、制动、转向、输入、相机和动画实例逻辑，不新增重复速度属性或硬编码资源路径。
+- 文档：更新 Docs/IdleWalkGuide.md，说明计算依据、构造函数编译重载、蓝图/实例覆盖值的局部重置、用户测试重点和 Idle 循环仍需开启的现状。源 root 强制锁定后，仅角色移动组件驱动位移，播放器保持原速。
+- 涉及文件：Source/ThirdPersonARPG/MyCharacter/MyCharacter.cpp、Docs/IdleWalkGuide.md、Docs/ExecutionLog.md；保留用户所有资产、配置与未跟踪文件。没有修改或保存蓝图、动画、地图，不提交这些既有用户变更。
+- 验证与限制：仅 C++/资产属性静态核对及 Git 差异/空白检查；按用户分工和项目规则没有编译、重启编辑器、运行 PIE 或执行效果/自动化测试。修改构造函数尚未加载到当前编辑器；需用户编译重开后检查最大速度为 167，若蓝图或实例显式覆盖 600，由用户仅重置该属性。
+- 后续：用户检查连续直行、斜向转弯、停止与脚底滑动；匀速步速为本轮基准，加减速匹配、跑步和起停动作后续再做。远程 main 推送沿用此前审批阻塞，仅本地提交，不重试。

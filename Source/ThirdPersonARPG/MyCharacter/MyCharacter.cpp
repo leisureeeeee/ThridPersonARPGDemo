@@ -33,6 +33,9 @@ AMyCharacter::AMyCharacter()
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	bUseControllerRotationYaw = false;
+
+	// Match the walk cycle's average travel speed (178.42 cm over 1.0667 s).
+	GetCharacterMovement()->MaxWalkSpeed = 167.0f;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
