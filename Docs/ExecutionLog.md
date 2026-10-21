@@ -876,3 +876,10 @@
 - 取舍：强制动时适当放宽精确距离匹配，优先保留约 0.15 秒的收脚推进；这是姿势连续性保护，仍不能消除不匹配脚相位造成的所有滑步。
 - 验证：沿用编译/加载授权，Live Coding 编译成功，UBT Result: Succeeded，编辑器日志 Live coding succeeded 且 No object changes detected（仅函数实现变化）。未启动关卡/运行效果测试，由用户再次试松键收脚。一次沙箱 git diff 报非工作树，升级权限后继续正常记录/提交。
 - 提交范围：仅本次动画实例 cpp 和相关说明/记录；用户其他修改不动。远程 main 推送沿用此前自动审批拒绝，不重试。
+
+## 2026-10-21 10:28:40 北京时间 — 补齐惯性化输出节点
+
+- 用户反馈：locomotion 的 Stop→Start 请求惯性化，但输出路径未找到节点。
+- 检查/修改：PIE=false，当前 AnimGraph 仅有 locomotion 直连输出。保留现有过渡设置，在中间添加唯一 Inertialization，连接 locomotion.Pose→Inertialization.Source→输出姿势.Result，整理节点位置并保存。不修改 C++ 或切回普通混合。
+- 验证：沿用已有编译授权，蓝图编译 UpToDate；静态读回 3 节点、2 连接，引脚均连接。未启动关卡，运行时请求是否消除仍由用户确认。
+- 版本管理：只提交当前动画蓝图及本条记录，保留其他用户改动；远程 main 推送仍受此前自动审批拒绝，不重试。
