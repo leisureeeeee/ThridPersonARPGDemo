@@ -211,14 +211,24 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bStopping = true;
 			bStopAnimationComplete = false;
 			StopSettleElapsed = 0.0f;
-			StopAnimationTime = FindStopTime(PredictStopDistance(*Movement));
+			// Strong gameplay braking can predict almost zero distance immediately.
+			// Keep a short visible approach to the planted pose instead of entering
+			// the stationary tail directly from an arbitrary walk-cycle pose.
+			constexpr float VisiblePlantLead = 0.30f;
+			const float LatestEntryTime = FMath::Max(0.0f, FindStopTime(0.0f) - VisiblePlantLead);
+			StopAnimationTime = FMath::Min(FindStopTime(PredictStopDistance(*Movement)), LatestEntryTime);
 		}
 		if (bStopping)
 		{
-			// Never rewind when a changing floor/contact perturbs the prediction.
+			// Relax exact distance matching when braking is faster than the clip:
+			// never rewind, but do not skip the remaining foot-plant in one update.
+			constexpr float MaxStopPlayRate = 2.0f;
+			const float PlantTime = FindStopTime(0.0f);
+			const float TargetTime = GroundSpeed <= 3.0f ? PlantTime
+				: FindStopTime(PredictStopDistance(*Movement));
 			StopAnimationTime = FMath::Max(StopAnimationTime,
-				FindStopTime(PredictStopDistance(*Movement)));
-			if (GroundSpeed <= 3.0f)
+				FMath::Min(TargetTime, StopAnimationTime + DeltaSeconds * MaxStopPlayRate));
+			if (GroundSpeed <= 3.0f && StopAnimationTime >= PlantTime - UE_KINDA_SMALL_NUMBER)
 			{
 				StopSettleElapsed += FMath::Max(0.0f, DeltaSeconds);
 				const float Alpha = FMath::Clamp(StopSettleElapsed
