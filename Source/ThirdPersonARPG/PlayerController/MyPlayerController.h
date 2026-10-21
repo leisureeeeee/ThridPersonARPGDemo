@@ -30,6 +30,7 @@ private:
 	void HandleMoveInput(const FInputActionValue& Value);
 	void HandleLookInput(const FInputActionValue& Value);
 	void HandleZoomInput(const FInputActionValue& Value);
+	void HandleDrawWeaponInput(const FInputActionValue& Value);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -48,4 +49,7 @@ private:
 	FVector2D MouseSensitivity = FVector2D(0.15f, 0.15f);
 
 	TWeakObjectPtr<UEnhancedInputLocalPlayerSubsystem> MappingSubsystem;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> DrawWeaponAction;
 };

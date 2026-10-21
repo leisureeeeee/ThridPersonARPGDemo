@@ -91,4 +91,13 @@ private:
 	// Append runtime storage to preserve the existing reflected field layout.
 	float BlockedMovementElapsed = 0.0f;
 	bool bMovementBlocked = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Idle")
+	TObjectPtr<UAnimSequence> SheathedIdleAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Idle")
+	TObjectPtr<UAnimSequence> DrawnIdleAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveIdleAnimation;
 };

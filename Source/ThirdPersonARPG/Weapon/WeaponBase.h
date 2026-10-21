@@ -15,6 +15,9 @@ class THIRDPERSONARPG_API AWeaponBase : public AActor
 public:
 	AWeaponBase();
 
+	virtual bool ActivateWeapon();
+	virtual void DeactivateWeapon();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> WeaponRoot;

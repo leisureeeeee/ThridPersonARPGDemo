@@ -2,6 +2,9 @@
 
 #include "MyCharacter.h"
 #include "Weapon/WeaponBase.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimSequence.h"
 #include "Engine/World.h"
 #include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/CameraComponent.h"
@@ -137,6 +140,15 @@ void AMyCharacter::InitializeWeapon()
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (UAnimInstance* Animation = GetMesh()->GetAnimInstance(); Animation && ActiveDrawMontage)
+	{
+		FOnMontageEnded EmptyDelegate;
+		Animation->Montage_SetEndDelegate(EmptyDelegate, ActiveDrawMontage);
+		Animation->Montage_Stop(0.0f, ActiveDrawMontage);
+	}
+	ActiveDrawMontage = nullptr;
+	bDrawingWeapon = false;
+	bWeaponDrawn = false;
 	if (IsValid(SpawnedWeapon.Get()))
 	{
 		SpawnedWeapon->Destroy();
@@ -150,4 +162,79 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	CurrentWeapon = nullptr;
 	SpawnedWeapon = nullptr;
 	Super::EndPlay(EndPlayReason);
+}
+
+bool AMyCharacter::DrawWeapon()
+{
+	if (bDrawingWeapon || bWeaponDrawn || !GetCurrentWeapon()
+		|| !GetCharacterMovement()->IsMovingOnGround() || GetVelocity().SizeSquared2D() > FMath::Square(3.0f)
+		|| !GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero())
+	{
+		return false;
+	}
+	if (!DrawWeaponAnimation)
+	{
+		const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
+		DrawWeaponAnimation = Defaults ? Defaults->DrawWeaponAnimation : nullptr;
+	}
+	UAnimInstance* Animation = GetMesh()->GetAnimInstance();
+	if (!Animation || !DrawWeaponAnimation || DrawWeaponSlot.IsNone()
+		|| !GetMesh()->DoesSocketExist(DrawnWeaponSocket) || Animation->IsAnyMontagePlaying())
+	{
+		return false;
+	}
+	ActiveDrawMontage = Animation->PlaySlotAnimationAsDynamicMontage(
+		DrawWeaponAnimation, DrawWeaponSlot, 0.12f, 0.15f, 1.0f, 1);
+	if (!ActiveDrawMontage)
+	{
+		return false;
+	}
+	bDrawingWeapon = true;
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AMyCharacter::HandleDrawMontageEnded);
+	Animation->Montage_SetEndDelegate(EndDelegate, ActiveDrawMontage);
+	return true;
+}
+
+void AMyCharacter::HandleWeaponGripNotify(UAnimSequenceBase* Animation)
+{
+	AWeaponBase* Weapon = GetCurrentWeapon();
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+	if (!bDrawingWeapon || bWeaponDrawn || !Weapon || Animation != DrawWeaponAnimation.Get()
+		|| !Instance || !ActiveDrawMontage || !Instance->Montage_IsPlaying(ActiveDrawMontage))
+	{
+		return;
+	}
+	const FTransform PreviousRelative = Weapon->GetRootComponent()->GetRelativeTransform();
+	const FName PreviousSocket = Weapon->GetRootComponent()->GetAttachSocketName();
+	if (!Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, DrawnWeaponSocket))
+	{
+		Instance->Montage_Stop(0.1f, ActiveDrawMontage);
+		return;
+	}
+	Weapon->SetActorRelativeTransform(DrawnWeaponOffset);
+	if (!Weapon->ActivateWeapon())
+	{
+		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PreviousSocket);
+		Weapon->SetActorRelativeTransform(PreviousRelative);
+		Instance->Montage_Stop(0.1f, ActiveDrawMontage);
+		return;
+	}
+	bWeaponDrawn = true;
+}
+
+void AMyCharacter::HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage != ActiveDrawMontage.Get())
+	{
+		return;
+	}
+	// Before the grip notify, an interruption keeps the weapon holstered.
+	// After the grip notify, retain the committed hand attachment and drawn state.
+	if (!bInterrupted && !bWeaponDrawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Draw animation ended without a successful weapon grip notify."), *GetName());
+	}
+	bDrawingWeapon = false;
+	ActiveDrawMontage = nullptr;
 }

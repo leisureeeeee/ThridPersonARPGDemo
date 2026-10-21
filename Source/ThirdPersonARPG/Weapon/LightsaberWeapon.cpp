@@ -69,3 +69,13 @@ bool ALightsaberWeapon::Extinguish()
 {
 	return SetBladeEnabled(false);
 }
+
+bool ALightsaberWeapon::ActivateWeapon()
+{
+	return Ignite();
+}
+
+void ALightsaberWeapon::DeactivateWeapon()
+{
+	Extinguish();
+}

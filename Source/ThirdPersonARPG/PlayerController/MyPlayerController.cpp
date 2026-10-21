@@ -1,4 +1,5 @@
 #include "MyPlayerController.h"
+#include "MyCharacter/MyCharacter.h"
 #include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/ARPGPlayerCameraManager.h"
 #include "Camera/CameraTypes.h"
@@ -57,6 +58,7 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMoveInput);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleLookInput);
 	EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleZoomInput);
+	EnhancedInput->BindAction(DrawWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleDrawWeaponInput);
 	RegisterInputMappingContext();
 }
 
@@ -98,6 +100,10 @@ void AMyPlayerController::CreateInputMappingContext()
 	ZoomAction->ValueType = EInputActionValueType::Axis1D;
 	// Wheel up is positive (closer); wheel down is negative (farther).
 	PlayerMappingContext->MapKey(ZoomAction, EKeys::MouseWheelAxis);
+
+	DrawWeaponAction = NewObject<UInputAction>(this, TEXT("DrawWeaponAction"), RF_Transient);
+	DrawWeaponAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(DrawWeaponAction, EKeys::LeftMouseButton);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()
@@ -141,6 +147,11 @@ void AMyPlayerController::HandleMoveInput(const FInputActionValue& Value)
 		return;
 	}
 
+	if (const AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(ControlledPawn); ControlledCharacter && ControlledCharacter->IsDrawingWeapon())
+	{
+		return;
+	}
+
 	const FVector2D MovementInput = Value.Get<FVector2D>().GetClampedToMaxSize(1.0f);
 	// Use this pawn's base camera, before CameraManager shakes/modifiers. Its
 	// authored relative rotation can differ from the controller's rotation.
@@ -177,5 +188,15 @@ void AMyPlayerController::HandleZoomInput(const FInputActionValue& Value)
 	{
 		// Wheel input is a delta, not a rate: do not multiply by DeltaTime.
 		Rig->AdjustCameraDistance(Value.Get<float>());
+	}
+}
+
+void AMyPlayerController::HandleDrawWeaponInput(const FInputActionValue& Value)
+{
+	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
+	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
+		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
+	{
+		ControlledCharacter->DrawWeapon();
 	}
 }

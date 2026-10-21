@@ -1,4 +1,5 @@
 #include "MyCharacterAnimInstance.h"
+#include "MyCharacter/MyCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Movement/ARPGCharacterMovementComponent.h"
@@ -6,6 +7,7 @@
 void UMyCharacterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+	ActiveIdleAnimation = SheathedIdleAnimation;
 	GroundSpeed = 0.0f;
 	bShouldMove = false;
 	bHadMovementIntent = false;
@@ -215,6 +217,9 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	const ACharacter* Character = Cast<ACharacter>(TryGetPawnOwner());
 	const UCharacterMovementComponent* Movement = IsValid(Character)
 		? Character->GetCharacterMovement() : nullptr;
+	const AMyCharacter* WeaponCharacter = Cast<AMyCharacter>(Character);
+	ActiveIdleAnimation = WeaponCharacter && WeaponCharacter->IsWeaponDrawn() && DrawnIdleAnimation
+		? DrawnIdleAnimation : SheathedIdleAnimation;
 	DeltaSeconds = FMath::IsFinite(DeltaSeconds) ? FMath::Max(0.0f, DeltaSeconds) : 0.0f;
 	float DistanceMoved = 0.0f;
 	if (IsValid(Character))

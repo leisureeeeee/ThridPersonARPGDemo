@@ -1,0 +1,21 @@
+# 拔刀函数与临时左键输入
+
+入口为AMyCharacter::DrawWeapon()，返回bool表示是否成功开始播放动作，不代表已经完成拔刀。函数不认识按键。MyPlayerController的Boolean DrawWeaponAction映射LeftMouseButton，Started只调用一次；处理器检查当前受控角色、输入允许和视角目标，再调用该入口。拔刀期间HandleMoveInput暂缓玩家移动，视角和滚轮继续工作。
+
+DrawWeapon拒绝重复拔刀、已持刀、无武器、离地、速度超过3 cm/s、有移动加速度或其他蒙太奇正在播放的请求。DrawWeaponAnimation为可配置序列，旧角色实例空引用时只读继承蓝图类默认值。通过PlaySlotAnimationAsDynamicMontage播放指定AS_Idle_To_Idle_Combat_Seq，DefaultSlot、播放速率1、一次，混入0.12秒、混出0.15秒；没有在构造函数硬编码资源路径或切换网格AnimationMode。
+
+动画主图现在为locomotion→RotateRootBone→Inertialization→DefaultSlot→Output，原移动状态机与惯性化保留。AS_Idle_To_Idle_Combat_Seq关闭根运动不变，新增根锁，避免动画内root平移造成网格漂移。
+
+新增UAnimNotify_DrawWeapon。原序列中0.30秒的WeaponGrip通知将动画来源和角色实例交给私有回调；只有本角色正在播放对应拔刀蒙太奇、尚未交接时才响应，因此编辑器预览或其他动画通知不会误改武器状态。时点依据右手0.2–0.3秒近似停留、0.4秒后明显外移的静态采样暂定，不等于已目视确认握住刀柄。
+
+回调保存原相对变换/插槽，将同一武器Actor挂到DrawnWeaponSocket（默认hand_r），应用DrawnWeaponOffset，再调用武器基类虚函数ActivateWeapon。普通基类成功返回，ALightsaberWeapon覆写并调用Ignite，所以角色不依赖具体光剑类型。点亮失败会回挂原插槽并恢复变换、停止本次蒙太奇，避免错误进入持刀状态。点亮成功才置bWeaponDrawn。
+
+蒙太奇结束回调清理bDrawingWeapon和ActiveDrawMontage：交接前被打断保持收刀，交接后被打断保留已提交的持刀挂接/亮灭状态。没有固定时长计时器。角色EndPlay先解除本次结束委托并停止本次蒙太奇，再执行已有武器销毁/解除挂接，避免退关卡回调访问武器。
+
+动画实例NativeInitializeAnimation选择收刀待机，NativeUpdateAnimation读取角色持刀状态，输出ActiveIdleAnimation；原Idle序列播放器新增Sequence引脚读取该变量。收刀使用AS_Idle_Seq，持刀使用AS_Idle_Combat_Seq；蒙太奇覆盖动作并混出到相应待机。只配置持刀待机，没有更换起步/行走/停步动画，也没有上半身分层、攻击、再次收刀、音效或渐进伸缩。
+
+手部与腰部偏移保留用户调整空间，本轮DrawnWeaponOffset为单位变换。模型本地轴和hand_r不一定直接对齐，用户在BP_Character的Weapon|Draw分类调整，不应把偏移不对误判为动画未播放。
+
+验证结果：完整Development Editor构建成功；首次因控制器局部变量Character遮蔽AController::Character报C4458，改为ControlledCharacter后重新构建Succeeded。编辑器正常重开，新类已加载；角色/动画蓝图配置、Slot接线、0.30秒通知、根锁均读回，动画蓝图UpToDate并保存。未启动PIE、执行DrawWeapon或运行任何自动化/功能测试，不声称观感及运行回调已验证。蓝图、序列修改前副本在工作区.ue-draw-weapon。
+
+用户手动验证：角色站稳后单击左键，应播放一次拔刀、约0.30秒切到手上并亮起，结束后保持持刀待机；连点不重播；动作期间移动暂缓且视角可转，结束恢复移动；结束关卡无重复回调。手部偏移和通知帧可由用户校准。
