@@ -1188,3 +1188,12 @@
 - 调用链：MyCharacterAnimInstance::UpdateStartMatching在GroundMovement->HasDirectionalStart成立时，覆盖ActiveStartAnimation为GetDirectionalStartAnimation并使用对应时刻/转向；因此侧向起步会绕过已修复的Fenrir前起步默认动画，混入旧骨架序列，完成后切回Fenrir循环，足以造成骨骼尺寸/姿势不连续。此前本轮之前已见源/目标小腿局部位移长度约42.57/54.61厘米，比例不同；不能用修改角色整体缩放修复混用骨架。
 - 排除：原左右起步及当前Fenrir待机/前起步/行走的root、pelvis、spine_01在0或0.3秒采样缩放均1/1/1，未发现这些采样点的缩放曲线变化。未启动PIE/输入、编译或执行功能测试，不声称已复现或修复全部画面症状；明确定位到旧骨架资源残留，建议先把两条侧向起步重定向并更换对应DirectionalStartSet配置。
 - 版本：只追加本条排查记录；用户已有动画、数据资产、蓝图及其他修改不纳入。沿用此前远程审批限制，不重试推送。
+
+## 2026-10-21 22:39:47 北京时间 — 修复左右起步混用旧骨架并说明腰部插槽创建位置
+
+- 用户授权：先修复左右起步仍引用旧骨架的问题；随后追问scabbard1在哪里创建。该插槽问题本轮仅说明位置，不创建/修改武器插槽。
+- 初始状态：角色默认及地图实例移动组件均使用DA_DirectionalStarts；两个配置项仍指向旧UE4骨架L90/R90 HeadAligned动画，目标Anim目录没有对应文件；没有脏内容包。原数据资产备份至工作区Fenrir_UE5/directional-start-backup/DA_DirectionalStarts.before.uasset。
+- 修复：复用已修好的IKRIg_Man_to_ironman，使用原动画匹配的SK_Mannequin源和SK_Fenrir目标，仅重定向AS_Walk_Start_L90_HeadAligned和AS_Walk_Start_R90_HeadAligned到/Game/Asset/Fenrir_UE5/Anim，不覆盖源资产、不重定向无关动画。通过受支持ObjectTools读取profiles完整数据，仅替换两项animation引用，保留authoredYaw约-86.4348/+86.0223及原76/86条MotionSamples，因此当前使用同一数据集的默认组件与地图实例都会取得新骨架动画，无需改地图或C++。
+- 验证：两个序列Skeleton均为SK_Fenrir_Skeleton；0和0.4秒采样root/pelvis/upperarm_l/thigh_l/calf_l，最大旋转变化约41.99/79.334度，采样骨骼缩放均1/1/1，确认有真实运动且与目标骨架匹配；读回profiles确认动画引用在指定目录、转向角和运动采样JSON逐项保持一致。保存两动画与数据集，脏内容包为空。未主动运行PIE、输入或功能测试，不声称已实机复现并排除所有视觉原因。未改光剑、现有插槽、旧动画或其他用户修改。
+- 插槽说明：向用户说明打开SK_Fenrir骨架编辑页，在骨骼树右键pelvis添加Socket并命名scabbard1，调整为腰侧挂剑位置；没有将其误建为动画蒙太奇槽或Actor组件。
+- 版本范围：仅提交两个新动画、DA_DirectionalStarts与本记录；沿用此前远程审批限制，不重试已被拒绝的推送。
