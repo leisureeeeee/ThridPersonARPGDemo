@@ -1180,3 +1180,11 @@
 - 修复：为现有重定向器添加默认处理栈，实际得到Pelvis Motion、FK Chains、Run IK Rig、Root Motion、Remap Curves五个启用操作；以完全同名匹配并明确映射全部22条目标链。使用原源动画匹配的ARPG_Samurai中SK_Mannequin及SK_Fenrir，通过IKRetargetBatchOperation.run_batch_retarget只重新生成AS_Idle_Seq、AS_Idle_Combat_Seq、AS_Walk_Start_F_0_Seq、AS_Walk_Loop_F_0_Seq、AS_Walk_Stop_F_0_Seq，覆盖前已备份的静止导出，路径仍/Game/Asset/Fenrir_UE5/Anim。保留蓝图引用路径，重编译并保存BP_CharacterAnim1。
 - 验证：使用原生AnimationLibrary对pelvis/spine_02/upperarm_l/lowerarm_l/thigh_l/calf_l在0、0.3、0.6秒（受序列时长限制）采样，五个目标序列均59条轨道，最大旋转变化分别约4.9743、4.9731、61.5759、45.7546、30.1986度，确认存在实际运动数据。蓝图编译状态UpToDate、三个默认引用正确、末尾脏内容包为空。打开动画编辑器后捕获窗口，实际显示Fenrir起步动作中的非参考姿势；截图Saved/VibeUE/Captures/capture-window-20261021-222929.png。没有主动运行游戏、输入或自动化功能测试，不声称全套移动/武器系统已实机验证。
 - 范围/版本：仅提交本轮改动的重定向器、五动画、动画蓝图和执行记录。用户并行新增的Block/Combat动画、另一动画蓝图、IK绑定及其他项目修改保持不纳入。源注册表接口提示弃用不影响批处理；BoneChain.start_bone不可读取，改用IKRigController公开读取接口完成链核对。沿用此前远程审批限制，不重试被拒绝的推送。
+
+## 2026-10-21 22:35:53 北京时间 — 定位左右移动时 Fenrir 尺寸跳变
+
+- 用户问题：左右移动时人物有时变小，询问原因。本轮只读定位，不更改动画/蓝图/数据资产。
+- 证据：BP_Character的SK_Fenrir网格组件默认RelativeScale3D为1/1/1，移动组件仍配置/Game/BP/MyCharatcer/DA_DirectionalStarts。该数据集两项AuthoredYaw约-86.4348/+86.0223，动画分别为旧/Game/BP/MyCharatcer/Animations/AS_Walk_Start_L90_HeadAligned和AS_Walk_Start_R90_HeadAligned，Skeleton均为旧UE4_Mannequin_Skeleton，并非SK_Fenrir_Skeleton。
+- 调用链：MyCharacterAnimInstance::UpdateStartMatching在GroundMovement->HasDirectionalStart成立时，覆盖ActiveStartAnimation为GetDirectionalStartAnimation并使用对应时刻/转向；因此侧向起步会绕过已修复的Fenrir前起步默认动画，混入旧骨架序列，完成后切回Fenrir循环，足以造成骨骼尺寸/姿势不连续。此前本轮之前已见源/目标小腿局部位移长度约42.57/54.61厘米，比例不同；不能用修改角色整体缩放修复混用骨架。
+- 排除：原左右起步及当前Fenrir待机/前起步/行走的root、pelvis、spine_01在0或0.3秒采样缩放均1/1/1，未发现这些采样点的缩放曲线变化。未启动PIE/输入、编译或执行功能测试，不声称已复现或修复全部画面症状；明确定位到旧骨架资源残留，建议先把两条侧向起步重定向并更换对应DirectionalStartSet配置。
+- 版本：只追加本条排查记录；用户已有动画、数据资产、蓝图及其他修改不纳入。沿用此前远程审批限制，不重试推送。
