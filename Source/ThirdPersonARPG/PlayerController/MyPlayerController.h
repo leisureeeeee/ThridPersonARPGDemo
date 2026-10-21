@@ -31,6 +31,7 @@ private:
 	void HandleLookInput(const FInputActionValue& Value);
 	void HandleZoomInput(const FInputActionValue& Value);
 	void HandleDrawWeaponInput(const FInputActionValue& Value);
+	void HandleSheatheWeaponInput(const FInputActionValue& Value);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -52,4 +53,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> DrawWeaponAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> SheatheWeaponAction;
 };

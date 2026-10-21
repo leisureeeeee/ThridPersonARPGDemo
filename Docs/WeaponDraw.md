@@ -8,7 +8,7 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 
 新增UAnimNotify_DrawWeapon。原序列中0.30秒的WeaponGrip通知将动画来源和角色实例交给私有回调；只有本角色正在播放对应拔刀蒙太奇、尚未交接时才响应，因此编辑器预览或其他动画通知不会误改武器状态。时点依据右手0.2–0.3秒近似停留、0.4秒后明显外移的静态采样暂定，不等于已目视确认握住刀柄。
 
-回调保存原相对变换/插槽，将同一武器Actor挂到DrawnWeaponSocket（默认hand_r），应用DrawnWeaponOffset，再调用武器基类虚函数ActivateWeapon。普通基类成功返回，ALightsaberWeapon覆写并调用Ignite，所以角色不依赖具体光剑类型。点亮失败会回挂原插槽并恢复变换、停止本次蒙太奇，避免错误进入持刀状态。点亮成功才置bWeaponDrawn。
+回调保存原相对变换/插槽，将同一武器Actor挂到DrawnWeaponSocket（原生默认hand_r，现BP_Character配置为WeaponHandSocket），应用DrawnWeaponOffset，再调用武器基类虚函数ActivateWeapon。普通基类成功返回，ALightsaberWeapon覆写并调用Ignite，所以角色不依赖具体光剑类型。点亮失败会回挂原插槽并恢复变换、停止本次蒙太奇，避免错误进入持刀状态。点亮成功才置bWeaponDrawn。
 
 蒙太奇结束回调清理bDrawingWeapon和ActiveDrawMontage：交接前被打断保持收刀，交接后被打断保留已提交的持刀挂接/亮灭状态。没有固定时长计时器。角色EndPlay先解除本次结束委托并停止本次蒙太奇，再执行已有武器销毁/解除挂接，避免退关卡回调访问武器。
 
@@ -30,7 +30,7 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 
 ## 收刀函数SheatheWeapon（2026-10-21）
 
-新增BlueprintCallable bool AMyCharacter::SheatheWeapon()，返回是否成功开始播放，未绑定任何新按键，原左键仍只调用DrawWeapon。C++可通过角色指针调用SheatheWeapon，蓝图可从角色引用调用Sheathe Weapon。仅持刀、地面、有有效武器且无正在播放蒙太奇时接受，拔刀/收刀进行中互相排斥，重复调用返回false；允许移动期间调用且不拦截移动。
+新增BlueprintCallable bool AMyCharacter::SheatheWeapon()，返回是否成功开始播放，现已由控制器右键Started调用，左键仍只调用DrawWeapon。C++可通过角色指针调用SheatheWeapon，蓝图可从角色引用调用Sheathe Weapon。仅持刀、地面、有有效武器且无正在播放蒙太奇时接受，拔刀/收刀进行中互相排斥，重复调用返回false；允许移动期间调用且不拦截移动。
 
 可配置SheatheWeaponAnimation使用AS_Idle_Combat_To_Idle_Seq（长1.75秒），SheatheWeaponPlayRate默认1.3，沿用现有DefaultSlot上半身分层、混入0.12/混出0.15。旧关卡实例新字段为空时只读继承蓝图类默认值，不写资源硬路径。
 
@@ -40,3 +40,13 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 
 收刀时点根据右手返回腰前并开始退出的采样暂定，握点/朝向和手离开剑柄的准确帧需用户目视校准。此实现不新增永久剑鞘或第二把武器。
 本轮完整Development Editor构建Succeeded并重新加载；角色蓝图配置与序列通知已保存读回。未运行PIE、主动调用收刀或执行功能测试。用户可在现有持刀状态下从蓝图调用SheatheWeapon，观察通知前后挂接/亮灭、移动不中断及再次DrawWeapon能否开始。
+
+## WeaponHandSocket与右键收刀（2026-10-21）
+
+用户已创建WeaponHandSocket，组件查询确认它存在且父骨骼为hand_r。BP_Character的DrawnWeaponSocket改为WeaponHandSocket，DrawnWeaponOffset保持单位变换：位置0、旋转0、缩放1；持刀位置由用户插槽控制。本轮不创建或调整插槽，也不编辑其父骨架或预览模型。
+
+旧关卡实例在蓝图配置后读回仍为hand_r，因此AMyCharacter::BeginPlay在初始化武器前只读蓝图类默认对象，复制defaults-only的DrawnWeaponSocket/DrawnWeaponOffset到实例，避免旧序列化值导致运行时继续使用骨骼原点。不修改CDO或地图。
+
+MyPlayerController新增Transient Boolean SheatheWeaponAction，RightMouseButton映射，Started调用HandleSheatheWeaponInput，经受控角色/输入启用/视角检查后仅调用SheatheWeapon。长按只请求一次，互斥和能否收刀仍由角色函数负责。左键拔刀和右键收刀均允许移动，不改变已有视角/缩放。
+
+完整Development Editor构建Succeeded。编辑器已在运行，避免重复启动，读回WeaponHandSocket、单位偏移及hand_r父骨骼。原生SheatheWeaponAction属性已存在，因Transient私有不可直接Python读取；未把snake_case查询失败当作模块未加载。未启动PIE或驱动输入。用户验证左右键切换、长按右键不重复、边走边操作和手部握点。

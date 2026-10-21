@@ -59,6 +59,7 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleLookInput);
 	EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleZoomInput);
 	EnhancedInput->BindAction(DrawWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleDrawWeaponInput);
+	EnhancedInput->BindAction(SheatheWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleSheatheWeaponInput);
 	RegisterInputMappingContext();
 }
 
@@ -104,6 +105,10 @@ void AMyPlayerController::CreateInputMappingContext()
 	DrawWeaponAction = NewObject<UInputAction>(this, TEXT("DrawWeaponAction"), RF_Transient);
 	DrawWeaponAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(DrawWeaponAction, EKeys::LeftMouseButton);
+
+	SheatheWeaponAction = NewObject<UInputAction>(this, TEXT("SheatheWeaponAction"), RF_Transient);
+	SheatheWeaponAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(SheatheWeaponAction, EKeys::RightMouseButton);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()
@@ -193,5 +198,15 @@ void AMyPlayerController::HandleDrawWeaponInput(const FInputActionValue& Value)
 		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
 	{
 		ControlledCharacter->DrawWeapon();
+	}
+}
+
+void AMyPlayerController::HandleSheatheWeaponInput(const FInputActionValue& Value)
+{
+	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
+	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
+		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
+	{
+		ControlledCharacter->SheatheWeapon();
 	}
 }

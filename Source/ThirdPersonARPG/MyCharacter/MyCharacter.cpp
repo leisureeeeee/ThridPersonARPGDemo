@@ -59,6 +59,13 @@ AWeaponBase* AMyCharacter::GetCurrentWeapon() const
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	// Defaults-only draw settings must follow the Blueprint template, including old placed actors.
+	const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
+	if (Defaults && Defaults != this)
+	{
+		DrawnWeaponSocket = Defaults->DrawnWeaponSocket;
+		DrawnWeaponOffset = Defaults->DrawnWeaponOffset;
+	}
 	InitializeWeapon();
 }
 

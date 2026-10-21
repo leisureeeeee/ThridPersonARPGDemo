@@ -1119,3 +1119,12 @@
 - 撤回：用户更正前已新增插槽编辑器辅助函数并启动完整构建；构建完成后只移除本轮新增部分，git diff确认EditorTools h/cpp恢复原样，再完整构建Succeeded并重开项目，避免留下不需要的原生接口。骨架/角色修改前备份在工作区.ue-lightsaber-sockets；未创建新资产或改骨架/角色配置。
 - 本轮最终范围为核对腰部单位偏移；未运行PIE或功能测试。保留用户地图、剑刃材质与其他修改。仅提交本条执行记录，远程推送此前被自动审批拒绝，不重试。
 - 重开读回：角色类默认HolsteredWeaponOffset保持单位变换（位置0、单位四元数、缩放1），插槽仍scabbard1/hand_r。EditorTools、骨架及角色BP差异为空，因此不重复写资产。用户随后自行进入PIE，助手未启动/停止；运行时世界未取得有效角色，本轮不声称读回了运行实例或验证位置效果。
+
+## 2026-10-21 18:54:55 北京时间 — 使用WeaponHandSocket并绑定右键收刀
+
+- 用户需求：用户已建WeaponHandSocket，角色改用该插槽，收刀绑定右键。只读确认插槽存在、父骨骼hand_r、DrawnWeaponOffset已经单位变换；未新建/重调骨架插槽，不改腰部插槽。
+- 配置：通过ObjectTools受支持API修改BP_Character的DrawnWeaponSocket并编译保存，偏移保持单位。读回蓝图新值成功，但旧关卡实例仍hand_r；BeginPlay新增只读复制类默认持刀插槽/偏移到实例，确保defaults-only设置生效，不强改或保存地图。
+- 输入：MyPlayerController.h/.cpp新增私有Transient SheatheWeaponAction、Boolean映射RightMouseButton和Started处理器；校验当前角色/输入/视角后只调用SheatheWeapon。左键仍DrawWeapon，重复/互斥沿用角色函数，移动不拦截。
+- 构建/加载：确认无PIE与未保存包后正常退出，完整Development Editor构建Succeeded；尝试启动时发现编辑器已在运行，未重复启动或终止进程。核对DLL写入与进程时间、配置及原生字段；最初用snake_case查Transient私有字段失败，精确原生名确认属性存在但受保护，未绕过读取限制或误认为未加载。没有因此多余重启/构建。
+- 验证：重开会话读回WeaponHandSocket、单位偏移及hand_r父骨骼；未运行PIE/自动化、主动按键或声称握点验证通过。用户可检查左键拔刀/右键收刀、长按不重播、走路不中断。
+- 范围/版本：仅提交控制器h/cpp、角色cpp、角色BP、WeaponDraw.md和本记录六文件。已有EditorTools修改、用户剑刃材质/地图/配置等保持不处理。此前远程推送被自动审批拒绝，不重试。
