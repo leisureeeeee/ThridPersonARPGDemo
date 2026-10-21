@@ -1009,3 +1009,13 @@
 - 工具异常：BlueprintEditorLibrary无mark_blueprint_as_structurally_modified，首次调用失败发生在节点属性修改后；随后读回true，通过save_loaded_asset成功保存。未重复修改其他字段，未编译；图状态Dirty如实保留。
 - 验证范围：仅资产采样与设置读回，未运行自动化/PIE或声称观感通过。按AGENTS显式编译规则未构建C++或编译蓝图；上一轮受阻C++也尚未由助手编译加载。用户需编译加载后验证W、左右起步进入循环和快速松开重按。采样不包含全身位置/速度，非完整脚相位系统。
 - 版本：仅提交动画蓝图LFS、只读采样脚本、地面移动文档与本记录。其他资产、配置、地图保持原样；此前远程推送被自动审批拒绝，本轮不重试。
+
+## 2026-10-21 14:10:30 北京时间 — 检查新导入的光剑资源
+
+- 用户需求：查看已导入的光剑资产包。只读检查Content/Asset/LDALightsaber与资产注册表，未修改导入资源、角色、材质或蓝图。PIE未运行，没有编译或播放测试。
+- 资源：注册表共9个资产：Lightsaber为StaticMesh，无SkeletalMesh/Skeleton/动画/蓝图；两个MaterialInstanceConstant（Hilt、SaberBlade）；四张贴图（BaseColor、Normal、Mask、OcclusionRoughnessMetallic）；两段SoundWave，点亮2.257958秒、熄灭0.680333秒。磁盘另有FBX、PNG、WAV原文件。
+- 模型：同一静态网格含Hilt和SaberBlade两个材质槽，包围盒约8.899×8.899×145.572 cm，沿本地Z方向；这不是精确刀刃长度或已校准握点。没有因检查擅自添加插槽或碰撞。
+- 材质：两实例父材质均为InterchangeAssets下FBXLegacyPhongSurfaceMaterial，默认不透明、默认受光。Hilt仅覆盖DiffuseColorMap=Hilt_BaseColor及少量导入参数，未配置法线或ORM贴图；SaberBlade覆盖灰色DiffuseColor，未配置专用光剑发光/长度参数。Normal贴图为法线压缩、sRGB关闭；ORM当前sRGB开启，若作为线性通道贴图使用需调整。Mask用途需进一步查看图像/通道，不猜测。
+- 适配建议：静态模型可用独立C++武器Actor挂到UE4右手插槽，随Katana手部动画移动，无需武器骨架。点亮/熄灭可由武器组件或Actor控制动态材质参数与音效；先补柄PBR及刃发光，再规划刃单独伸缩或材质长度控制。因柄刃同一网格，不宜直接缩放整个组件来伸缩刃。当前未实现这些建议，也未声称外观通过。
+- 工具限制：首次读取StaticMesh受保护Sockets属性失败，改用公开find_socket查询几个常见候选名；未找到不等同于列举所有插槽。读取材质static_parameters属性不存在，随后读取公开参数名称和有效实例覆盖。无资源写入。
+- 版本：仅提交本条执行记录，保留新导入包为用户当前未跟踪状态及其他全部改动。远程推送此前被自动审批拒绝，本轮不重试。
