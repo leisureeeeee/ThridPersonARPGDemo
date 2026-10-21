@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyCharacter.h"
+#include "Weapon/WeaponBase.h"
 #include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -44,4 +45,9 @@ void AMyCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	ensure(CameraRig->InitializeRig(SpringArm, FollowCamera));
+}
+
+AWeaponBase* AMyCharacter::GetCurrentWeapon() const
+{
+	return IsValid(CurrentWeapon.Get()) ? CurrentWeapon.Get() : nullptr;
 }

@@ -1,0 +1,15 @@
+# 武器类基础结构
+
+本轮只实现武器对象结构，没有加入拔刀、收刀、点亮、输入、伤害或自动生成。
+
+- AWeaponBase继承AActor，声明为Abstract/Blueprintable。它只创建WeaponRoot场景根组件，用于后续挂接；基类不要求具体网格类型，其他武器可选择自己的表现组件。关闭Tick，不创建空BeginPlay/Tick覆写。
+- ALightsaberWeapon继承AWeaponBase，创建私有WeaponMesh静态网格组件并挂到根组件。按现有光剑StaticMesh资源类型选择组件，默认关闭物理、碰撞和重叠事件，避免将来挂到角色时阻挡自己；后续伤害检测另行实现。未硬编码资源路径。
+- AMyCharacter新增私有UPROPERTY TObjectPtr<AWeaponBase> CurrentWeapon，默认nullptr，追加在已有字段后。它是世界中的武器Actor实例引用，不是TSubclassOf武器类配置，也不会生成、挂接或销毁武器。EditInstanceOnly允许对关卡角色实例指定已有武器，BlueprintReadOnly与GetCurrentWeapon提供只读访问。getter遇到已销毁对象返回nullptr；UPROPERTY使引用被UE反射/垃圾回收系统追踪，但不会自动管理Actor销毁生命周期。
+
+调用关系为AMyCharacter→AWeaponBase，ALightsaberWeapon是其派生类型。角色不依赖光剑头文件，未来可以引用其他武器子类，具体光剑材质和音效不进入角色类。
+
+组件在Actor原生构造函数中通过CreateDefaultSubobject建立，蓝图子类继承组件结构。没有在构造函数中生成世界Actor或加载游戏资源。
+
+本轮未编译、未加载新类、未运行测试。新增UCLASS/UPROPERTY和构造组件需完整重新编译并加载后才会出现在编辑器。建议用户关闭编辑器、构建Development Editor再打开项目，避免仅依赖旧模块。
+
+加载后可创建ALightsaberWeapon的蓝图子类BP_LightsaberWeapon，在WeaponMesh组件指定已导入的Lightsaber静态网格；将蓝图实例放进关卡，再在角色实例的Weapon分类将CurrentWeapon指向它。这个操作只建立引用，武器不会因此自动出现在手中或腰部。基类是抽象类型，不能直接放置。当前没有自动生成、装备接口、多人复制或存档逻辑。
