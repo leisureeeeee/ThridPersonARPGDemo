@@ -29,6 +29,7 @@ private:
 	void RemoveInputMappingContext();
 	void HandleMoveInput(const FInputActionValue& Value);
 	void HandleLookInput(const FInputActionValue& Value);
+	void HandleZoomInput(const FInputActionValue& Value);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -38,6 +39,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> LookAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> ZoomAction;
 
 	// Degrees per mouse delta; mouse input is already a per-frame displacement.
 	UPROPERTY(EditDefaultsOnly, Category = "Input|Look", meta = (ClampMin = "0.0"))

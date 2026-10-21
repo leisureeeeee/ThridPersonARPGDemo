@@ -50,6 +50,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	bool ResetCameraSettings(float BlendTime = 0.2f);
 
+	// Positive input moves closer; negative input moves farther away.
+	UFUNCTION(BlueprintCallable, Category = "Camera|Zoom")
+	bool AdjustCameraDistance(float ZoomInput);
+
 protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -58,6 +62,18 @@ private:
 	void ConfigureCameraComponents();
 	FARPGCameraRigSettings ReadCameraSettings() const;
 	void ApplyCameraSettings(const FARPGCameraRigSettings& Settings);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "cm"))
+	float MinCameraDistance = 150.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "cm"))
+	float MaxCameraDistance = 800.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "cm"))
+	float DistancePerScrollStep = 50.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "s"))
+	float ZoomBlendTime = 0.15f;
 
 	// Tune follow behavior on the rig; the spring arm performs the actual damping.
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag")

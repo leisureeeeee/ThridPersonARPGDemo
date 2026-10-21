@@ -109,6 +109,32 @@ bool UARPGCameraRigComponent::ResetCameraSettings(float BlendTime)
 	return SetCameraSettings(DefaultSettings, BlendTime);
 }
 
+bool UARPGCameraRigComponent::AdjustCameraDistance(float ZoomInput)
+{
+	if (!IsRigInitialized() || !FMath::IsFinite(ZoomInput) || FMath::IsNearlyZero(ZoomInput)
+		|| !FMath::IsFinite(MinCameraDistance) || !FMath::IsFinite(MaxCameraDistance)
+		|| !FMath::IsFinite(DistancePerScrollStep) || DistancePerScrollStep <= 0.0f
+		|| !FMath::IsFinite(ZoomBlendTime))
+	{
+		return false;
+	}
+
+	const float MinDistance = FMath::Max(0.0f, MinCameraDistance);
+	const float MaxDistance = FMath::Max(MinDistance, MaxCameraDistance);
+	// Accumulate wheel steps against the pending target, not the half-blended arm.
+	// Keep the target FOV and offsets if another rig transition is in progress.
+	FARPGCameraRigSettings Settings = IsComponentTickEnabled() ? TargetSettings : ReadCameraSettings();
+	const float NewDistance = FMath::Clamp(
+		Settings.ArmLength - ZoomInput * DistancePerScrollStep, MinDistance, MaxDistance);
+	if (FMath::IsNearlyEqual(NewDistance, Settings.ArmLength))
+	{
+		return true;
+	}
+
+	Settings.ArmLength = NewDistance;
+	return SetCameraSettings(Settings, ZoomBlendTime);
+}
+
 void UARPGCameraRigComponent::ApplyCameraSettings(const FARPGCameraRigSettings& Settings)
 {
 	SpringArm->TargetArmLength = Settings.ArmLength;

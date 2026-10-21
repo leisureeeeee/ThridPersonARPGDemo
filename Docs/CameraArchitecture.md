@@ -21,6 +21,7 @@
 - `LookAction` 是 Axis2D，直接绑定 Mouse2D；根据用户实际体验反馈，已移除原先额外的 Y 轴 Negate，鼠标 Y 原值乘灵敏度后交给 AddPitchInput，反转此前的上下操作。配置保持关闭 `bEnableLegacyInputScales`，防止 UE 旧输入比例叠加。`MouseSensitivity` 是控制器的私有 EditDefaultsOnly 参数，默认每单位鼠标位移 0.15 度，蓝图类默认值中可调整；鼠标位移不再乘 DeltaTime。
 - 本地控制器 `BeginPlay` 设置 GameOnly 输入模式并隐藏光标。PIE 应使用 Play，点击游戏视口捕获鼠标；Shift+F1 可释放鼠标。处理器分别尊重移动/视角输入禁用状态，没有受控角色时不处理。
 - Character 继续负责移动与组件装配，Rig 负责相机参数，CameraManager 负责视角输出；键位和输入事件仍封装在控制器中。
+- `ZoomAction` 为 Axis1D（一维轴），在同一运行时输入映射中绑定 `MouseWheelAxis`（鼠标滚轮轴），由 `HandleZoomInput` 将滚轮值交给当前 Pawn 的 CameraRig。滚轮输入是位移量，不乘帧时间；无本地控制器、无受控角色、角色禁用输入、视角输入被禁止或当前视角目标不是该角色时不处理。
 
 输入回归测试 `ThirdPersonARPG.Input.CameraRelativeMoveAndMouseLook` 使用真实控制器绑定、运行时映射修饰器和 Enhanced Input 注入，覆盖相机与控制器错开 90° 的 WASD、相机转向后的 W、俯仰时平面移动、斜向限速、反向抵消、鼠标方向和忽略输入。该测试不覆盖桌面鼠标捕获、关卡蓝图覆盖或实体硬件操作，仍需在项目 PIE 中验证。
 
@@ -59,6 +60,27 @@
 3. 使用 Play（运行），按 W 起步后松开，再做左右转向和鼠标环绕；预期位置缓冲明显但短促，旋转平滑且较快追上鼠标。靠墙应仍缩臂，离墙恢复；未改动碰撞配置。
 4. 太飘时增大 `CameraLagSpeed` / `CameraRotationLagSpeed`；太硬时降低对应值。先调整位置，再调整旋转，以区分两者的手感。
 
+## 滚轮调整相机距离
+
+调用链：鼠标滚轮 → `MyPlayerController::HandleZoomInput` → `CameraRig::AdjustCameraDistance` → 复用 `SetCameraSettings` 的平滑过渡 → 弹簧臂计算相机位置及碰撞。控制器仅提交缩放输入，不直接访问弹簧臂或角色内部成员。
+
+`AdjustCameraDistance` 以 `目标臂长 - 滚轮值 × 每格距离` 计算新目标：向上为正值，缩短臂长、拉近相机；向下为负值，增大臂长、拉远相机。初始臂长 300 cm 时，向上一格目标 250 cm，向下一格目标 350 cm。
+
+在角色蓝图选中 `CameraRig`（相机装置组件），可编辑 `Camera | Zoom`（相机 | 缩放）中的以下默认配置：
+
+| 字段 | 含义 | 默认值 |
+| --- | --- | --- |
+| `MinCameraDistance` | 滚轮允许的最近目标臂长 | 150 cm |
+| `MaxCameraDistance` | 滚轮允许的最远目标臂长 | 800 cm |
+| `DistancePerScrollStep` | 每格滚轮调整距离 | 50 cm |
+| `ZoomBlendTime` | 到新目标距离的过渡时长 | 0.15 s |
+
+过渡过程中继续滚动，会在待完成的目标距离上累计步数；新过渡仍从当前实际参数出发，所以连续输入不会每次仅按尚未到位的臂长重新计算。到达限值后继续同向滚动不重启已有过渡。复用现有参数混合时保留其目标 FOV（视野）和偏移，但新的滚轮输入会重新计时这次参数过渡；当前仍是单一参数过渡，不是镜头模式优先级系统。
+
+缩放只改变目标臂长，原有相机延迟继续运行。弹簧臂碰撞可能临时缩短实际距离，离开障碍后恢复到滚轮选择的臂长；位置延迟及偏移也会影响实际的角色与相机距离。因此 150～800 cm 是滚轮的目标臂长范围，不是对所有情况下相机实际位置的硬性约束。`ResetCameraSettings` 仍恢复初始化构图，包括原始臂长。
+
+本轮未编译或运行测试，新增输入动作引用、配置属性和反射方法需要完整重新编译加载。用户手动验证：保存关闭编辑器，编译 `ThirdPersonARPGEditor` 后重新打开，使用 Play（运行）并点击游戏视口；上下滚动分别应拉近/拉远，快速连续滚动应累计生效，持续滚动应停在最近/最远限值；靠墙检查碰撞缩臂及离墙恢复。可在 `CameraRig` 的缩放分类调整步长、范围和时长；移动、鼠标环绕和屏幕中心调试标记仍由各自原有逻辑处理。
+
 ## 职责划分
 
 角色转身与模型朝向分别处理：`bUseControllerRotationYaw=false`、`bUseControllerDesiredRotation=false`、`bOrientRotationToMovement=true`，由 CharacterMovement 根据加速度方向和 RotationRate 转动角色胶囊。当前蓝图使用 UE4 `SK_Mannequin`，其模型前向需要相对胶囊做 Yaw=-90° 的对齐；在 `MyCharacter` 构造函数中设置 `GetMesh()->SetRelativeRotation(FRotator(0,-90,0))`，不用旋转 Actor、相机或移动输入来补偿模型偏移。
@@ -90,7 +112,7 @@
 ## 已实现的第一阶段
 
 - `AMyCharacter` 创建并挂接 SpringArm、FollowCamera 和 CameraRig，在 `PostInitializeComponents` 绑定它们。此时蓝图构造已经完成，Rig 先统一应用跟随/控制旋转配置，再捕获实际调好的默认距离、偏移和 FOV。角色不再设置相机跟随参数。
-- `FARPGCameraRigSettings` 是参数值对象；Rig 的公开接口为 `GetCurrentCameraSettings`、`SetCameraSettings`、`ResetCameraSettings`。外部通过参数副本提出调整，不直接访问组件内部指针。
+- `FARPGCameraRigSettings` 是参数值对象；Rig 的参数接口为 `GetCurrentCameraSettings`、`SetCameraSettings`、`ResetCameraSettings`，滚轮输入通过 `AdjustCameraDistance` 提出增量调整。外部不直接访问组件内部指针。
 - 调整时从当前实际参数出发，以指定时长执行 SmoothStep 插值；中途再次调整会以当前视角参数作为新的起点。过渡结束后关闭 Rig 自身 Tick。SpringArm 的碰撞检测和原有更新继续工作。
 - Rig 建立 SpringArm 对自身的 Tick 前置依赖，确保先更新参数，再计算弹簧臂的最终位置，避免参数晚一帧生效。
 - `AMyPlayerController` 通过 `PlayerCameraManagerClass` 使用新的 Manager。Manager 不覆写最终 POV 计算，沿用 UE 的 CameraComponent、镜头切换及修饰器流程。

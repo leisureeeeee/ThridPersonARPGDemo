@@ -1,4 +1,5 @@
 #include "MyPlayerController.h"
+#include "Camera/ARPGCameraRigComponent.h"
 #include "Camera/ARPGPlayerCameraManager.h"
 #include "Camera/CameraTypes.h"
 #include "EnhancedInputComponent.h"
@@ -55,6 +56,7 @@ void AMyPlayerController::SetupInputComponent()
 	CreateInputMappingContext();
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMoveInput);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleLookInput);
+	EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleZoomInput);
 	RegisterInputMappingContext();
 }
 
@@ -91,6 +93,11 @@ void AMyPlayerController::CreateInputMappingContext()
 	LookAction->ValueType = EInputActionValueType::Axis2D;
 	// Pass mouse Y through without an additional pitch inversion.
 	PlayerMappingContext->MapKey(LookAction, EKeys::Mouse2D);
+
+	ZoomAction = NewObject<UInputAction>(this, TEXT("ZoomAction"), RF_Transient);
+	ZoomAction->ValueType = EInputActionValueType::Axis1D;
+	// Wheel up is positive (closer); wheel down is negative (farther).
+	PlayerMappingContext->MapKey(ZoomAction, EKeys::MouseWheelAxis);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()
@@ -155,4 +162,20 @@ void AMyPlayerController::HandleLookInput(const FInputActionValue& Value)
 	const FVector2D LookInput = Value.Get<FVector2D>();
 	AddYawInput(LookInput.X * MouseSensitivity.X);
 	AddPitchInput(LookInput.Y * MouseSensitivity.Y);
+}
+
+void AMyPlayerController::HandleZoomInput(const FInputActionValue& Value)
+{
+	APawn* ControlledPawn = GetPawn();
+	if (!IsLocalPlayerController() || !ControlledPawn || !ControlledPawn->InputEnabled()
+		|| IsLookInputIgnored() || GetViewTarget() != ControlledPawn)
+	{
+		return;
+	}
+
+	if (UARPGCameraRigComponent* Rig = ControlledPawn->FindComponentByClass<UARPGCameraRigComponent>())
+	{
+		// Wheel input is a delta, not a rate: do not multiply by DeltaTime.
+		Rig->AdjustCameraDistance(Value.Get<float>());
+	}
 }
