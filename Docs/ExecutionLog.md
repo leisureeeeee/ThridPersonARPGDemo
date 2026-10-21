@@ -1162,3 +1162,12 @@
 - 明确异常：新BP_CharacterAnim1有与旧蓝图相同的AnimGraph、locomotion及Idle/Walk/Start/Stop图结构，但ForwardStartAnimation、SheathedIdleAnimation、DrawnIdleAnimation全部为空；资产注册表直接依赖仅脚本、网格与Fenrir骨架，没有动画序列或混合空间。旧BP_CharacterAnim上述三个默认字段均配置了UE4骨架动画，且依赖起步/循环/停止/待机动画。说明新蓝图迁移后缺少动画引用，单改角色AnimClass不能使其有可播放资源；建议补回重定向后的动画与类默认字段，或重新整套重定向并包含引用资源。
 - 其他问题：日志显示scabbard1插槽缺失导致武器未装备，与基础动画引用为空分开说明。未创建插槽或更改武器设置。
 - 工具记录：首次读取AnimBlueprint.parent_class失败，该属性不可读取，后续跳过并使用生成类CDO默认字段及AnimGraphService图结构核对；get_game_world提示弃用但返回None。未编译/保存用户蓝图、播放动画、执行自动化或功能测试。仅追加本记录并本地提交，沿用此前远程审批限制，不重试推送。
+
+## 2026-10-21 22:18:33 北京时间 — 修复 Fenrir 三个默认动画及遗失的行走/停止节点引用
+
+- 用户需求：将向前起步、收刀待机、持刀待机三个动画放在/Game/Asset/Fenrir_UE5/Anim并配置，上一轮中断后要求继续解决。
+- 初始检查：指定目录已有用户导出的AS_Walk_Start_F_0_Seq、AS_Idle_Seq、AS_Idle_Combat_Seq，均为SK_Fenrir_Skeleton且时长分别1.25/10/10秒，因此复用、不覆盖或重复重定向。同时已有Walk_Loop/Walk_Stop及另一份已配置的BP_CharacterAnim，但角色实际绑定仍是/Game/BP/MyCharatcer/BP_CharacterAnim1，其三个默认字段全空。没有脏内容包。
+- 保护：上一轮已备份BP_CharacterAnim1原文件至工作区Fenrir_UE5/animation-defaults-backup/BP_CharacterAnim1.before.uasset，本轮未覆盖备份。源UE4动画、角色当前AnimClass、重定向器与其他用户修改保持原样。
+- 修复：通过ObjectTools已发现的forwardStartAnimation/sheathedIdleAnimation/drawnIdleAnimation三个字段，分别配置指定Anim目录的对应Fenrir动画；编译首次报序列播放器和按时间序列评估器引用未知动画。进一步定位Walk和Stop节点Sequence均为空，使用ObjectTools读取节点结构后只补sequence字段，分别引用已有AS_Walk_Loop_F_0_Seq和AS_Walk_Stop_F_0_Seq；保留节点、连线、速度、循环和时间输入设置。
+- 验证：重新编译后BlueprintGraphSummary.compile_status为UpToDate；保存动画蓝图并重新获取生成类CDO，三个动画路径正确。Walk节点及Stop节点实际结构读回引用正确；AnimGraphService.get_node_animation_asset对Stop评估器返回空，改用ObjectTools读node.sequence核实，未据此误判修复失败。末尾脏内容包列表为空。没有修改代码、运行PIE、主动播放动画、执行自动化或功能测试，不把编译通过描述为运行验证通过。腰部scabbard1缺失及DirectionalStartSet等其他配置不在本轮改动范围。
+- 版本范围：仅提交修复后的BP_CharacterAnim1、用户本轮指定的三个现有Fenrir动画及本记录；其他用户导入的Anim蓝图、循环/停止动画、网格/骨架/物理资产不额外纳入。沿用此前远程推送审批限制，不重试已被拒绝的推送。
