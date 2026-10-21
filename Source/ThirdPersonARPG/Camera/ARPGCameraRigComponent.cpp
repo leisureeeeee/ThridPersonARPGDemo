@@ -114,25 +114,23 @@ bool UARPGCameraRigComponent::AdjustCameraDistance(float ZoomInput)
 	if (!IsRigInitialized() || !FMath::IsFinite(ZoomInput) || FMath::IsNearlyZero(ZoomInput)
 		|| !FMath::IsFinite(MinCameraDistance) || !FMath::IsFinite(MaxCameraDistance)
 		|| !FMath::IsFinite(DistancePerScrollStep) || DistancePerScrollStep <= 0.0f
-		|| !FMath::IsFinite(ZoomBlendTime))
+		|| !FMath::IsFinite(SpringArm->TargetArmLength))
 	{
 		return false;
 	}
 
 	const float MinDistance = FMath::Max(0.0f, MinCameraDistance);
 	const float MaxDistance = FMath::Max(MinDistance, MaxCameraDistance);
-	// Accumulate wheel steps against the pending target, not the half-blended arm.
-	// Keep the target FOV and offsets if another rig transition is in progress.
-	FARPGCameraRigSettings Settings = IsComponentTickEnabled() ? TargetSettings : ReadCameraSettings();
+	// Consume only this wheel delta at the currently applied distance. No queued zoom.
 	const float NewDistance = FMath::Clamp(
-		Settings.ArmLength - ZoomInput * DistancePerScrollStep, MinDistance, MaxDistance);
-	if (FMath::IsNearlyEqual(NewDistance, Settings.ArmLength))
-	{
-		return true;
-	}
+		SpringArm->TargetArmLength - ZoomInput * DistancePerScrollStep, MinDistance, MaxDistance);
 
-	Settings.ArmLength = NewDistance;
-	return SetCameraSettings(Settings, ZoomBlendTime);
+	SpringArm->TargetArmLength = NewDistance;
+	// Wheel input takes over distance even at a limit. Prevent an existing rig blend
+	// from pulling the arm again next tick; leave its FOV/offset timing untouched.
+	BlendStartSettings.ArmLength = NewDistance;
+	TargetSettings.ArmLength = NewDistance;
+	return true;
 }
 
 void UARPGCameraRigComponent::ApplyCameraSettings(const FARPGCameraRigSettings& Settings)

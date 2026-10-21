@@ -70,10 +70,11 @@ private:
 	float MaxCameraDistance = 800.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "cm"))
-	float DistancePerScrollStep = 50.0f;
+	float DistancePerScrollStep = 25.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Camera|Zoom", meta = (ClampMin = "0", Units = "s"))
-	float ZoomBlendTime = 0.15f;
+	// Retain the old reflected field/layout for saved assets; wheel zoom no longer blends.
+	UPROPERTY()
+	float ZoomBlendTime = 0.0f;
 
 	// Tune follow behavior on the rig; the spring arm performs the actual damping.
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag")
