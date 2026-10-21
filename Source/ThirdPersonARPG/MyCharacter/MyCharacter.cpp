@@ -27,6 +27,16 @@ AMyCharacter::AMyCharacter(const FObjectInitializer& ObjectInitializer)
 	SpringArm->TargetArmLength = 300.0f;
 	SpringArm->bUsePawnControlRotation = true;
 
+	// Smooth follow and mouse-look on the arm, before its camera collision sweep.
+	// Keep rotation more responsive than position for camera-relative ARPG movement.
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->CameraLagSpeed = 12.0f;
+	SpringArm->CameraLagMaxDistance = 40.0f;
+	SpringArm->bEnableCameraRotationLag = true;
+	SpringArm->CameraRotationLagSpeed = 20.0f;
+	SpringArm->bUseCameraLagSubstepping = true;
+	SpringArm->CameraLagMaxTimeStep = 1.0f / 120.0f;
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;

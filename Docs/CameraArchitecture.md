@@ -26,6 +26,33 @@
 
 2026-10-19 验证：在 `Saved/InputValidation_20261019_1732` 使用与主项目哈希一致的源码构建独立 Editor 模块，并以 UnrealEditor-Cmd、NullRHI 运行上述测试；报告为 Success，1 项测试通过、0 错误、0 警告。临时工程使用独立文件缓存，避免与当前编辑器共享 Zen 缓存服务；全部临时文件均被 Git 忽略。
 
+## 跟随与转向延迟（Camera Lag）
+
+`AMyCharacter` 在创建 `SpringArm` 时提供以下可调默认值，位置与旋转的平滑计算继续交给 UE 原生 `USpringArmComponent`：
+
+| 弹簧臂选项 | 代码字段 | 默认值 | 作用 |
+| --- | --- | --- | --- |
+| Enable Camera Lag（启用相机延迟） | `bEnableCameraLag` | true | 平滑跟随角色锚点的位置，柔化起步、松键和转向时的镜头位移。 |
+| Camera Lag Speed（相机延迟速度） | `CameraLagSpeed` | 12 | 每帧向目标位置追赶的速度；越大越紧，越小拖尾越明显。0 表示立即到位。 |
+| Camera Lag Max Distance（相机延迟最大距离） | `CameraLagMaxDistance` | 40 cm | 限制位置落后距离；不是碰撞缩臂后的相机与角色距离。 |
+| Enable Camera Rotation Lag（启用相机旋转延迟） | `bEnableCameraRotationLag` | true | 平滑鼠标改变的目标朝向。 |
+| Camera Rotation Lag Speed（相机旋转延迟速度） | `CameraRotationLagSpeed` | 20 | 旋转较快追上目标，减少第三人称操作的拖拽感。 |
+| Use Camera Lag Substepping（使用相机延迟子步进） | `bUseCameraLagSubstepping` | true | 将较长帧拆成较小的平滑计算步长，缓解帧率波动带来的差异。 |
+| Camera Lag Max Time Step（相机延迟最大时间步长） | `CameraLagMaxTimeStep` | 1/120 s | 限制延迟计算的子步长；不改变游戏帧率，也不保证消除所有卡顿。 |
+
+调用链仍为：鼠标输入 → `PlayerController` 更新 `ControlRotation`（控制旋转）→ 弹簧臂计算位置/旋转延迟与碰撞 → `FollowCamera`（跟随相机）→ `PlayerCameraManager`（玩家相机管理器）输出画面。没有新增角色 Tick（逐帧更新）或第二套插值；`CameraRig` 原有距离、偏移和视野参数过渡与跟随延迟各自处理不同的参数。
+
+这是逐帧追赶目标的阻尼，而非等待固定秒数再移动。位移速度突然归零后，镜头会继续收敛到角色锚点，形成柔和收尾。位置限制不限制旋转延迟角度；快速甩鼠标仍可能明显落后，届时提高旋转速度或只关闭旋转延迟即可。当前移动参考取 Pawn 的基础相机朝向，因此移动方向也会跟随平滑后的相机水平朝向。
+
+这些设置放在构造函数，不在 `BeginPlay`（开始运行）或每帧强行写入，角色蓝图仍可覆盖它们。构造函数变更需要重新编译并重新加载编辑器；本轮未执行编译、PIE（在编辑器中运行）或自动化测试。当前 `BP_Character` 是用户已有的未跟踪资源，本轮不修改或提交该蓝图、地图。
+
+用户验证步骤：
+
+1. 关闭并保存编辑器后，编译 `ThirdPersonARPGEditor` 并重新打开项目。
+2. 打开角色蓝图，选中 `SpringArm`（弹簧臂），检查 Lag（延迟）分类；如蓝图保留了旧值，将上述七项重置为父类默认值，或按表设置，再编译并保存蓝图。已有地图实例若单独覆盖了这些属性，也需对相应属性重置。
+3. 使用 Play（运行），按 W 起步后松开，再做左右转向和鼠标环绕；预期位置缓冲明显但短促，旋转平滑且较快追上鼠标。靠墙应仍缩臂，离墙恢复；未改动碰撞配置。
+4. 太飘时增大 `CameraLagSpeed` / `CameraRotationLagSpeed`；太硬时降低对应值。先调整位置，再调整旋转，以区分两者的手感。
+
 ## 职责划分
 
 角色转身与模型朝向分别处理：`bUseControllerRotationYaw=false`、`bUseControllerDesiredRotation=false`、`bOrientRotationToMovement=true`，由 CharacterMovement 根据加速度方向和 RotationRate 转动角色胶囊。当前蓝图使用 UE4 `SK_Mannequin`，其模型前向需要相对胶囊做 Yaw=-90° 的对齐；在 `MyCharacter` 构造函数中设置 `GetMesh()->SetRelativeRotation(FRotator(0,-90,0))`，不用旋转 Actor、相机或移动输入来补偿模型偏移。
