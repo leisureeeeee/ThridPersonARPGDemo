@@ -39,3 +39,15 @@ ALightsaberWeapon增加Ignite/Extinguish（bool返回是否成功）与IsIgnited
 Content/Python/create_lightsaber_blade_material.py可创建父材质，存在同名资产时拒绝覆盖。脚本仅创建/保存材质，现有实例换父操作由本轮编辑器操作完成。新父材质未硬编码到运行时C++，C++读取网格已有槽位材质。
 
 材质资源已保存并读回：Masked/Unlit、BladeEnabled=0、模型仍引用原Hilt与SaberBlade。当前编辑器尚无LightsaberWeapon原生类，未编译加载C++或创建光剑蓝图、未运行PIE/测试。用户完整编译后仍需建立ALightsaberWeapon蓝图并指定Lightsaber模型，再配置角色DefaultWeaponClass；默认剑刃应隐藏。Ignite/Extinguish接口可供后续拔刀通知调用。本轮不接左键或拔刀蒙太奇。
+
+## 光剑蓝图接入与编译授权更新（2026-10-21）
+
+用户已持续授权必要C++编译和加载，无需逐轮确认。AGENTS.md同步；自动化/PIE功能测试仍需明确请求。此前各节“未编译”是当时状态，本节记录后续实际集成结果。
+
+本轮在无PIE、无未保存包时正常退出编辑器，完整Development Editor构建成功并重开，新LightsaberWeapon类可加载。创建/Game/Weapons/Lightsaber/BP_LightsaberWeapon继承ALightsaberWeapon，通过ObjectTools编辑器接口配置继承的WeaponMesh为已有/Game/Asset/LDALightsaber/Lightsaber，继续使用原Hilt和已换父的SaberBlade材质实例。C++没有写死模型路径，也没有直接Python写类默认对象。
+
+BP_Character的DefaultWeaponClass配置为该光剑蓝图类，HolsteredWeaponSocket=scabbard1，HolsteredWeaponOffset保持单位变换。两个蓝图编译保存后读回配置；光剑模型及依赖材质/底色纹理为实际运行所需资源，纳入本轮版本记录，不顺带提交原始FBX/PNG/WAV或其他未用资产。
+
+实际旧关卡角色实例的DefaultWeaponClass仍为空，未直接修改用户地图。InitializeWeapon新增兼容：实例默认类为空时，只读自身类默认对象中的DefaultWeaponClass并继承，然后执行既有生成逻辑。保持已有非空配置/现有CurrentWeapon的优先关系，不修改CDO。为该实际发现的问题再次完整构建，结果Succeeded，重新打开项目加载。
+
+腰部socket已存在，但未运行关卡或校准握点/朝向；默认偏移并不保证视觉位置已完美。用户可直接运行，观察腰部只有熄灭剑柄、数量为一、移动时跟随腰部；需要调整时修改BP_Character的HolsteredWeaponOffset或光剑蓝图WeaponMesh偏移。当前未实现左键拔刀、持刀待机或音效，这些属于下一阶段。

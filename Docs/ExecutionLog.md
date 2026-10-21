@@ -1054,3 +1054,14 @@
 - 验证：读回材质类型、参数默认0、实例新父引用和模型槽引用。C++接口按本机MaterialInterface/MaterialParameters/PrimitiveComponent头文件核对；材质参数兼容构造已找到。几次Classes/Public及通配符路径搜索失败后定位到正确Public头文件；未因此声称构建通过。新父创建脚本拒绝覆盖，运行只创建保存资源，没有调用C++构建、PIE或自动化测试。
 - 待完成：编辑器load_class原生LightsaberWeapon为None，说明当前模块尚未加载这些新类；未创建配置光剑蓝图或实际确认默认腰部显示。需完整编译并指定光剑模型/角色DefaultWeaponClass再由用户验证。暂为瞬时开关，无拔刀、渐变、音效或实灯，目视发光效果未验证。
 - 版本：仅提交光剑h/cpp、材质创建脚本、新父材质、实际修改的SaberBlade实例、说明及本记录。保留其他源码/导入资源/地图配置；此前远程推送被自动审批拒绝，不重试。
+
+## 2026-10-21 17:01:30 北京时间 — 编译加载并配置默认光剑蓝图
+
+- 用户需求：继续接入光剑。用户先明确允许本轮编译加载并配置，随后说明编译不必明确授权；同步AGENTS.md为持续授权必要C++构建/加载，保留功能测试需明确请求的规则。
+- 检查/构建：确认PIE关闭、内容包/地图无未保存修改，正常退出编辑器，完整ThirdPersonARPGEditor Win64 Development构建Result: Succeeded；重开后LightsaberWeapon类可加载。未强制结束进程、未启动关卡。系统正常退出后再启动，使用隐藏窗口参数。
+- 配置：备份角色蓝图至工作区.ue-lightsaber；创建BP_LightsaberWeapon，继承原生类，使用ObjectTools.set_properties配置其WeaponMesh原Lightsaber模型；角色BP配置DefaultWeaponClass与scabbard1插槽，偏移保留单位变换。蓝图编译保存成功，读回原Hilt/SaberBlade材质引用，未新建重复模型或改原剑柄。
+- 实际问题/修复：关卡旧角色读回DefaultWeaponClass=None，蓝图默认值已正确。InitializeWeapon增加只读继承类默认配置的兼容逻辑，避免强改/保存用户地图；仅空字段继承，现有武器与非空配置优先。新增修复后再次完整构建Succeeded，重新打开加载。二次构建由实际代码变化触发，非无理由重复。
+- 工具说明：Skeleton无find_socket方法，改为读取角色组件get_socket_transform，不猜测骨骼归属。ObjectTools配置通过受支持API完成，未绕过CDO写入限制。首次属性清单输出较长，后续按已发现属性定向设置。
+- 验证/限制：源码和配置读回完成、构建成功；未运行PIE/自动化或宣称生成挂接实际效果通过。默认腰部偏移未做视觉校准，用户需观察位置与数量。未接左键、拔刀蒙太奇、持刀姿势或音效。
+- 版本：仅纳入本轮角色cpp、授权规范、角色/光剑蓝图、必要的原光剑模型及其剑柄材质/底色贴图、说明和本记录。原始导入源及无关资源/地图/配置保留，不纳入。此前远程推送被自动审批拒绝，不重试。
+- 冷加载补充：重开后再次读回光剑默认组件模型、SaberBlade槽索引1及角色默认武器类，均保留；PIE=false，地图无dirty包。注册表硬依赖确认Lightsaber→Hilt/SaberBlade、Hilt→插件通用父材质/Hilt_BaseColor，因此仅补纳入模型/Hilt/底色三项必要导入资源。

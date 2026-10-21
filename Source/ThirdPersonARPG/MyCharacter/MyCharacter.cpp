@@ -61,6 +61,16 @@ void AMyCharacter::BeginPlay()
 
 void AMyCharacter::InitializeWeapon()
 {
+	// Older placed actors can retain an empty value for newly introduced defaults.
+	// This is defaults-only configuration; read the Blueprint template without editing it.
+	if (!DefaultWeaponClass)
+	{
+		const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
+		if (Defaults && Defaults != this)
+		{
+			DefaultWeaponClass = Defaults->DefaultWeaponClass;
+		}
+	}
 	if (!IsValid(CurrentWeapon.Get()) && !DefaultWeaponClass)
 	{
 		return;
