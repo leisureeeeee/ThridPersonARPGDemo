@@ -1154,3 +1154,11 @@
 - 只读核对：当前动画蓝图 /Game/BP/MyCharatcer/BP_CharacterAnim 使用 UE4_Mannequin_Skeleton；现有 /Game/BP/MyCharatcer/ik/IKRIg_Man_to_ironman 源预览SK_Mannequin、目标SK_Fenrir，方向匹配。C++配置还有ForwardStartAnimation、SheathedIdleAnimation、DrawnIdleAnimation、角色DrawWeaponAnimation/SheatheWeaponAnimation及移动组件DirectionalStartSet，不应只替换动画图而忽略间接引用。源码最初定位在模块根失败，随后rg --files定位MyCharacter子目录成功。
 - 建议：从整个BP_CharacterAnim右键重定向，选择已建重定向器，包含引用资产并输出Fenrir专用目录；在BP_Character的Mesh组件同时替换SkeletalMesh与AnimClass，保留原动画实例C++父类。核对各默认动画字段、方向起步数据集、拔收刀通知、DefaultSlot及新骨架武器插槽和模型偏移。官方UE5.8文档确认批量导出Include Referenced Assets会包含动画蓝图和混合空间引用的动画资源。
 - 验证/范围：未修改骨架、动画、模型、角色蓝图或代码，未编译、运行PIE或功能测试；仅追加本条记录并本地提交。沿用此前远程审批限制，不重试推送。
+
+## 2026-10-21 22:03:01 北京时间 — 排查 Fenrir 已绑定动画蓝图但无动画
+
+- 用户问题：角色蓝图已绑定动画蓝图，运行仍无作用。本轮只读定位，不执行资产修复。
+- 证据：BP_Character默认CharacterMesh0使用SK_Fenrir、ANIMATION_BLUEPRINT模式、BP_CharacterAnim1_C；模型骨架与动画蓝图目标骨架均SK_Fenrir_Skeleton，绑定配置匹配。MyCharacter源码未发现SetAnim/SetSkeletal覆盖；没有运行中的游戏世界，未主动启动PIE。
+- 明确异常：新BP_CharacterAnim1有与旧蓝图相同的AnimGraph、locomotion及Idle/Walk/Start/Stop图结构，但ForwardStartAnimation、SheathedIdleAnimation、DrawnIdleAnimation全部为空；资产注册表直接依赖仅脚本、网格与Fenrir骨架，没有动画序列或混合空间。旧BP_CharacterAnim上述三个默认字段均配置了UE4骨架动画，且依赖起步/循环/停止/待机动画。说明新蓝图迁移后缺少动画引用，单改角色AnimClass不能使其有可播放资源；建议补回重定向后的动画与类默认字段，或重新整套重定向并包含引用资源。
+- 其他问题：日志显示scabbard1插槽缺失导致武器未装备，与基础动画引用为空分开说明。未创建插槽或更改武器设置。
+- 工具记录：首次读取AnimBlueprint.parent_class失败，该属性不可读取，后续跳过并使用生成类CDO默认字段及AnimGraphService图结构核对；get_game_world提示弃用但返回None。未编译/保存用户蓝图、播放动画、执行自动化或功能测试。仅追加本记录并本地提交，沿用此前远程审批限制，不重试推送。
