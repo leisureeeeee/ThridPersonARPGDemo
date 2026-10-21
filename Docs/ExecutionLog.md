@@ -1147,3 +1147,10 @@
 - 保护与失败处理：操作前无脏内容包，根目录32个uasset已备份到当前工作区Fenrir_UE5/material-backup。首次实例参数setter在值等于父材质默认值时返回false触发断言；检查实际父级和参数、编译无错后，改用读回纹理引用验证完成配置，没有删除原参数或资产。
 - 验证：主材质recompile_material返回空错误列表；逐一读回五实例父材质及24个参数纹理引用正确，保存全部24张纹理、五实例和主材质。打开SK_Fenrir骨骼网格体编辑器并实际捕获/查看窗口，确认白黑橙外观、蓝色灯带和各部位纹理显示；截图为Saved/VibeUE/Captures/capture-window-20261021-212416.png。未运行PIE、自动化、动画适配或C++编译；保持用户原骨架/蒙皮与网格引用。
 - 文件/版本：仅将本轮实际配置的五实例、24张根目录纹理、新主材质及本记录纳入本地提交；用户本轮之前导入但未由助手修改的网格/骨架/物理资产和其他重复贴图不擅自纳入。沿用项目历史记录中的远程推送审批限制，本轮不重试此前被拒绝的推送。
+
+## 2026-10-21 21:37:58 北京时间 — 说明整套替换 Fenrir 模型与动画的快捷流程
+
+- 用户需求：已完成重定向配置，询问如何快捷替换当前骨骼网格体和动画；本轮仅检查并提供操作说明，不执行替换。
+- 只读核对：当前动画蓝图 /Game/BP/MyCharatcer/BP_CharacterAnim 使用 UE4_Mannequin_Skeleton；现有 /Game/BP/MyCharatcer/ik/IKRIg_Man_to_ironman 源预览SK_Mannequin、目标SK_Fenrir，方向匹配。C++配置还有ForwardStartAnimation、SheathedIdleAnimation、DrawnIdleAnimation、角色DrawWeaponAnimation/SheatheWeaponAnimation及移动组件DirectionalStartSet，不应只替换动画图而忽略间接引用。源码最初定位在模块根失败，随后rg --files定位MyCharacter子目录成功。
+- 建议：从整个BP_CharacterAnim右键重定向，选择已建重定向器，包含引用资产并输出Fenrir专用目录；在BP_Character的Mesh组件同时替换SkeletalMesh与AnimClass，保留原动画实例C++父类。核对各默认动画字段、方向起步数据集、拔收刀通知、DefaultSlot及新骨架武器插槽和模型偏移。官方UE5.8文档确认批量导出Include Referenced Assets会包含动画蓝图和混合空间引用的动画资源。
+- 验证/范围：未修改骨架、动画、模型、角色蓝图或代码，未编译、运行PIE或功能测试；仅追加本条记录并本地提交。沿用此前远程审批限制，不重试推送。
