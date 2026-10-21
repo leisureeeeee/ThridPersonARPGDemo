@@ -27,3 +27,15 @@ DefaultWeaponClass是蓝图类配置，CurrentWeapon是运行时对象实例引�
 本轮未编译/加载、未配置资产、未启动PIE或运行测试。需完整编译加载新增反射字段后，在ALightsaberWeapon派生蓝图的WeaponMesh指定Lightsaber模型，再在BP_Character类默认值Weapon分类设置DefaultWeaponClass为该蓝图、HolsteredWeaponSocket为scabbard1；自动生成方式下CurrentWeapon保持空。如果场景已有武器，也可只给角色实例指定CurrentWeapon。只有完成这些配置后，开局代码才有模型可生成/挂接。
 
 用户验证步骤：开局观察仅一把武器随腰部运动；结束运行后无多余生成实例；重复进入游戏不会叠加。检查偏移、使用已放置武器时不重复生成，以及缺少插槽时输出日志警告。以上尚未由助手执行。
+
+## 光剑剑刃开关基础
+
+ALightsaberWeapon增加Ignite/Extinguish（bool返回是否成功）与IsIgnited。BeginPlay调用Extinguish；按BladeMaterialSlot（默认SaberBlade）查找材质槽，检查Masked及BladeEnabled标量存在，创建每个Actor独立的UMaterialInstanceDynamic。成功写入0或1后更新状态；失败记录警告并返回false。仅切换剑刃材质，不隐藏或缩放整个网格，不影响剑柄，不修改共享材质参数，不需要Tick。
+
+新增/Game/Weapons/Lightsaber/M_LightsaberBlade父材质：Masked、Unlit、双面；BladeEnabled默认0驱动OpacityMask，BladeColor×Intensity×BladeEnabled驱动自发光。颜色默认蓝色，强度20。当前为立即开关，无长度动画、音效或真实灯光，发光外观与Bloom取决于项目渲染设置，尚未目视验证。
+
+用户询问已有材质为何重建后，改为保留导入的SaberBlade材质实例入口，仅替换它的父材质，模型材质槽引用不变。Hilt完全不改；SaberBlade原FBXLegacyPhongSurfaceMaterial通用着色逻辑和灰色DiffuseColor效果并未沿用，原实例旧参数仍可能保存在文件中但新父材质不消费。应准确称为“复用材质实例，替换剑刃着色逻辑”，不能声称原视觉全部保留。原SaberBlade二进制备份在工作区.ue-lightsaber/SaberBlade-before.uasset。
+
+Content/Python/create_lightsaber_blade_material.py可创建父材质，存在同名资产时拒绝覆盖。脚本仅创建/保存材质，现有实例换父操作由本轮编辑器操作完成。新父材质未硬编码到运行时C++，C++读取网格已有槽位材质。
+
+材质资源已保存并读回：Masked/Unlit、BladeEnabled=0、模型仍引用原Hilt与SaberBlade。当前编辑器尚无LightsaberWeapon原生类，未编译加载C++或创建光剑蓝图、未运行PIE/测试。用户完整编译后仍需建立ALightsaberWeapon蓝图并指定Lightsaber模型，再配置角色DefaultWeaponClass；默认剑刃应隐藏。Ignite/Extinguish接口可供后续拔刀通知调用。本轮不接左键或拔刀蒙太奇。

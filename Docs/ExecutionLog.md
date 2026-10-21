@@ -1045,3 +1045,12 @@
 - 验证：静态检查引擎World.h的SpawnActor变换重载与Actor.h的挂接/相对变换接口；本轮差异检查无空白错误。未编译/加载、未创建或配置光剑蓝图、未运行PIE或任何自动化测试，不能声称开局视觉已完成。需用户编译加载并配置DefaultWeaponClass和模型后验证。
 - 限制：默认类为空时不生成，不会因新增代码自动出现光剑；腰部挂接尚不包含熄灭剑刃或收刀动画，后续单独实现。单机范围，无网络复制或换装API。
 - 文档/版本：WeaponFoundation.md追加调用链、配置和手动验证；仅提交角色h/cpp、武器文档和本条记录。保留其他用户修改与未跟踪资产。此前远程推送被自动审批拒绝，不重试，保留本地提交。
+
+## 2026-10-21 16:53:54 北京时间 — 默认熄灭与剑刃材质开关
+
+- 用户需求：继续武器基础功能，选择实现光剑默认熄灭和Ignite/Extinguish接口。用户随后询问为何新建材质、原材质是否使用，解释并调整为沿用现有SaberBlade实例，更换其通用父材质；Hilt未改，原灰色剑刃着色逻辑不保留，如实说明。
+- 源码：LightsaberWeapon.h/.cpp新增私有材质槽配置、动态材质引用和状态，BeginPlay熄灭，公开bool Ignite/Extinguish与只读IsIgnited。校验槽位、Masked及参数存在后创建每实例动态材质；成功才写状态，不改共享实例，不加Tick/输入/音效/伸缩。移除了起初设计的不必要材质覆盖配置，直接沿用网格槽材质。
+- 资源：创建Weapons/Lightsaber/M_LightsaberBlade（Masked/Unlit/双面，BladeEnabled默认0遮罩并门控发光，颜色蓝/强度20）；现有Asset/LDALightsaber/SaberBlade换父到它并保存。先备份原实例至工作区.ue-lightsaber。未改Hilt、Lightsaber模型或贴图；模型两个材质槽仍引用原实例。SaberBlade之前未跟踪，本轮因实际修改单独纳入LFS，不顺带提交整个用户导入包。
+- 验证：读回材质类型、参数默认0、实例新父引用和模型槽引用。C++接口按本机MaterialInterface/MaterialParameters/PrimitiveComponent头文件核对；材质参数兼容构造已找到。几次Classes/Public及通配符路径搜索失败后定位到正确Public头文件；未因此声称构建通过。新父创建脚本拒绝覆盖，运行只创建保存资源，没有调用C++构建、PIE或自动化测试。
+- 待完成：编辑器load_class原生LightsaberWeapon为None，说明当前模块尚未加载这些新类；未创建配置光剑蓝图或实际确认默认腰部显示。需完整编译并指定光剑模型/角色DefaultWeaponClass再由用户验证。暂为瞬时开关，无拔刀、渐变、音效或实灯，目视发光效果未验证。
+- 版本：仅提交光剑h/cpp、材质创建脚本、新父材质、实际修改的SaberBlade实例、说明及本记录。保留其他源码/导入资源/地图配置；此前远程推送被自动审批拒绝，不重试。
