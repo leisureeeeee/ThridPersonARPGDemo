@@ -29,6 +29,7 @@ bool UARPGCameraRigComponent::InitializeRig(USpringArmComponent* InSpringArm, UC
 
 	SpringArm = InSpringArm;
 	FollowCamera = InCamera;
+	ConfigureCameraComponents();
 	DefaultSettings = ReadCameraSettings();
 	TargetSettings = DefaultSettings;
 	SetComponentTickEnabled(false);
@@ -37,6 +38,22 @@ bool UARPGCameraRigComponent::InitializeRig(USpringArmComponent* InSpringArm, UC
 	// Apply rig parameters before the arm calculates camera position and collision.
 	SpringArm->AddTickPrerequisiteComponent(this);
 	return true;
+}
+
+void UARPGCameraRigComponent::ConfigureCameraComponents()
+{
+	// The arm follows control rotation; the camera inherits the arm's final pose.
+	SpringArm->bUsePawnControlRotation = true;
+	FollowCamera->bUsePawnControlRotation = false;
+
+	// The rig owns follow policy; the engine arm owns damping and collision.
+	SpringArm->bEnableCameraLag = bEnableCameraLag;
+	SpringArm->CameraLagSpeed = CameraLagSpeed;
+	SpringArm->CameraLagMaxDistance = CameraLagMaxDistance;
+	SpringArm->bEnableCameraRotationLag = bEnableCameraRotationLag;
+	SpringArm->CameraRotationLagSpeed = CameraRotationLagSpeed;
+	SpringArm->bUseCameraLagSubstepping = bUseCameraLagSubstepping;
+	SpringArm->CameraLagMaxTimeStep = CameraLagMaxTimeStep;
 }
 
 bool UARPGCameraRigComponent::IsRigInitialized() const

@@ -28,7 +28,7 @@
 
 ## 跟随与转向延迟（Camera Lag）
 
-`AMyCharacter` 在创建 `SpringArm` 时提供以下可调默认值，位置与旋转的平滑计算继续交给 UE 原生 `USpringArmComponent`：
+`UARPGCameraRigComponent` 持有以下跟随配置，位置与旋转的平滑计算继续交给 UE 原生 `USpringArmComponent`。角色仅创建、挂接组件，并在 `PostInitializeComponents`（组件初始化之后）调用 `InitializeRig` 接线；Rig 内部的 `ConfigureCameraComponents` 统一应用控制旋转和延迟配置：
 
 | 弹簧臂选项 | 代码字段 | 默认值 | 作用 |
 | --- | --- | --- | --- |
@@ -44,12 +44,16 @@
 
 这是逐帧追赶目标的阻尼，而非等待固定秒数再移动。位移速度突然归零后，镜头会继续收敛到角色锚点，形成柔和收尾。位置限制不限制旋转延迟角度；快速甩鼠标仍可能明显落后，届时提高旋转速度或只关闭旋转延迟即可。当前移动参考取 Pawn 的基础相机朝向，因此移动方向也会跟随平滑后的相机水平朝向。
 
-这些设置放在构造函数，不在 `BeginPlay`（开始运行）或每帧强行写入，角色蓝图仍可覆盖它们。构造函数变更需要重新编译并重新加载编辑器；本轮未执行编译、PIE（在编辑器中运行）或自动化测试。当前 `BP_Character` 是用户已有的未跟踪资源，本轮不修改或提交该蓝图、地图。
+七项跟随配置是 Rig 的私有 `EditDefaultsOnly` 属性，可在角色蓝图选中 `CameraRig`（相机装置组件）后调整 `Camera | Lag`（相机 | 延迟）分类；不向外暴露内部组件指针或运行时写权限。`InitializeRig` 在蓝图构造完成后将这些配置应用到弹簧臂，同时设置弹簧臂使用控制旋转、相机继承弹簧臂旋转。SpringArm（弹簧臂）上的同名延迟字段是应用结果，运行时以 Rig 配置为准，后续应在 Rig 上调参。
+
+`TargetArmLength`（目标臂长）不再由角色重复写入 300：已读取本机 UE 原生弹簧臂类默认值，确认为 300 cm；蓝图的现有臂长、偏移和相机 FOV（视野）继续由 Rig 初始化时读取，保留角色的构图设置。运行时距离、偏移、视野调整仍通过既有 `SetCameraSettings` / `ResetCameraSettings`，本次固定跟随配置不参加该参数混合或重置。
+
+新增反射属性和构造函数调整需要完整重新编译并重新加载编辑器；本轮未执行编译、PIE（在编辑器中运行）或自动化测试。当前 `BP_Character` 是用户已有的未跟踪资源，本轮不修改或提交该蓝图、地图。
 
 用户验证步骤：
 
 1. 关闭并保存编辑器后，编译 `ThirdPersonARPGEditor` 并重新打开项目。
-2. 打开角色蓝图，选中 `SpringArm`（弹簧臂），检查 Lag（延迟）分类；如蓝图保留了旧值，将上述七项重置为父类默认值，或按表设置，再编译并保存蓝图。已有地图实例若单独覆盖了这些属性，也需对相应属性重置。
+2. 打开角色蓝图，选中 `CameraRig`（相机装置组件），检查 `Camera | Lag`（相机 | 延迟）分类中的七项默认值；高级选项包含子步进配置。后续在此调整跟随手感，再编译并保存蓝图。初始化时 Rig 会写入 SpringArm 对应字段，无需再手动修正弹簧臂上的旧延迟开关。
 3. 使用 Play（运行），按 W 起步后松开，再做左右转向和鼠标环绕；预期位置缓冲明显但短促，旋转平滑且较快追上鼠标。靠墙应仍缩臂，离墙恢复；未改动碰撞配置。
 4. 太飘时增大 `CameraLagSpeed` / `CameraRotationLagSpeed`；太硬时降低对应值。先调整位置，再调整旋转，以区分两者的手感。
 
@@ -83,7 +87,7 @@
 
 ## 已实现的第一阶段
 
-- `AMyCharacter` 创建并保存 CameraRig 组件，在 `PostInitializeComponents` 绑定原有 SpringArm 与 FollowCamera。此时蓝图构造已经完成，因此 Rig 捕获的是实际调好的默认距离、偏移和 FOV。
+- `AMyCharacter` 创建并挂接 SpringArm、FollowCamera 和 CameraRig，在 `PostInitializeComponents` 绑定它们。此时蓝图构造已经完成，Rig 先统一应用跟随/控制旋转配置，再捕获实际调好的默认距离、偏移和 FOV。角色不再设置相机跟随参数。
 - `FARPGCameraRigSettings` 是参数值对象；Rig 的公开接口为 `GetCurrentCameraSettings`、`SetCameraSettings`、`ResetCameraSettings`。外部通过参数副本提出调整，不直接访问组件内部指针。
 - 调整时从当前实际参数出发，以指定时长执行 SmoothStep 插值；中途再次调整会以当前视角参数作为新的起点。过渡结束后关闭 Rig 自身 Tick。SpringArm 的碰撞检测和原有更新继续工作。
 - Rig 建立 SpringArm 对自身的 Tick 前置依赖，确保先更新参数，再计算弹簧臂的最终位置，避免参数晚一帧生效。

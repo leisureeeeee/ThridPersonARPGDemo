@@ -35,7 +35,7 @@ class THIRDPERSONARPG_API UARPGCameraRigComponent : public UActorComponent
 public:
 	UARPGCameraRigComponent();
 
-	// Bind after construction scripts have applied the character's camera defaults.
+	// Bind and apply rig-owned follow behavior after the character's construction scripts.
 	bool InitializeRig(USpringArmComponent* InSpringArm, UCameraComponent* InCamera);
 
 	UFUNCTION(BlueprintPure, Category = "Camera")
@@ -55,8 +55,34 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	void ConfigureCameraComponents();
 	FARPGCameraRigSettings ReadCameraSettings() const;
 	void ApplyCameraSettings(const FARPGCameraRigSettings& Settings);
+
+	// Tune follow behavior on the rig; the spring arm performs the actual damping.
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag")
+	bool bEnableCameraLag = true;
+
+	// Higher values follow more tightly; zero disables position damping.
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", meta = (ClampMin = "0", ClampMax = "1000", EditCondition = "bEnableCameraLag"))
+	float CameraLagSpeed = 12.0f;
+
+	// Maximum position lag in centimeters; zero removes the limit.
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", meta = (ClampMin = "0", EditCondition = "bEnableCameraLag", Units = "cm"))
+	float CameraLagMaxDistance = 40.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag")
+	bool bEnableCameraRotationLag = true;
+
+	// Keep rotation more responsive for camera-relative ARPG movement.
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", meta = (ClampMin = "0", ClampMax = "1000", EditCondition = "bEnableCameraRotationLag"))
+	float CameraRotationLagSpeed = 20.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", AdvancedDisplay)
+	bool bUseCameraLagSubstepping = true;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", AdvancedDisplay, meta = (ClampMin = "0.005", ClampMax = "0.5", EditCondition = "bUseCameraLagSubstepping", Units = "s"))
+	float CameraLagMaxTimeStep = 1.0f / 120.0f;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USpringArmComponent> SpringArm;
