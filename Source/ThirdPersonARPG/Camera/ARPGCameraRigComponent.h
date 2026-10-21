@@ -65,11 +65,11 @@ private:
 
 	// Higher values follow more tightly; zero disables position damping.
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", meta = (ClampMin = "0", ClampMax = "1000", EditCondition = "bEnableCameraLag"))
-	float CameraLagSpeed = 12.0f;
+	float CameraLagSpeed = 3.0f;
 
 	// Maximum position lag in centimeters; zero removes the limit.
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag", meta = (ClampMin = "0", EditCondition = "bEnableCameraLag", Units = "cm"))
-	float CameraLagMaxDistance = 40.0f;
+	float CameraLagMaxDistance = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Camera|Lag")
 	bool bEnableCameraRotationLag = true;
