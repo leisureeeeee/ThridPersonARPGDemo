@@ -214,7 +214,7 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			// Strong gameplay braking can predict almost zero distance immediately.
 			// Keep a short visible approach to the planted pose instead of entering
 			// the stationary tail directly from an arbitrary walk-cycle pose.
-			constexpr float VisiblePlantLead = 0.30f;
+			constexpr float VisiblePlantLead = 0.35f;
 			const float LatestEntryTime = FMath::Max(0.0f, FindStopTime(0.0f) - VisiblePlantLead);
 			StopAnimationTime = FMath::Min(FindStopTime(PredictStopDistance(*Movement)), LatestEntryTime);
 		}
@@ -222,7 +222,7 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		{
 			// Relax exact distance matching when braking is faster than the clip:
 			// never rewind, but do not skip the remaining foot-plant in one update.
-			constexpr float MaxStopPlayRate = 2.0f;
+			constexpr float MaxStopPlayRate = 1.0f;
 			const float PlantTime = FindStopTime(0.0f);
 			const float TargetTime = GroundSpeed <= 3.0f ? PlantTime
 				: FindStopTime(PredictStopDistance(*Movement));
