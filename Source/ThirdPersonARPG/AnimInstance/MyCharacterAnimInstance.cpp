@@ -15,6 +15,7 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 	StartDistanceTraveled = 0.0f;
 	bStartAnimationComplete = false;
 	bHasPreviousLocation = false;
+	StopAnimationTime = 0.0f;
 	ResetStopMatching();
 	bStartProfileValid = StartDistanceSamples.Num() >= 2;
 	for (int32 Index = 0; Index < StartDistanceSamples.Num(); ++Index)
@@ -55,7 +56,8 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 void UMyCharacterAnimInstance::ResetStopMatching()
 {
 	bStopping = false;
-	StopAnimationTime = 0.0f;
+	// Preserve the outgoing pose while a transition still evaluates this state.
+	// A fresh stop explicitly selects its entry time below.
 	StopSettleElapsed = 0.0f;
 	bStopAnimationComplete = true;
 }
@@ -125,7 +127,8 @@ void UMyCharacterAnimInstance::UpdateStartMatching(float DeltaSeconds, float Dis
 {
 	if (!bShouldMove)
 	{
-		StartAnimationTime = 0.0f;
+		// A blended-out Start can still be evaluated after input is released.
+		// Keep its last pose; reset time only on the next movement-entry edge.
 		StartDistanceTraveled = 0.0f;
 		bStartAnimationComplete = false;
 		return;
