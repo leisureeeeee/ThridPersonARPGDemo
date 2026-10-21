@@ -1171,3 +1171,12 @@
 - 修复：通过ObjectTools已发现的forwardStartAnimation/sheathedIdleAnimation/drawnIdleAnimation三个字段，分别配置指定Anim目录的对应Fenrir动画；编译首次报序列播放器和按时间序列评估器引用未知动画。进一步定位Walk和Stop节点Sequence均为空，使用ObjectTools读取节点结构后只补sequence字段，分别引用已有AS_Walk_Loop_F_0_Seq和AS_Walk_Stop_F_0_Seq；保留节点、连线、速度、循环和时间输入设置。
 - 验证：重新编译后BlueprintGraphSummary.compile_status为UpToDate；保存动画蓝图并重新获取生成类CDO，三个动画路径正确。Walk节点及Stop节点实际结构读回引用正确；AnimGraphService.get_node_animation_asset对Stop评估器返回空，改用ObjectTools读node.sequence核实，未据此误判修复失败。末尾脏内容包列表为空。没有修改代码、运行PIE、主动播放动画、执行自动化或功能测试，不把编译通过描述为运行验证通过。腰部scabbard1缺失及DirectionalStartSet等其他配置不在本轮改动范围。
 - 版本范围：仅提交修复后的BP_CharacterAnim1、用户本轮指定的三个现有Fenrir动画及本记录；其他用户导入的Anim蓝图、循环/停止动画、网格/骨架/物理资产不额外纳入。沿用此前远程推送审批限制，不重试已被拒绝的推送。
+
+## 2026-10-21 22:30:15 北京时间 — 修复重定向器空处理栈导致 Fenrir 动画静止
+
+- 用户反馈：上轮补动画引用后仍没作用。继续定位，未主动启动或停止PIE；当前没有游戏世界，只读编辑器地图BP_Character实例确认SK_Fenrir、BP_CharacterAnim1及三个动画默认/活动引用均已正确生效。首次调用角色get_mesh未暴露报错，改用骨骼网格组件枚举完成检查。
+- 根因：本次进一步用AnimSequenceService和原生AnimationLibrary对比源/目标动画，在不同时间采样目标骨骼旋转完全一致，而源走路动画确有变化。检查IKRIg_Man_to_ironman，处理操作数量0、目标22条链的来源全部None。此前导出虽有59轨道与时长，但只包含参考姿势；上轮仅修引用与编译不足以发现该问题，已明确向用户说明。
+- 保护：修改前把重定向器及5个目标动画原文件备份至当前工作区Fenrir_UE5/retarget-motion-backup。没有修改源动画、源/目标IK绑定的链定义或用户其他新增动画。
+- 修复：为现有重定向器添加默认处理栈，实际得到Pelvis Motion、FK Chains、Run IK Rig、Root Motion、Remap Curves五个启用操作；以完全同名匹配并明确映射全部22条目标链。使用原源动画匹配的ARPG_Samurai中SK_Mannequin及SK_Fenrir，通过IKRetargetBatchOperation.run_batch_retarget只重新生成AS_Idle_Seq、AS_Idle_Combat_Seq、AS_Walk_Start_F_0_Seq、AS_Walk_Loop_F_0_Seq、AS_Walk_Stop_F_0_Seq，覆盖前已备份的静止导出，路径仍/Game/Asset/Fenrir_UE5/Anim。保留蓝图引用路径，重编译并保存BP_CharacterAnim1。
+- 验证：使用原生AnimationLibrary对pelvis/spine_02/upperarm_l/lowerarm_l/thigh_l/calf_l在0、0.3、0.6秒（受序列时长限制）采样，五个目标序列均59条轨道，最大旋转变化分别约4.9743、4.9731、61.5759、45.7546、30.1986度，确认存在实际运动数据。蓝图编译状态UpToDate、三个默认引用正确、末尾脏内容包为空。打开动画编辑器后捕获窗口，实际显示Fenrir起步动作中的非参考姿势；截图Saved/VibeUE/Captures/capture-window-20261021-222929.png。没有主动运行游戏、输入或自动化功能测试，不声称全套移动/武器系统已实机验证。
+- 范围/版本：仅提交本轮改动的重定向器、五动画、动画蓝图和执行记录。用户并行新增的Block/Combat动画、另一动画蓝图、IK绑定及其他项目修改保持不纳入。源注册表接口提示弃用不影响批处理；BoneChain.start_bone不可读取，改用IKRigController公开读取接口完成链核对。沿用此前远程审批限制，不重试被拒绝的推送。
