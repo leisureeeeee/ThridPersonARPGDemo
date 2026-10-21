@@ -5,6 +5,8 @@
 #include "MyCharacterAnimInstance.generated.h"
 
 class UCharacterMovementComponent;
+class UARPGCharacterMovementComponent;
+class UAnimSequence;
 
 /** Reads movement on the game thread; the animation graph only consumes pose data. */
 UCLASS()
@@ -20,7 +22,7 @@ private:
 	void ResetStopMatching();
 	float FindStopTime(float RemainingDistance) const;
 	static float PredictStopDistance(const UCharacterMovementComponent& Movement);
-	void UpdateStartMatching(float DeltaSeconds, float DistanceMoved);
+	void UpdateStartMatching(float DeltaSeconds, float DistanceMoved, const UARPGCharacterMovementComponent* GroundMovement);
 	float FindStartTime(float Distance) const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
@@ -74,4 +76,13 @@ private:
 	bool bHasPreviousLocation = false;
 	FVector PreviousLocation = FVector::ZeroVector;
 	float StartDistanceTraveled = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Start Matching")
+	TObjectPtr<UAnimSequence> ForwardStartAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveStartAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
+	float StartRootYawOffset = 0.0f;
 };

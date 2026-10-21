@@ -12,6 +12,8 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 	bPivoting = false;
 	WalkPlayRate = 1.0f;
 	StartAnimationTime = 0.0f;
+	ActiveStartAnimation = ForwardStartAnimation;
+	StartRootYawOffset = 0.0f;
 	StartDistanceTraveled = 0.0f;
 	bStartAnimationComplete = false;
 	bHasPreviousLocation = false;
@@ -123,8 +125,9 @@ float UMyCharacterAnimInstance::FindStartTime(float Distance) const
 	return static_cast<float>(StartDistanceSamples.Last().X);
 }
 
-void UMyCharacterAnimInstance::UpdateStartMatching(float DeltaSeconds, float DistanceMoved)
+void UMyCharacterAnimInstance::UpdateStartMatching(float DeltaSeconds, float DistanceMoved, const UARPGCharacterMovementComponent* GroundMovement)
 {
+	StartRootYawOffset = 0.0f;
 	if (!bShouldMove)
 	{
 		// A blended-out Start can still be evaluated after input is released.
@@ -140,8 +143,17 @@ void UMyCharacterAnimInstance::UpdateStartMatching(float DeltaSeconds, float Dis
 	if (!bHadMovementIntent)
 	{
 		StartAnimationTime = 0.0f;
+		ActiveStartAnimation = ForwardStartAnimation;
 		StartDistanceTraveled = 0.0f;
 		bStartAnimationComplete = false;
+	}
+	if (IsValid(GroundMovement) && GroundMovement->HasDirectionalStart())
+	{
+		ActiveStartAnimation = GroundMovement->GetDirectionalStartAnimation();
+		StartAnimationTime = GroundMovement->GetDirectionalStartTime();
+		bStartAnimationComplete = GroundMovement->IsDirectionalStartComplete();
+		StartRootYawOffset = GroundMovement->GetDirectionalMeshYaw();
+		return;
 	}
 	if (bStartProfileValid)
 	{
@@ -197,12 +209,12 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!IsValid(Movement) || !Movement->IsMovingOnGround())
 	{
 		bShouldMove = false;
-		UpdateStartMatching(DeltaSeconds, 0.0f);
+		UpdateStartMatching(DeltaSeconds, 0.0f, nullptr);
 		ResetStopMatching();
 		bHadMovementIntent = false;
 		return;
 	}
-	UpdateStartMatching(DeltaSeconds, DistanceMoved);
+	UpdateStartMatching(DeltaSeconds, DistanceMoved, GroundMovement);
 	if (bShouldMove)
 	{
 		ResetStopMatching();
