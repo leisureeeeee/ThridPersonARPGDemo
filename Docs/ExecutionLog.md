@@ -1128,3 +1128,13 @@
 - 构建/加载：确认无PIE与未保存包后正常退出，完整Development Editor构建Succeeded；尝试启动时发现编辑器已在运行，未重复启动或终止进程。核对DLL写入与进程时间、配置及原生字段；最初用snake_case查Transient私有字段失败，精确原生名确认属性存在但受保护，未绕过读取限制或误认为未加载。没有因此多余重启/构建。
 - 验证：重开会话读回WeaponHandSocket、单位偏移及hand_r父骨骼；未运行PIE/自动化、主动按键或声称握点验证通过。用户可检查左键拔刀/右键收刀、长按不重播、走路不中断。
 - 范围/版本：仅提交控制器h/cpp、角色cpp、角色BP、WeaponDraw.md和本记录六文件。已有EditorTools修改、用户剑刃材质/地图/配置等保持不处理。此前远程推送被自动审批拒绝，不重试。
+
+## 2026-10-21 20:33:50 北京时间 — Fenrir Blender 人物模型转 UE5 源文件
+
+- 用户需求：将 G:/动画素材/NO830-Blender机械芬里尔机器人战士3D模型/ 中的人物处理为 UE5 可用骨骼模型，后续使用小白人动画；随后明确本轮只生成 FBX 与处理后的 Blender 文件并放入 Asset 文件夹，不导入项目或配置重定向器。
+- 工具：本机未找到 see 技能和 scripts/see.sh，已说明缺失；原系统未找到 Blender。下载官方 Blender 4.5.9 LTS 便携版到当前工作区 .tools，验证官方 SHA256 41DA973B9BF95BB312CBEFF4D1982FEB13259B43C821686B9BAFEA4DFE5477CF；没有修改源模型。
+- 转换：读取 Blender 3.1 保存的 Fenrir_Rigged_All in One.blend，使用 root.001 简化骨架及五个已蒙皮部件，移除另一套角色、控制器与武器，清除残余 IK/旋转约束。新增 root 地面根并把 pelvis 置于其下，保留原 58 根骨骼与裙甲附加骨骼，最终 59 根骨骼。合并网格，保留5个材质槽，规范化有效权重，转换厘米数据并保持物体单位变换；三角化导出、关闭末端骨骼和动画。没有对源权重做未匹配骨骼重映射（无此类有效权重）。
+- 文件：新增 Content/Asset/Fenrir_UE5/SK_Fenrir.fbx、Fenrir_UE5.blend、24张Textures贴图、Blender静态预览、导入说明和结构验证报告，共29文件。Blender文件保留内嵌贴图；OpenGL法线需在UE翻转绿色通道。模型采用原白黑橙配色，不含武器和动画。
+- 验证：重新打开处理后的 blend 并用 Cycles 渲染，实际查看预览，外观/贴图正常；FBX重新读入Blender，确认1网格、1骨架、单一root、全部59骨骼保留、37452三角面、21439顶点、5材质槽、无未分配有效蒙皮权重顶点、最多7骨骼影响、高约2.3327米。交付复制逐文件SHA256一致。首次导出出现旧打包贴图路径与n-gon切线警告，重建正确路径并重新打包、三角化后重新导出，最终导出无这些警告。FBX读入仅扩展缓存目录写入被沙箱拒绝，不影响读入与验证。
+- 自动导入：检测当前编辑器开启监视和自动创建资产，使用受支持的ObjectTools接口读取并为 /Game/ 的监视目录追加排除通配符 Asset/Fenrir_UE5/*，保留原Localization/*及其他设置；读回内存和Saved/Config/WindowsEditor/EditorPerProjectUserSettings.ini均确认规则。避免放入Content时自动生成资产，可手动导入。
+- 限制：本骨架沿用标准UE4式主干和原作者比例，并非Manny/Quinn相同骨架。后续须用IK Rig/IK Retargeter配置映射与重定向姿势，不能仅指定Manny骨架直接复用动画蓝图。没有导入UE、创建uasset、重定向/播放动画、PIE、C++编译或功能测试；静态渲染不代表动画适配完成。保留用户已有项目修改，不更改现有角色/地图/动画。

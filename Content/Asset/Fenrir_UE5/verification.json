@@ -1,0 +1,14 @@
+{
+  "armatures": 1,
+  "meshes": 1,
+  "roots": [
+    "root"
+  ],
+  "bones": 59,
+  "vertices_after_uv_splits": 21439,
+  "triangles": 37452,
+  "height_m": 2.332726953551173,
+  "material_slots": 5,
+  "unweighted_vertices": 0,
+  "all_original_bones_preserved": true
+}
