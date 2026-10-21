@@ -24,6 +24,8 @@ private:
 	static float PredictStopDistance(const UCharacterMovementComponent& Movement);
 	void UpdateStartMatching(float DeltaSeconds, float DistanceMoved, const UARPGCharacterMovementComponent* GroundMovement);
 	float FindStartTime(float Distance) const;
+	void UpdateMovementBlocked(float DeltaSeconds, float DistanceMoved, const UCharacterMovementComponent* Movement,
+		const UARPGCharacterMovementComponent* GroundMovement);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
 	float GroundSpeed = 0.0f;
@@ -85,4 +87,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
 	float StartRootYawOffset = 0.0f;
+
+	// Append runtime storage to preserve the existing reflected field layout.
+	float BlockedMovementElapsed = 0.0f;
+	bool bMovementBlocked = false;
 };

@@ -17,6 +17,8 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 	StartDistanceTraveled = 0.0f;
 	bStartAnimationComplete = false;
 	bHasPreviousLocation = false;
+	BlockedMovementElapsed = 0.0f;
+	bMovementBlocked = false;
 	StopAnimationTime = 0.0f;
 	ResetStopMatching();
 	bStartProfileValid = StartDistanceSamples.Num() >= 2;
@@ -125,6 +127,43 @@ float UMyCharacterAnimInstance::FindStartTime(float Distance) const
 	return static_cast<float>(StartDistanceSamples.Last().X);
 }
 
+void UMyCharacterAnimInstance::UpdateMovementBlocked(float DeltaSeconds, float DistanceMoved,
+	const UCharacterMovementComponent* Movement, const UARPGCharacterMovementComponent* GroundMovement)
+{
+	// bShouldMove still represents raw intent here, before the blocked-pose gate.
+	// Directional clips can legitimately turn in place before starting translation.
+	const bool bTurningStart = IsValid(GroundMovement) && GroundMovement->HasDirectionalStart()
+		&& !GroundMovement->IsDirectionalStartComplete();
+	if (!bShouldMove || !IsValid(Movement) || !Movement->IsMovingOnGround()
+		|| Movement->HasAnimRootMotion() || Movement->CurrentRootMotion.HasOverrideVelocity()
+		|| Movement->bJustTeleported || bTurningStart)
+	{
+		BlockedMovementElapsed = 0.0f;
+		bMovementBlocked = false;
+		return;
+	}
+
+	constexpr float EnterSpeed = 3.0f;
+	constexpr float ExitSpeed = 8.0f;
+	constexpr float BlockDelay = 0.2f;
+	if (GroundSpeed > ExitSpeed || DistanceMoved > ExitSpeed * DeltaSeconds)
+	{
+		// Reopening the gate produces the normal Idle/Stop -> Start entry edge.
+		BlockedMovementElapsed = 0.0f;
+		bMovementBlocked = false;
+	}
+	else if (GroundSpeed <= EnterSpeed && DistanceMoved <= EnterSpeed * DeltaSeconds)
+	{
+		// A single hitch must not look like a sustained obstruction.
+		BlockedMovementElapsed += FMath::Min(DeltaSeconds, 0.05f);
+		bMovementBlocked |= BlockedMovementElapsed >= BlockDelay;
+	}
+	else
+	{
+		BlockedMovementElapsed = 0.0f;
+	}
+}
+
 void UMyCharacterAnimInstance::UpdateStartMatching(float DeltaSeconds, float DistanceMoved, const UARPGCharacterMovementComponent* GroundMovement)
 {
 	StartRootYawOffset = 0.0f;
@@ -202,6 +241,8 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bPivoting = IsValid(GroundMovement) && GroundMovement->IsPivoting();
 	bShouldMove = IsValid(Movement)
 		&& Movement->GetCurrentAcceleration().SizeSquared2D() > UE_KINDA_SMALL_NUMBER && !bPivoting;
+	UpdateMovementBlocked(DeltaSeconds, DistanceMoved, Movement, GroundMovement);
+	bShouldMove &= !bMovementBlocked;
 	const float TargetWalkRate = GroundSpeed > 3.0f
 		? FMath::Clamp(GroundSpeed / FMath::Max(1.0f, WalkAuthoredSpeed), 0.0f, 2.0f) : 0.0f;
 	WalkPlayRate = TargetWalkRate <= UE_KINDA_SMALL_NUMBER ? 0.0f
