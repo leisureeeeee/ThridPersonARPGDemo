@@ -1075,3 +1075,11 @@
 - 构建/加载：先确认无PIE和无未保存包，正常退出并完整构建。初次两处局部Character遮蔽引擎成员引发C4458，改为ControlledCharacter后再构建Result: Succeeded；重开加载。新通知类可加载，蓝图编译UpToDate并保存，配置/通知/根锁/接线读回。未启动PIE、主动调用动作或新增/运行功能测试；构建编译已有测试源不等于执行测试。
 - 保护/范围：本轮角色与动画蓝图、拔刀序列原件备份至工作区.ue-draw-weapon。SaberBlade本轮开始已被用户修改，未覆盖或暂存；其他地图/配置/导入资源保留。未加攻击、再次收刀、音效、渐变、上身分层或持刀行走体系。
 - 文件/版本：仅提交角色、控制器、动画实例、武器基类/光剑h/cpp、新通知h/cpp、两个蓝图、拔刀序列、WeaponDraw.md与本记录。此前远程推送被自动审批拒绝，不重试，保留本地提交。
+
+## 2026-10-21 17:22:52 北京时间 — 允许行走中拔刀并保留下半身移动
+
+- 用户纠正：走路时也要能触发拔刀。移除DrawWeapon对速度<=3和无加速度的限制，保留地面/武器/重复请求/蒙太奇占用保护；移除HandleMoveInput对IsDrawingWeapon的拦截，拔刀期间移动与转向持续响应。
+- 动画修正：不是单纯放开输入。主图缓存原locomotion→RotateRootBone→Inertialization为GroundLocomotion，两路读取分别进入分层BasePose与DefaultSlot.Source；Slot输出作为LayeredBoneBlend层0，spine_01分支深度3、MeshSpaceRotationBlend=true、权重1，保留骨盆与双腿步行动画，覆盖上半身拔刀。无蒙太奇时Slot返回同一缓存，不影响普通走路；缓存避免状态机重复求值。
+- 保护/核对：编辑前无PIE/未保存包，动画蓝图备份至工作区.ue-draw-weapon/BP_CharacterAnim-before-moving-draw.uasset；蓝图编译UpToDate并保存，嵌套结构读回spine_01、3与网格空间旋转true。没有修改武器偏移、通知时点、材质、地图或用户其他配置。
+- 构建加载：保存后确认无dirty包正常退出，完整Development Editor构建Succeeded，再打开项目加载。未启动PIE/自动化或主动调用拔刀；实际移动手感、转向握点与脊柱混合待用户验证。
+- 文档/范围：WeaponDraw.md更新为当前移动拔刀语义及手动步骤，取消旧的站立/暂停移动描述。本轮未新增专用持刀行走、手IK或全身动作适配。仅提交两处cpp、动画蓝图、说明与本记录。远程推送此前被自动审批拒绝，不重试。

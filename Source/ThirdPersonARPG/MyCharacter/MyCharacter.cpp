@@ -167,8 +167,7 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 bool AMyCharacter::DrawWeapon()
 {
 	if (bDrawingWeapon || bWeaponDrawn || !GetCurrentWeapon()
-		|| !GetCharacterMovement()->IsMovingOnGround() || GetVelocity().SizeSquared2D() > FMath::Square(3.0f)
-		|| !GetCharacterMovement()->GetCurrentAcceleration().IsNearlyZero())
+		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
 	}

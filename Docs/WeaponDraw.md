@@ -1,10 +1,10 @@
 # 拔刀函数与临时左键输入
 
-入口为AMyCharacter::DrawWeapon()，返回bool表示是否成功开始播放动作，不代表已经完成拔刀。函数不认识按键。MyPlayerController的Boolean DrawWeaponAction映射LeftMouseButton，Started只调用一次；处理器检查当前受控角色、输入允许和视角目标，再调用该入口。拔刀期间HandleMoveInput暂缓玩家移动，视角和滚轮继续工作。
+入口为AMyCharacter::DrawWeapon()，返回bool表示是否成功开始播放动作，不代表已经完成拔刀。函数不认识按键。MyPlayerController的Boolean DrawWeaponAction映射LeftMouseButton，Started只调用一次；处理器检查当前受控角色、输入允许和视角目标，再调用该入口。拔刀期间移动输入、视角和滚轮均继续工作，支持边走边拔刀。
 
-DrawWeapon拒绝重复拔刀、已持刀、无武器、离地、速度超过3 cm/s、有移动加速度或其他蒙太奇正在播放的请求。DrawWeaponAnimation为可配置序列，旧角色实例空引用时只读继承蓝图类默认值。通过PlaySlotAnimationAsDynamicMontage播放指定AS_Idle_To_Idle_Combat_Seq，DefaultSlot、播放速率1、一次，混入0.12秒、混出0.15秒；没有在构造函数硬编码资源路径或切换网格AnimationMode。
+DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇正在播放的请求；不再要求站立或无加速度。DrawWeaponAnimation为可配置序列，旧角色实例空引用时只读继承蓝图类默认值。通过PlaySlotAnimationAsDynamicMontage播放指定AS_Idle_To_Idle_Combat_Seq，DefaultSlot、播放速率1、一次，混入0.12秒、混出0.15秒；没有在构造函数硬编码资源路径或切换网格AnimationMode。
 
-动画主图现在为locomotion→RotateRootBone→Inertialization→DefaultSlot→Output，原移动状态机与惯性化保留。AS_Idle_To_Idle_Combat_Seq关闭根运动不变，新增根锁，避免动画内root平移造成网格漂移。
+动画主图先将locomotion→RotateRootBone→Inertialization保存为GroundLocomotion缓存。两路Use Cached Pose分别作为Layered Blend Per Bone的BasePose，以及DefaultSlot的Source；Slot输出接混合层0，分层混合输出到Output。分支从spine_01开始、深度3，启用Mesh Space Rotation Blend，层权重1；骨盆/双腿保持移动缓存，上半身使用Slot结果。无蒙太奇时Slot返回同一缓存姿势，因此不覆盖正常姿势；缓存避免两路重复求值原状态机。AS_Idle_To_Idle_Combat_Seq关闭根运动不变，新增根锁，避免动画内root平移造成网格漂移。
 
 新增UAnimNotify_DrawWeapon。原序列中0.30秒的WeaponGrip通知将动画来源和角色实例交给私有回调；只有本角色正在播放对应拔刀蒙太奇、尚未交接时才响应，因此编辑器预览或其他动画通知不会误改武器状态。时点依据右手0.2–0.3秒近似停留、0.4秒后明显外移的静态采样暂定，不等于已目视确认握住刀柄。
 
@@ -18,4 +18,8 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地、速度超过3 cm
 
 验证结果：完整Development Editor构建成功；首次因控制器局部变量Character遮蔽AController::Character报C4458，改为ControlledCharacter后重新构建Succeeded。编辑器正常重开，新类已加载；角色/动画蓝图配置、Slot接线、0.30秒通知、根锁均读回，动画蓝图UpToDate并保存。未启动PIE、执行DrawWeapon或运行任何自动化/功能测试，不声称观感及运行回调已验证。蓝图、序列修改前副本在工作区.ue-draw-weapon。
 
-用户手动验证：角色站稳后单击左键，应播放一次拔刀、约0.30秒切到手上并亮起，结束后保持持刀待机；连点不重播；动作期间移动暂缓且视角可转，结束恢复移动；结束关卡无重复回调。手部偏移和通知帧可由用户校准。
+用户手动验证：长按W行走中点击左键，双腿应持续走路，上半身拔刀、约0.30秒切到手上并亮起；动作中A/D转向、松开W或重新移动都应及时响应。站立拔刀也应可用；连点不重播，结束后静止时使用持刀待机。手部偏移、通知帧、转弯中握点和脊柱混合观感仍需用户校准。当前没有专门的持刀行走动画或手部IK。
+
+## 移动拔刀修正（2026-10-21）
+
+用户明确要求走路时也能触发，已移除站定门槛和移动拦截，并使用上述上半身分层，避免仅放开输入却仍让全身播放站立动作。两处C++源码完整编译Succeeded，编辑器重新打开加载；动画蓝图编译UpToDate，分支spine_01/深度3及网格空间旋转已读回。未启动PIE或执行功能测试。原腰部/手部偏移、通知时刻、点亮和中断策略保持不变。分层结果仍需用户观察脊柱扭转及转向动作，不能当作已完成脚步/手部接触匹配。

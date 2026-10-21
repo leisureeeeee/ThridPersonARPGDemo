@@ -147,11 +147,6 @@ void AMyPlayerController::HandleMoveInput(const FInputActionValue& Value)
 		return;
 	}
 
-	if (const AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(ControlledPawn); ControlledCharacter && ControlledCharacter->IsDrawingWeapon())
-	{
-		return;
-	}
-
 	const FVector2D MovementInput = Value.Get<FVector2D>().GetClampedToMaxSize(1.0f);
 	// Use this pawn's base camera, before CameraManager shakes/modifiers. Its
 	// authored relative rotation can differ from the controller's rotation.
