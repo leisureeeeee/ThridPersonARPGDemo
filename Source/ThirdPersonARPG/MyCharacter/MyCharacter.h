@@ -24,8 +24,12 @@ public:
 
 protected:
 	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	void InitializeWeapon();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
 
@@ -35,7 +39,20 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UARPGCameraRigComponent> CameraRig;
 
-	// An actor instance reference, not a weapon class or an automatically spawned weapon.
+	// Optional placed weapon; otherwise BeginPlay creates DefaultWeaponClass.
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AWeaponBase> CurrentWeapon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AWeaponBase> DefaultWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName HolsteredWeaponSocket = TEXT("scabbard1");
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FTransform HolsteredWeaponOffset = FTransform::Identity;
+
+	// Only an actor spawned by this character is destroyed with it.
+	UPROPERTY(Transient)
+	TObjectPtr<AWeaponBase> SpawnedWeapon;
 };
