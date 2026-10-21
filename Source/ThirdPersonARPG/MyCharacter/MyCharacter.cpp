@@ -182,8 +182,9 @@ bool AMyCharacter::DrawWeapon()
 	{
 		return false;
 	}
+	const float PlayRate = FMath::IsFinite(DrawWeaponPlayRate) ? FMath::Clamp(DrawWeaponPlayRate, 0.1f, 3.0f) : 1.3f;
 	ActiveDrawMontage = Animation->PlaySlotAnimationAsDynamicMontage(
-		DrawWeaponAnimation, DrawWeaponSlot, 0.12f, 0.15f, 1.0f, 1);
+		DrawWeaponAnimation, DrawWeaponSlot, 0.12f, 0.15f, PlayRate, 1);
 	if (!ActiveDrawMontage)
 	{
 		return false;

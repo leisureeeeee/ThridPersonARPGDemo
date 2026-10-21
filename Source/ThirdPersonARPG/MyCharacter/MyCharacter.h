@@ -89,4 +89,7 @@ private:
 
 	bool bDrawingWeapon = false;
 	bool bWeaponDrawn = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Draw", meta = (ClampMin = "0.1", ClampMax = "3.0"))
+	float DrawWeaponPlayRate = 1.3f;
 };

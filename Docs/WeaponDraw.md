@@ -2,7 +2,7 @@
 
 入口为AMyCharacter::DrawWeapon()，返回bool表示是否成功开始播放动作，不代表已经完成拔刀。函数不认识按键。MyPlayerController的Boolean DrawWeaponAction映射LeftMouseButton，Started只调用一次；处理器检查当前受控角色、输入允许和视角目标，再调用该入口。拔刀期间移动输入、视角和滚轮均继续工作，支持边走边拔刀。
 
-DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇正在播放的请求；不再要求站立或无加速度。DrawWeaponAnimation为可配置序列，旧角色实例空引用时只读继承蓝图类默认值。通过PlaySlotAnimationAsDynamicMontage播放指定AS_Idle_To_Idle_Combat_Seq，DefaultSlot、播放速率1、一次，混入0.12秒、混出0.15秒；没有在构造函数硬编码资源路径或切换网格AnimationMode。
+DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇正在播放的请求；不再要求站立或无加速度。DrawWeaponAnimation为可配置序列，旧角色实例空引用时只读继承蓝图类默认值。通过PlaySlotAnimationAsDynamicMontage播放指定AS_Idle_To_Idle_Combat_Seq，DefaultSlot、可配置DrawWeaponPlayRate（默认1.3倍）、一次，混入0.12秒、混出0.15秒；没有在构造函数硬编码资源路径或切换网格AnimationMode。
 
 动画主图先将locomotion→RotateRootBone→Inertialization保存为GroundLocomotion缓存。两路Use Cached Pose分别作为Layered Blend Per Bone的BasePose，以及DefaultSlot的Source；Slot输出接混合层0，分层混合输出到Output。分支从spine_01开始、深度3，启用Mesh Space Rotation Blend，层权重1；骨盆/双腿保持移动缓存，上半身使用Slot结果。无蒙太奇时Slot返回同一缓存姿势，因此不覆盖正常姿势；缓存避免两路重复求值原状态机。AS_Idle_To_Idle_Combat_Seq关闭根运动不变，新增根锁，避免动画内root平移造成网格漂移。
 
@@ -23,3 +23,7 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 ## 移动拔刀修正（2026-10-21）
 
 用户明确要求走路时也能触发，已移除站定门槛和移动拦截，并使用上述上半身分层，避免仅放开输入却仍让全身播放站立动作。两处C++源码完整编译Succeeded，编辑器重新打开加载；动画蓝图编译UpToDate，分支spine_01/深度3及网格空间旋转已读回。未启动PIE或执行功能测试。原腰部/手部偏移、通知时刻、点亮和中断策略保持不变。分层结果仍需用户观察脊柱扭转及转向动作，不能当作已完成脚步/手部接触匹配。
+
+## 拔刀提速（2026-10-21）
+
+角色新增EditDefaultsOnly DrawWeaponPlayRate，默认1.3，运行时检查有限数值并限制0.1–3。仅作为动态蒙太奇播放倍率，不修改动画源文件RateScale、行走速度、分层和通知所在动画帧。1.333333秒的源动作按倍率约1.026秒，0.30秒交接通知约在0.231秒触发（不含帧调度/混合等影响）；原0.12/0.15秒混入混出时间保留。用户可在BP_Character类默认值的Weapon|Draw分类调整Draw Weapon Play Rate。完整构建Succeeded并重开加载，未运行PIE或功能测试。
