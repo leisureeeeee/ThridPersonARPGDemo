@@ -75,7 +75,7 @@ bool ALightsaberWeapon::ActivateWeapon()
 	return Ignite();
 }
 
-void ALightsaberWeapon::DeactivateWeapon()
+bool ALightsaberWeapon::DeactivateWeapon()
 {
-	Extinguish();
+	return Extinguish();
 }

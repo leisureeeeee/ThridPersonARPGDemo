@@ -14,6 +14,7 @@ bool AWeaponBase::ActivateWeapon()
 	return true;
 }
 
-void AWeaponBase::DeactivateWeapon()
+bool AWeaponBase::DeactivateWeapon()
 {
+	return true;
 }

@@ -1101,3 +1101,13 @@
 - 工具：Python AnimSequence无get_data_model，未绕过反射限制；改用公开AnimSequenceService.apply_bone_rotation，先读本机插件C++确认该接口实际写局部轨道、Space参数未实现转换，因此脚本自行计算局部四元数。接口AddBoneCurve报告head轨道已存在的提示，SetBoneTrackKeys随后成功，无丢骨或位置变动。
 - 限制/范围：对当前左右方向起步的90/180转向均生效；脖子观感与过渡需用户确认，180仍是近似脚步。未改镜头、全局LookAt、移动时钟、拔刀或用户剑刃材质。资产数据改动无需重新编译C++。
 - 版本：仅提交两个派生序列、DA_DirectionalStarts、新生成脚本、DirectionalStarts.md与本记录六文件，保留其他用户修改。远程推送此前被自动审批拒绝，不重试。
+
+## 2026-10-21 18:00:05 北京时间 — 使用指定动画新增SheatheWeapon收刀函数
+
+- 用户需求：AS_Idle_Combat_To_Idle_Seq用于收刀动作函数。新增BlueprintCallable bool SheatheWeapon与只读IsSheathingWeapon，不添加/修改任何控制器按键绑定，原左键仍只拔刀。
+- 实现：地面持刀状态且没有拔刀/收刀/其他蒙太奇时，使用可配置收刀序列和独立1.3倍速动态蒙太奇，复用DefaultSlot上半身分层，因此允许移动。新反射字段尾部追加，旧关卡实例空资源时只读继承蓝图类默认值。结束委托与EndPlay清理对称处理，交接前中断持刀不变，交接后保持收刀。
+- 交接：新增AnimNotify_SheatheWeapon，1.15动画秒WeaponSheath通知将同一武器回挂现有腰部插槽、应用原HolsteredWeaponOffset、DeactivateWeapon成功后清除bWeaponDrawn。停用虚接口改为bool，光剑返回Extinguish结果，失败回滚手部挂接/变换并停止蒙太奇，避免错误提交状态。既有Idle选择自动回收刀待机。
+- 资产依据：指定序列长1.75秒，使用当前UE4骨架，原根运动关闭保留，新增根锁；右手分段位置采样用于暂定回鞘通知时刻，不等同于目视确认接触。1.3倍下通知约0.885现实秒，源动作约1.346秒，混入混出仍0.12/0.15。角色BP已配置指定序列，模型偏移不改。角色BP和收刀序列原件备份至工作区.ue-draw-weapon。
+- 构建/验证：确认无PIE和未保存包后正常退出，完整Development Editor构建Result: Succeeded，再打开加载。新通知类可加载，角色蓝图编译/保存、序列通知/根锁保存成功，读回资源及1.3速度和1.15秒通知；地图无dirty包。未启动关卡、主动调用收刀或执行自动化/功能测试。通知时点、手部动作及动画中断实际观感仍需用户验证。
+- 工具/规范：本机see技能/脚本搜索未找到；通过Unreal读取用户指定资产继续工作。只按ObjectTools受支持接口配置蓝图默认值，不直接Python修改CDO。
+- 文件/版本：仅提交角色h/cpp、武器基类/光剑h/cpp、新收刀通知h/cpp、角色BP、指定收刀序列、WeaponDraw.md与本记录，共12文件。用户剑刃材质/地图/配置及其他资源修改保持不纳入。此前远程推送被自动审批拒绝，不重试。

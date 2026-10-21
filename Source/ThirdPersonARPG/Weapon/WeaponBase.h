@@ -16,7 +16,7 @@ public:
 	AWeaponBase();
 
 	virtual bool ActivateWeapon();
-	virtual void DeactivateWeapon();
+	virtual bool DeactivateWeapon();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))

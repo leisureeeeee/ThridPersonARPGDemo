@@ -146,6 +146,14 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Animation->Montage_SetEndDelegate(EmptyDelegate, ActiveDrawMontage);
 		Animation->Montage_Stop(0.0f, ActiveDrawMontage);
 	}
+	if (UAnimInstance* Animation = GetMesh()->GetAnimInstance(); Animation && ActiveSheatheMontage)
+	{
+		FOnMontageEnded EmptyDelegate;
+		Animation->Montage_SetEndDelegate(EmptyDelegate, ActiveSheatheMontage);
+		Animation->Montage_Stop(0.0f, ActiveSheatheMontage);
+	}
+	ActiveSheatheMontage = nullptr;
+	bSheathingWeapon = false;
 	ActiveDrawMontage = nullptr;
 	bDrawingWeapon = false;
 	bWeaponDrawn = false;
@@ -166,7 +174,7 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool AMyCharacter::DrawWeapon()
 {
-	if (bDrawingWeapon || bWeaponDrawn || !GetCurrentWeapon()
+	if (bDrawingWeapon || bSheathingWeapon || bWeaponDrawn || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
@@ -237,4 +245,78 @@ void AMyCharacter::HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	}
 	bDrawingWeapon = false;
 	ActiveDrawMontage = nullptr;
+}
+
+bool AMyCharacter::SheatheWeapon()
+{
+	if (bDrawingWeapon || bSheathingWeapon || !bWeaponDrawn || !GetCurrentWeapon()
+		|| !GetCharacterMovement()->IsMovingOnGround())
+	{
+		return false;
+	}
+	if (!SheatheWeaponAnimation)
+	{
+		const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
+		SheatheWeaponAnimation = Defaults ? Defaults->SheatheWeaponAnimation : nullptr;
+	}
+	UAnimInstance* Animation = GetMesh()->GetAnimInstance();
+	if (!Animation || !SheatheWeaponAnimation || DrawWeaponSlot.IsNone()
+		|| !GetMesh()->DoesSocketExist(HolsteredWeaponSocket) || Animation->IsAnyMontagePlaying())
+	{
+		return false;
+	}
+	const float PlayRate = FMath::IsFinite(SheatheWeaponPlayRate) ? FMath::Clamp(SheatheWeaponPlayRate, 0.1f, 3.0f) : 1.3f;
+	ActiveSheatheMontage = Animation->PlaySlotAnimationAsDynamicMontage(
+		SheatheWeaponAnimation, DrawWeaponSlot, 0.12f, 0.15f, PlayRate, 1);
+	if (!ActiveSheatheMontage)
+	{
+		return false;
+	}
+	bSheathingWeapon = true;
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AMyCharacter::HandleSheatheMontageEnded);
+	Animation->Montage_SetEndDelegate(EndDelegate, ActiveSheatheMontage);
+	return true;
+}
+
+void AMyCharacter::HandleWeaponSheathNotify(UAnimSequenceBase* Animation)
+{
+	AWeaponBase* Weapon = GetCurrentWeapon();
+	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
+	if (!bSheathingWeapon || !bWeaponDrawn || !Weapon || Animation != SheatheWeaponAnimation.Get()
+		|| !Instance || !ActiveSheatheMontage || !Instance->Montage_IsPlaying(ActiveSheatheMontage))
+	{
+		return;
+	}
+	const FTransform PreviousRelative = Weapon->GetRootComponent()->GetRelativeTransform();
+	const FName PreviousSocket = Weapon->GetRootComponent()->GetAttachSocketName();
+	if (!Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, HolsteredWeaponSocket))
+	{
+		Instance->Montage_Stop(0.1f, ActiveSheatheMontage);
+		return;
+	}
+	Weapon->SetActorRelativeTransform(HolsteredWeaponOffset);
+	if (!Weapon->DeactivateWeapon())
+	{
+		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PreviousSocket);
+		Weapon->SetActorRelativeTransform(PreviousRelative);
+		Instance->Montage_Stop(0.1f, ActiveSheatheMontage);
+		return;
+	}
+	bWeaponDrawn = false;
+}
+
+void AMyCharacter::HandleSheatheMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage != ActiveSheatheMontage.Get())
+	{
+		return;
+	}
+	// Only the notify commits the equipment state. Interruptions preserve that result.
+	if (!bInterrupted && bWeaponDrawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: Sheathe animation ended without a successful weapon sheath notify."), *GetName());
+	}
+	bSheathingWeapon = false;
+	ActiveSheatheMontage = nullptr;
 }

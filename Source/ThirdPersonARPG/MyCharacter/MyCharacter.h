@@ -14,6 +14,7 @@ class UAnimSequence;
 class UAnimSequenceBase;
 class UAnimMontage;
 class UAnimNotify_DrawWeapon;
+class UAnimNotify_SheatheWeapon;
 
 UCLASS()
 class THIRDPERSONARPG_API AMyCharacter : public ACharacter
@@ -29,6 +30,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	bool DrawWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool SheatheWeapon();
+
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	bool IsSheathingWeapon() const { return bSheathingWeapon; }
+
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	bool IsDrawingWeapon() const { return bDrawingWeapon; }
 
@@ -42,9 +49,12 @@ protected:
 
 private:
 	friend class UAnimNotify_DrawWeapon;
+	friend class UAnimNotify_SheatheWeapon;
 	void InitializeWeapon();
 	void HandleWeaponGripNotify(UAnimSequenceBase* Animation);
 	void HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void HandleWeaponSheathNotify(UAnimSequenceBase* Animation);
+	void HandleSheatheMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> SpringArm;
@@ -92,4 +102,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Draw", meta = (ClampMin = "0.1", ClampMax = "3.0"))
 	float DrawWeaponPlayRate = 1.3f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Sheathe")
+	TObjectPtr<UAnimSequence> SheatheWeaponAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Sheathe", meta = (ClampMin = "0.1", ClampMax = "3.0"))
+	float SheatheWeaponPlayRate = 1.3f;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> ActiveSheatheMontage;
+
+	bool bSheathingWeapon = false;
 };

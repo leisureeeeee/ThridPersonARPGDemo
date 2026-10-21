@@ -16,7 +16,7 @@ class THIRDPERSONARPG_API ALightsaberWeapon : public AWeaponBase
 public:
 	ALightsaberWeapon();
 	virtual bool ActivateWeapon() override;
-	virtual void DeactivateWeapon() override;
+	virtual bool DeactivateWeapon() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Lightsaber")
 	bool Ignite();

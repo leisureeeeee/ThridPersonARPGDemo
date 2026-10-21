@@ -12,7 +12,7 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 
 蒙太奇结束回调清理bDrawingWeapon和ActiveDrawMontage：交接前被打断保持收刀，交接后被打断保留已提交的持刀挂接/亮灭状态。没有固定时长计时器。角色EndPlay先解除本次结束委托并停止本次蒙太奇，再执行已有武器销毁/解除挂接，避免退关卡回调访问武器。
 
-动画实例NativeInitializeAnimation选择收刀待机，NativeUpdateAnimation读取角色持刀状态，输出ActiveIdleAnimation；原Idle序列播放器新增Sequence引脚读取该变量。收刀使用AS_Idle_Seq，持刀使用AS_Idle_Combat_Seq；蒙太奇覆盖动作并混出到相应待机。只配置持刀待机，没有更换起步/行走/停步动画，也没有上半身分层、攻击、再次收刀、音效或渐进伸缩。
+动画实例NativeInitializeAnimation选择收刀待机，NativeUpdateAnimation读取角色持刀状态，输出ActiveIdleAnimation；原Idle序列播放器新增Sequence引脚读取该变量。收刀使用AS_Idle_Seq，持刀使用AS_Idle_Combat_Seq；蒙太奇覆盖动作并混出到相应待机。持刀待机与收刀待机均已配置，起步/行走/停步动画未更换；现有上半身分层同时供拔刀和收刀使用。没有攻击、音效或渐进伸缩。
 
 手部与腰部偏移保留用户调整空间，本轮DrawnWeaponOffset为单位变换。模型本地轴和hand_r不一定直接对齐，用户在BP_Character的Weapon|Draw分类调整，不应把偏移不对误判为动画未播放。
 
@@ -27,3 +27,16 @@ DrawWeapon拒绝重复拔刀、已持刀、无武器、离地或其他蒙太奇�
 ## 拔刀提速（2026-10-21）
 
 角色新增EditDefaultsOnly DrawWeaponPlayRate，默认1.3，运行时检查有限数值并限制0.1–3。仅作为动态蒙太奇播放倍率，不修改动画源文件RateScale、行走速度、分层和通知所在动画帧。1.333333秒的源动作按倍率约1.026秒，0.30秒交接通知约在0.231秒触发（不含帧调度/混合等影响）；原0.12/0.15秒混入混出时间保留。用户可在BP_Character类默认值的Weapon|Draw分类调整Draw Weapon Play Rate。完整构建Succeeded并重开加载，未运行PIE或功能测试。
+
+## 收刀函数SheatheWeapon（2026-10-21）
+
+新增BlueprintCallable bool AMyCharacter::SheatheWeapon()，返回是否成功开始播放，未绑定任何新按键，原左键仍只调用DrawWeapon。C++可通过角色指针调用SheatheWeapon，蓝图可从角色引用调用Sheathe Weapon。仅持刀、地面、有有效武器且无正在播放蒙太奇时接受，拔刀/收刀进行中互相排斥，重复调用返回false；允许移动期间调用且不拦截移动。
+
+可配置SheatheWeaponAnimation使用AS_Idle_Combat_To_Idle_Seq（长1.75秒），SheatheWeaponPlayRate默认1.3，沿用现有DefaultSlot上半身分层、混入0.12/混出0.15。旧关卡实例新字段为空时只读继承蓝图类默认值，不写资源硬路径。
+
+新增AnimNotify_SheatheWeapon，在序列1.15动画秒暂定WeaponSheath通知（1.3倍下约0.885现实秒，不含帧调度等影响）。它仅在匹配的收刀播放中响应：保存旧挂接，将同一武器回挂HolsteredWeaponSocket，恢复HolsteredWeaponOffset，然后调用武器基类DeactivateWeapon。该接口改为返回bool，光剑覆写返回Extinguish结果；停用失败时恢复手部挂接和原变换并停止动作，避免武器仍亮着却进入收刀状态。成功后bWeaponDrawn=false，动画实例现有Idle选择自动回到AS_Idle_Seq。
+
+收刀通知前被中断保持持刀；通知后被中断保持收刀，不在结束回调强行执行交接。收刀蒙太奇正常结束但没有成功通知会记录警告。EndPlay解绑并停止收刀蒙太奇后继续已有武器清理，无额外计时器或Tick。
+
+收刀时点根据右手返回腰前并开始退出的采样暂定，握点/朝向和手离开剑柄的准确帧需用户目视校准。此实现不新增永久剑鞘或第二把武器。
+本轮完整Development Editor构建Succeeded并重新加载；角色蓝图配置与序列通知已保存读回。未运行PIE、主动调用收刀或执行功能测试。用户可在现有持刀状态下从蓝图调用SheatheWeapon，观察通知前后挂接/亮灭、移动不中断及再次DrawWeapon能否开始。
