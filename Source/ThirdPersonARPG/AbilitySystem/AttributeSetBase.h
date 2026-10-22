@@ -4,8 +4,8 @@
 #include "AttributeSet.h"
 #include "AttributeSetBase.generated.h"
 
-// Concrete sets will declare their attributes and attribute-specific rules.
-UCLASS(Abstract, BlueprintType)
+// Instantiable foundation; derived sets may declare attributes and their rules.
+UCLASS(BlueprintType)
 class THIRDPERSONARPG_API UAttributeSetBase : public UAttributeSet
 {
     GENERATED_BODY()

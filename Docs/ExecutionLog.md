@@ -1292,3 +1292,14 @@
 - 编译与加载：暂停前 MCP 只读请求因本地编辑器未运行而连接失败；继续后重新确认无项目编辑器进程，直接执行完整 Development Editor 编译，一次成功（16.45 秒）。启动前检查避免重复实例；首次通过 get_editor_property 查询蓝图 parent_class 因属性未暴露报错，改用 BlueprintService 读取后完成检查。编辑器加载后确认三个新类型存在，MyCharacter 属于 CharacterBase，角色默认对象的两个引用均为 None、没有 ASC 组件实例，移动组件仍为 ARPGCharacterMovementComponent；角色蓝图父类仍为 MyCharacter，状态 BS_UP_TO_DATE，地图角色同样属于 CharacterBase 且维持原移动组件。结束无脏地图/内容包且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试，原有运行表现未在本轮实测。
 - 文件：新增 Character/CharacterBase.h/.cpp、AbilitySystem/AbilitySystemComponentBase.h/.cpp、AbilitySystem/AttributeSetBase.h/.cpp、Docs/CharacterBase.md；修改 MyCharacter.h、ThirdPersonARPG.Build.cs、ThirdPersonARPG.uproject 的 GameplayAbilities 插件段及本日志。修改前原文件备份在工作区 .ue-character-base/backup。用户既有配置、地图、资源、EditorTools 代码和未跟踪文件保留；uproject 的 ModelContextProtocol/MCPClientToolset 原有启用差异不纳入提交，仅暂存本轮 GAS 段。
 - 查看与后续：继承链为 ACharacter → ACharacterBase → AMyCharacter。角色蓝图 Class Settings（类设置）父类仍应为 MyCharacter；继承属性里的两个引用为空是预期状态。具体 ASC/属性集子类、PlayerState 持有与生命周期绑定、实际技能和属性规则均留待后续实现。本轮仅提交明确相关文件与执行记录，远程同步结果见最终回复。
+
+
+## 2026-10-22 13:40:17 北京时间 — 新增 BossCharacter 并在构造函数初始化 GAS 指针
+
+- 用户需求：新增 BossCharacter 继承 CharacterBase，在构造函数初始化基类的 ASC、AttributeSet 两个指针。
+- 实现：新增 ABossCharacter : ACharacterBase；构造函数原样传递 FObjectInitializer，并通过 CreateDefaultSubobject<UAbilitySystemComponentBase>、CreateDefaultSubobject<UAttributeSetBase> 创建两个默认子对象，直接赋给继承的 AbilitySystemComponent、AttributeSet。两个对象的 Outer 都是 Boss，本轮不新增第二套缓存或公开写入接口。
+- 必要调整：两个 GAS 基类原先被标记 Abstract，不能作为目标默认子对象直接创建，因此去除它们的 Abstract 标记，保留 BlueprintType 和可派生能力；CharacterBase 仍保持抽象。没有为本次简单初始化额外增加 Boss ASC/属性集子类。更新 Docs/CharacterBase.md 中实例化条件与 Boss 继承/持有说明。
+- 编译与加载：开始及退出前均无 PIE、无脏地图/内容包；编辑器正常退出且确认进程结束后完整 Development Editor 构建一次成功（16.27 秒）。正常重新启动，未创建重复实例；读回 BossCharacter 类型已加载、属于 CharacterBase、两个继承引用均非空，ASC 类型为 AbilitySystemComponentBase、属性集类型为 AttributeSetBase；两个子对象均属于 Boss 默认对象，ASC 引用与其原生组件一致。MyCharacter 默认对象两个引用仍为 None，角色蓝图 BS_UP_TO_DATE，结束无脏地图/内容包且 PIE=False。
+- 范围与未验证：只新增角色类并创建基础对象，不初始化实际 ActorInfo，不添加复制策略、实际属性、技能授予、AI、网格或动画；没有创建 Boss 蓝图或将其放入关卡。未新增/执行自动化、PIE、模拟输入或功能测试；默认对象读回不代表战斗机制已可用。
+- 文件与版本：新增 Character/BossCharacter.h/.cpp；修改 AbilitySystem/AbilitySystemComponentBase.h、AbilitySystem/AttributeSetBase.h、Docs/CharacterBase.md 和本日志。原文件备份位于工作区 .ue-boss-character/backup。保留用户既有源文件、地图、资源与配置修改，MyCharacter、GameMode 和 uproject 本轮未改；只提交上述明确文件，远程同步结果见最终回复。
+- 编辑器查看：可从 BossCharacter 创建 Blueprint Class（蓝图类），在组件面板查看 AbilitySystemComponent，在继承的 Abilities（能力）属性中查看两个引用。AttributeSet 是 UObject（引擎对象）而非 ActorComponent（Actor 组件），不要求出现在组件列表；对象通过默认子对象和反射指针由引擎管理生命周期，无需普通 C++ new/delete。
