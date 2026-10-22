@@ -2,21 +2,25 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-#include "ARPGAbilitySystemComponent.generated.h"
+#include "MyCharacterAbilitySystemSComponent.generated.h"
 
 class UARPGCombatAttributeSet;
 class UARPGCombatDefinition;
 
-UCLASS(ClassGroup = (Combat), meta = (BlueprintSpawnableComponent))
-class THIRDPERSONARPG_API UARPGAbilitySystemComponent : public UAbilitySystemComponent
+// Player-only ASC. AARPGPlayerState owns it; the possessed character is its avatar.
+UCLASS(ClassGroup = (Player))
+class THIRDPERSONARPG_API UMyCharacterAbilitySystemSComponent : public UAbilitySystemComponent
 {
     GENERATED_BODY()
 
 public:
-    UARPGAbilitySystemComponent();
+    UMyCharacterAbilitySystemSComponent();
 
-    // Character-owned ASC: owner and avatar are the same actor, for players and enemies.
-    void InitializeCombat();
+    // Called after possession on the server and PlayerState replication on clients.
+    void InitializeCombat(AActor* InAvatarActor);
+
+    // An old character cannot detach the avatar of its replacement.
+    void ReleaseCombatAvatar(const AActor* ExpectedAvatarActor);
 
     UFUNCTION(BlueprintPure, Category = "Combat")
     const UARPGCombatAttributeSet* GetCombatAttributes() const { return CombatAttributes; }
@@ -24,21 +28,20 @@ public:
     UFUNCTION(BlueprintPure, Category = "Combat")
     const UARPGCombatDefinition* GetCombatDefinition() const { return CombatDefinition; }
 
-    // True means GAS accepted activation, not that an animation/hit/skill has completed.
+    // Acceptance by GAS does not mean the action completed or hit a target.
     UFUNCTION(BlueprintCallable, Category = "Combat")
     bool RequestCombatAction(FGameplayTag ActionTag);
 
-    // Local server event dispatch only; this is deliberately not an RPC or a hit resolver.
     UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Combat")
     int32 DispatchCombatEvent(FGameplayTag EventTag, const FGameplayEventData& Payload);
 
 protected:
-    virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
     void GrantStartupConfiguration();
 
+    // Nested under this ASC, these attributes share the PlayerState lifetime.
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     TObjectPtr<UARPGCombatAttributeSet> CombatAttributes;
 

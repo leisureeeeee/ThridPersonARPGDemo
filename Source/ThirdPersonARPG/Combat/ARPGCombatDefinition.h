@@ -6,7 +6,7 @@
 
 class UARPGCombatAbility;
 class UGameplayEffect;
-class UARPGAbilitySystemComponent;
+class UMyCharacterAbilitySystemSComponent;
 
 // Contract only: timing and balance are intentionally unset and not consumed yet.
 USTRUCT(BlueprintType)
@@ -36,7 +36,7 @@ struct THIRDPERSONARPG_API FARPGCombatTuning
     float ExecutionEnergyReward = 0.0f;
 };
 
-// Separate player/enemy assets can share the same C++ framework.
+// Player combat configuration consumed by MyCharacterAbilitySystemSComponent.
 UCLASS(BlueprintType)
 class THIRDPERSONARPG_API UARPGCombatDefinition : public UDataAsset
 {
@@ -52,7 +52,7 @@ public:
     TSubclassOf<UGameplayEffect> GetSpecialAttackCostEffect() const { return SpecialAttackCostEffect; }
 
 private:
-    friend class UARPGAbilitySystemComponent;
+    friend class UMyCharacterAbilitySystemSComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Combat|Startup")
     TArray<TSubclassOf<UARPGCombatAbility>> StartupAbilities;

@@ -8,7 +8,7 @@
 #include "GameplayTagContainer.h"
 #include "MyCharacter.generated.h"
 
-class UARPGAbilitySystemComponent;
+class UMyCharacterAbilitySystemSComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UARPGCameraRigComponent;
@@ -57,13 +57,19 @@ public:
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Controller() override;
+	virtual void OnRep_PlayerState() override;
+	virtual void UnPossessed() override;
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UARPGAbilitySystemComponent> CombatAbilitySystem;
+	void InitializePlayerAbilitySystem();
+	void ReleasePlayerAbilitySystem();
+
+	// Non-owning cache only. The PlayerState creates and retains the ASC.
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UMyCharacterAbilitySystemSComponent> CachedAbilitySystem;
 
 	friend class UAnimNotify_DrawWeapon;
 	friend class UAnimNotify_SheatheWeapon;

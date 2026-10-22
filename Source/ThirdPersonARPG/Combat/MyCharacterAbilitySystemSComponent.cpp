@@ -1,39 +1,60 @@
-#include "Combat/ARPGAbilitySystemComponent.h"
+#include "Combat/MyCharacterAbilitySystemSComponent.h"
 #include "Combat/ARPGCombatAbility.h"
 #include "Combat/ARPGCombatAttributeSet.h"
 #include "Combat/ARPGCombatDefinition.h"
 #include "Combat/ARPGCombatTags.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "GameplayEffect.h"
 
-UARPGAbilitySystemComponent::UARPGAbilitySystemComponent()
+UMyCharacterAbilitySystemSComponent::UMyCharacterAbilitySystemSComponent()
 {
     SetIsReplicatedByDefault(true);
-    SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+    // PlayerState is owned by PlayerController, as required by Mixed replication.
+    SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
     CombatAttributes = CreateDefaultSubobject<UARPGCombatAttributeSet>(TEXT("CombatAttributes"));
 }
 
-void UARPGAbilitySystemComponent::BeginPlay()
+void UMyCharacterAbilitySystemSComponent::InitializeCombat(AActor* InAvatarActor)
 {
-    Super::BeginPlay();
-    InitializeCombat();
-}
-
-void UARPGAbilitySystemComponent::InitializeCombat()
-{
-    if (!IsValid(GetOwner()))
+    const APlayerState* OwnerState = Cast<APlayerState>(GetOwner());
+    const APawn* AvatarPawn = Cast<APawn>(InAvatarActor);
+    if (!IsValid(OwnerState) || !IsValid(AvatarPawn) || AvatarPawn->GetPlayerState() != OwnerState)
     {
         return;
     }
-    InitAbilityActorInfo(GetOwner(), GetOwner());
-    // AddSpawnedAttribute uses AddUnique; repeated possession cannot duplicate the set.
+    if (GetAvatarActor() && GetAvatarActor() != InAvatarActor)
+    {
+        CancelAllAbilities();
+    }
+    InitAbilityActorInfo(GetOwner(), InAvatarActor);
     AddAttributeSetSubobject(CombatAttributes.Get());
-    if (HasBegunPlay() && GetOwner()->HasAuthority() && !bStartupGranted)
+    // Once per PlayerState, not once per pawn; possession may precede BeginPlay.
+    if (GetOwner()->HasAuthority() && !bStartupGranted)
     {
         GrantStartupConfiguration();
     }
 }
 
-void UARPGAbilitySystemComponent::GrantStartupConfiguration()
+void UMyCharacterAbilitySystemSComponent::ReleaseCombatAvatar(const AActor* ExpectedAvatarActor)
+{
+    if (!ExpectedAvatarActor || GetAvatarActor() != ExpectedAvatarActor)
+    {
+        return;
+    }
+    CancelAllAbilities();
+    // Preserve the persistent owner while clearing pawn-specific cached actor information.
+    if (IsValid(GetOwner()))
+    {
+        InitAbilityActorInfo(GetOwner(), nullptr);
+    }
+    else
+    {
+        ClearActorInfo();
+    }
+}
+
+void UMyCharacterAbilitySystemSComponent::GrantStartupConfiguration()
 {
     if (!CombatDefinition)
     {
@@ -68,22 +89,22 @@ void UARPGAbilitySystemComponent::GrantStartupConfiguration()
     bStartupGranted = true;
 }
 
-bool UARPGAbilitySystemComponent::RequestCombatAction(FGameplayTag ActionTag)
+bool UMyCharacterAbilitySystemSComponent::RequestCombatAction(FGameplayTag ActionTag)
 {
     using namespace ARPGCombatTags;
     const bool bInputAction = ActionTag == Ability_Attack_Normal || ActionTag == Ability_Attack_Special
         || ActionTag == Ability_Parry || ActionTag == Ability_Dodge;
-    if (!bInputAction || !AbilityActorInfo.IsValid() || (!AbilityActorInfo->IsLocallyControlled()
-        && !AbilityActorInfo->IsNetAuthority()))
+    if (!bInputAction || !IsValid(GetAvatarActor()) || !AbilityActorInfo.IsValid()
+        || (!AbilityActorInfo->IsLocallyControlled() && !AbilityActorInfo->IsNetAuthority()))
     {
         return false;
     }
     return TryActivateAbilitiesByTag(FGameplayTagContainer(ActionTag), false);
 }
 
-int32 UARPGAbilitySystemComponent::DispatchCombatEvent(FGameplayTag EventTag, const FGameplayEventData& Payload)
+int32 UMyCharacterAbilitySystemSComponent::DispatchCombatEvent(FGameplayTag EventTag, const FGameplayEventData& Payload)
 {
-    if (!GetOwner() || !GetOwner()->HasAuthority() || !AbilityActorInfo.IsValid()
+    if (!GetOwner() || !GetOwner()->HasAuthority() || !IsValid(GetAvatarActor()) || !AbilityActorInfo.IsValid()
         || !EventTag.MatchesTag(ARPGCombatTags::Event_Root))
     {
         return 0;
@@ -93,7 +114,7 @@ int32 UARPGAbilitySystemComponent::DispatchCombatEvent(FGameplayTag EventTag, co
     return HandleGameplayEvent(EventTag, &EventData);
 }
 
-void UARPGAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UMyCharacterAbilitySystemSComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     CancelAllAbilities();
     Super::EndPlay(EndPlayReason);

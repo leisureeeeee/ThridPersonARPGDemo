@@ -12,7 +12,7 @@
     GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 // Posture measures pressure: zero is recovered, maximum is broken.
-// Enemies may leave Energy unused; no player-only rules live in this shared set.
+// Player attributes persist with the owning PlayerState; action rules live in abilities.
 UCLASS()
 class THIRDPERSONARPG_API UARPGCombatAttributeSet : public UAttributeSet
 {

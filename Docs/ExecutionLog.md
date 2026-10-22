@@ -1261,3 +1261,14 @@
 - 执行记录：首次沙箱内 Git 读取实际项目路径被拒，按工具权限升级后完成；首次全项目 diff --check 报用户已有 DefaultEditor.ini/DefaultGame.ini 空行，未改这些文件，限定本轮文件检查通过。引擎私有源码路径查询不存在，使用已发现公开头与成功编译校核。本轮未使用视觉输入或运行 see。
 - 文件：Source/ThirdPersonARPG/Combat 下 11 个新 C++ 文件、MyCharacter.h/.cpp、ThirdPersonARPG.Build.cs、ThirdPersonARPG.uproject 的 GameplayAbilities 插件段、Docs/GASCombatFramework.md 与本记录。修改前原文件备份在工作区 .ue-gas-framework/backup。保留用户地图/模型/动画/配置/EditorTools 等改动；uproject 原有 ModelContextProtocol/MCPClientToolset 启用差异留在工作区，仅暂存本轮 GAS 插件段。
 - 版本与后续：仅提交本轮明确文件和日志；远程同步结果见本轮最终回复。编辑器可在角色组件面板查看 CombatAbilitySystem，在数据资产类型中查找 ARPGCombatDefinition；默认无新战斗效果为预期行为。实际机制、素材配置和功能验证留待后续任务。
+
+
+## 2026-10-22 12:56:48 北京时间 — 玩家 GAS 迁移至 PlayerState 并按指定名称重命名
+
+- 用户需求：GAS 组件由 PlayerState（玩家状态）持有；随后明确该 GAS 仅负责玩家，名称统一改为 MyCharacterAbilitySystemSComponent。本轮保留用户指定的 SComponent 拼写，不扩大到敌人实现或具体战斗机制。
+- 持有关系：新增 AARPGPlayerState，实现 IAbilitySystemInterface，构造并持有 UMyCharacterAbilitySystemSComponent；属性集仍为 ASC 子对象，因此跟随 PlayerState 生命周期。GameMode 的 PlayerStateClass 指向 AARPGPlayerState。玩家 ASC 采用 Mixed 效果复制模式，Owner=PlayerState、Avatar=当前玩家 Pawn，初始化校验 Avatar 的 PlayerState 确实为自身拥有者。
+- 生命周期：MyCharacter 移除原生 ASC 子对象，只保留 Transient 弱引用并转发动作请求；服务端 PossessedBy、客户端 OnRep_PlayerState 绑定，BeginPlay 补齐已存在的状态，OnRep_Controller 仅刷新当前 Avatar 的缓存。UnPossessed、状态更换和 EndPlay 解除绑定/取消活跃能力，初始能力与属性按 PlayerState 只授予/应用一次；ExpectedAvatar 检查避免旧 Pawn 销毁时解绑新 Pawn，无 Avatar 时拒绝动作和战斗事件。死亡数值重置、断线重连或无缝旅行迁移未实现。
+- 重命名：原 ARPGAbilitySystemComponent.h/.cpp 改为 MyCharacterAbilitySystemSComponent.h/.cpp，C++ 类型、构造函数、引用和配置友元均更新；DefaultEngine.ini 添加旧反射类到新类的 ClassRedirect。历史执行记录保留当时名称，当前框架文档更新为仅玩家/PlayerState 持有方案，属性集/配置的过时敌人组件说明同步移除。
+- 验证：编辑器退出前无 PIE、无脏内容/地图，正常退出且确认无残留项目进程；Development Editor 完整 C++ 构建一次成功（23.34 秒），正常重新启动且避免重复实例。MCP 读回 AARPGPlayerState 和新名 ASC 均加载，PS 默认对象持有 ASC=True、ASC 持有属性集=True、GameMode.PlayerStateClass=ARPGPlayerState；Character 默认对象及地图 BP_Character_C_1 均无本地 ASC，角色蓝图 BS_UP_TO_DATE，配置仍为 None，结束无脏包/地图且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试；未验证实际换角色、重生及网络复制行为。
+- 文件：新增 PlayerState/ARPGPlayerState.h/.cpp；ASC 两文件重命名及初始化更新；MyCharacter.h/.cpp、GameMode/ARPGGameMode.cpp、Combat/ARPGCombatDefinition.h、Combat/ARPGCombatAttributeSet.h、Config/DefaultEngine.ini、Docs/GASCombatFramework.md 与本日志。原文件备份位于工作区 .ue-gas-playerstate/backup。未修改用户已有地图、角色/动画蓝图、模型、武器、EditorTools 或 uproject 的原有插件差异。
+- 查看与后续：在原生 PlayerState 默认对象可见 MyCharacterAbilitySystemSComponent；需要编辑配置时，从 ARPGPlayerState 派生蓝图并在实际 GameMode 的 Player State Class（玩家状态类）指定。编辑器非运行关卡角色无 PlayerState/本地 ASC 为预期；具体战斗能力保持抽象入口，输入、动画及数值结算继续留空。本轮只提交明确迁移文件及日志，远程同步结果见最终回复。

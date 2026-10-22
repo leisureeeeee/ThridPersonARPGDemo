@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyCharacter.h"
-#include "Combat/ARPGAbilitySystemComponent.h"
+#include "Combat/MyCharacterAbilitySystemSComponent.h"
+#include "PlayerState/ARPGPlayerState.h"
 #include "Weapon/WeaponBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -19,7 +20,6 @@ AMyCharacter::AMyCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UARPGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
-	CombatAbilitySystem = CreateDefaultSubobject<UARPGAbilitySystemComponent>(TEXT("CombatAbilitySystem"));
 
 	// The capsule origin is its center; this mesh's origin is at the feet.
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f,
@@ -61,6 +61,7 @@ AWeaponBase* AMyCharacter::GetCurrentWeapon() const
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	InitializePlayerAbilitySystem();
 	// Defaults-only draw settings must follow the Blueprint template, including old placed actors.
 	const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
 	if (Defaults && Defaults != this)
@@ -149,6 +150,7 @@ void AMyCharacter::InitializeWeapon()
 
 void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	ReleasePlayerAbilitySystem();
 	if (UAnimInstance* Animation = GetMesh()->GetAnimInstance(); Animation && ActiveDrawMontage)
 	{
 		FOnMontageEnded EmptyDelegate;
@@ -341,22 +343,65 @@ void AMyCharacter::SetSprintRequested(bool bRequested)
 
 UAbilitySystemComponent* AMyCharacter::GetAbilitySystemComponent() const
 {
-	return CombatAbilitySystem;
+	return CachedAbilitySystem.Get();
 }
 
 bool AMyCharacter::RequestCombatAction(FGameplayTag ActionTag)
 {
-	return CombatAbilitySystem && CombatAbilitySystem->RequestCombatAction(ActionTag);
+	UMyCharacterAbilitySystemSComponent* AbilitySystem = CachedAbilitySystem.Get();
+	return AbilitySystem && AbilitySystem->GetAvatarActor() == this
+		&& AbilitySystem->RequestCombatAction(ActionTag);
+}
+
+void AMyCharacter::InitializePlayerAbilitySystem()
+{
+	AARPGPlayerState* CharacterPlayerState = GetPlayerState<AARPGPlayerState>();
+	UMyCharacterAbilitySystemSComponent* NewAbilitySystem = CharacterPlayerState
+		? CharacterPlayerState->GetMyCharacterAbilitySystem() : nullptr;
+	if (CachedAbilitySystem.Get() != NewAbilitySystem)
+	{
+		ReleasePlayerAbilitySystem();
+		CachedAbilitySystem = NewAbilitySystem;
+	}
+	if (NewAbilitySystem)
+	{
+		NewAbilitySystem->InitializeCombat(this);
+	}
+}
+
+void AMyCharacter::ReleasePlayerAbilitySystem()
+{
+	if (UMyCharacterAbilitySystemSComponent* AbilitySystem = CachedAbilitySystem.Get())
+	{
+		AbilitySystem->ReleaseCombatAvatar(this);
+	}
+	CachedAbilitySystem.Reset();
 }
 
 void AMyCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	CombatAbilitySystem->InitializeCombat();
+	InitializePlayerAbilitySystem();
+}
+
+void AMyCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	InitializePlayerAbilitySystem();
 }
 
 void AMyCharacter::OnRep_Controller()
 {
 	Super::OnRep_Controller();
-	CombatAbilitySystem->InitializeCombat();
+	if (UMyCharacterAbilitySystemSComponent* AbilitySystem = CachedAbilitySystem.Get();
+		AbilitySystem && AbilitySystem->GetAvatarActor() == this)
+	{
+		AbilitySystem->RefreshAbilityActorInfo();
+	}
+}
+
+void AMyCharacter::UnPossessed()
+{
+	ReleasePlayerAbilitySystem();
+	Super::UnPossessed();
 }
