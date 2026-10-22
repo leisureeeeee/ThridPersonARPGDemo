@@ -205,7 +205,6 @@ bool AMyCharacter::DrawWeapon()
 		return false;
 	}
 	bDrawingWeapon = true;
-	SetSprintRequested(false);
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleDrawMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveDrawMontage);
@@ -281,7 +280,6 @@ bool AMyCharacter::SheatheWeapon()
 		return false;
 	}
 	bSheathingWeapon = true;
-	SetSprintRequested(false);
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleSheatheMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveSheatheMontage);
@@ -334,6 +332,7 @@ void AMyCharacter::SetSprintRequested(bool bRequested)
 {
 	if (UARPGCharacterMovementComponent* Movement = Cast<UARPGCharacterMovementComponent>(GetCharacterMovement()))
 	{
-		Movement->SetSprintRequested(bRequested && !bDrawingWeapon && !bSheathingWeapon);
+		// Equipment montages only own the upper body; movement intent stays independent.
+		Movement->SetSprintRequested(bRequested);
 	}
 }

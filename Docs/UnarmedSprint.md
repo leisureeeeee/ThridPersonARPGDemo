@@ -7,14 +7,14 @@
 - 在地面时，按住左/右 Shift + 移动键奔跑。松开 Shift 回步行；松开移动键接现有 Stop（停步）。只按 Shift 不播放奔跑。
 - 静止起跑：Idle/Stop → SprintStart → Sprint；走路中加速：Start/Walk → Sprint。
 - 反向输入沿用移动组件的制动和转身判定，进入 SprintTurn，再回 Sprint；允许松键或拔刀打断。
-- 正在拔刀或正在收刀时暂时禁用奔跑。动作成功开始立即取消奔跑；持续按住 Shift 时，动作结束后恢复对应持刀/收刀奔跑。持刀本身不再禁用奔跑。
+- 拔刀与收刀不清除、不拦截奔跑请求；按住 Shift 时可以持续奔跑，也可在武器动作过程中开始或结束奔跑。武器动作通过上半身分层混合播放，腿部仍由移动状态机驱动。
 - PlayerController（玩家控制器）解除控制或结束时清除奔跑请求，避免旧角色残留请求。
 
 ## 职责和调用链
 
 `Shift → MyPlayerController::HandleSprintInput → MyCharacter::SetSprintRequested → ARPGCharacterMovementComponent::SetSprintRequested/GetMaxSpeed → MyCharacterAnimInstance::NativeUpdateAnimation → BP_CharacterAnim1.locomotion`
 
-控制器只接收输入，不直接改速度或动画。角色只裁决装备状态。移动组件负责实际速度上限及碰撞、制动、旋转。动画实例读取运动结果，向动画图输出是否奔跑、播放时间和循环倍率。动画实例配置持刀/收刀各三段动画引用，在移动时按 IsWeaponDrawn 选择 ActiveSprintStart/Loop/TurnAnimation，动画图通过 Sequence（序列）引脚读取。C++ 不硬编码资源路径；没有复制两套状态机。
+控制器只接收输入，不直接改速度或动画。角色协调武器行为并转发移动请求，武器动作不限制奔跑。移动组件负责实际速度上限及碰撞、制动、旋转。动画实例读取运动结果，向动画图输出是否奔跑、播放时间和循环倍率。动画实例配置持刀/收刀各三段动画引用，在移动时按 IsWeaponDrawn 选择 ActiveSprintStart/Loop/TurnAnimation，动画图通过 Sequence（序列）引脚读取。C++ 不硬编码资源路径；没有复制两套状态机。
 
 保持原 MaxWalkSpeed，使用 GetMaxSpeed 的覆盖返回奔跑速度，释放时自然恢复原步行配置。当前是项目的本地移动流程，没有额外实现网络预测和自定义移动请求复制。
 
@@ -52,3 +52,4 @@ C++ Development Editor 编译成功并正常重启加载；动画蓝图状态 BS
 移动上限从600升至720，循环动画匹配基准仍600，因此满速循环倍率从1升至1.2，脚步随速度加快。起步倍率 SprintStartPlayRate 设为1.15，收刀有效起步0.85秒约在0.739秒播放完；持刀起步使用0.75秒片段，约0.652秒播完。持刀掉头原长0.55秒，按同一掉头进度映射到0..0.55秒，避免沿用无武器1.1秒时间范围。
 
 新增动画设置位于 BP_CharacterAnim1 类默认值的 Locomotion > Sprint > Animations（运动 > 奔跑 > 动画），可分别替换 Sheathed/Drawn Sprint Start/Loop/Turn Animation（收刀/持刀的奔跑起步/循环/掉头动画）。控制器输入和7状态20转换拓扑保持不变。
+用法补充：持续按住 Shift+W 时左键拔刀、右键收刀，移动速度不应因武器动作降回步行；也可在动作中按下或松开 Shift，移动请求立即按正常规则处理。武器动作之间仍保留互斥，防止同一把武器同时执行拔刀和收刀。

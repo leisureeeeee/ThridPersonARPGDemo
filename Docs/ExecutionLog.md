@@ -1225,3 +1225,11 @@
 - 验证：动画蓝图编译状态BS_UP_TO_DATE，状态机结构检查is_valid=True、errors/warnings为空。读回六引用均正确、骨架均SK_Fenrir_Skeleton，三个Sequence引脚和原ExplicitTime/PlayRate、Pose全部已连。起步倍率1.15、动画匹配基准600；角色蓝图默认移动组件和地图BP_Character_C_1的SprintSpeed均720，无需修改用户角色蓝图/地图。保存AnimBP，结束时无脏内容包。没有运行PIE、模拟输入或功能测试；停步仍复用现有Stop，高速脚步和掉头观感待用户测试。
 - 调用探索：首次用Python读取角色get_character_movement未暴露报错，改用get_component_by_class(CharacterMovementComponent)读取完成；未影响资源。
 - 修改文件：Content/BP/MyCharatcer/BP_CharacterAnim1.uasset、Docs/UnarmedSprint.md、Docs/ExecutionLog.md。源代码与三段持刀动画已在上一提交e3e73f1；本次追加完成接线提交，保留用户其他源文件、模型、材质、地图、配置修改。沿用此前自动审批拒绝远程推送限制，不重试。
+
+## 2026-10-22 10:02:53 北京时间 — 拔收刀与正常奔跑解耦
+
+- 用户要求：拔刀、收刀动作独立，不影响角色正常奔跑。
+- 根因：MyCharacter::DrawWeapon/SheatheWeapon在动作开始清除奔跑请求，SetSprintRequested又按bDrawingWeapon/bSheathingWeapon拦截持续Shift。只读核对现有动画图LayeredBoneBlend已经使用spine_01、深度3、权重1，RootMotion按root骨骼混合，武器动作已有上半身分层；本轮不修改动画资源和拓扑。
+- 修改：移除两处SetSprintRequested(false)，角色转发原始bRequested给移动组件，不再使用装备动作状态过滤。控制器解除控制/结束时原有清理仍保留，拔收刀之间互斥不变，速度/制动/转向继续由原移动组件处理。更新Docs/UnarmedSprint.md对应旧限制和职责说明。
+- 验证：开始无PIE、无脏内容或地图，正常退出并确认进程结束后Development Editor编译成功；启动前检查进程避免重复实例，正常重新加载并恢复MCP。读回AnimBP状态BS_UP_TO_DATE、PIE False、无脏内容包。未运行PIE、模拟输入或功能测试，因此不声称已经实机排除全部腿部姿势跳变；请用户保持Shift+W连续拔收刀，观察速度和腿部动作连续性。
+- 文件与版本：仅MyCharacter.cpp、Docs/UnarmedSprint.md及本记录；保留用户EditorTools、模型、材质、地图等已有修改。提交本轮明确文件；沿用此前自动审批拒绝远程推送限制，不重试。
