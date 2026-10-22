@@ -1217,3 +1217,11 @@
 - 未完成：等待用户恢复MCP连接后，给AnimBP六个配置引用赋值、三个Sequence引脚绑定ActiveSprint引用、编译保存AnimBP、读回实际速度默认值/地图实例与引用/引脚。当前图仍使用上一版静态无武器动画，不应声称持刀动画已接完。工作区已准备.ue-armed-sprint-wire.py，已备份原源文件和AnimBP于.ue-armed-sprint-backup。
 - 文件：MyCharacter.cpp、Movement/ARPGCharacterMovementComponent.h、AnimInstance/MyCharacterAnimInstance.h/.cpp；三段新增持刀重定向动画；Docs/UnarmedSprint.md与本记录。用户其他模型/地图/武器/EditorTools等修改不纳入。see技能及see.sh未在技能目录找到，通过Unreal资源接口检查用户资产路径。
 - 版本：先保存本轮已完成部分的本地提交，待连接后追加完成接线的提交。沿用此前自动审批拒绝远程推送限制，不重试。
+
+## 2026-10-22 09:56:36 北京时间 — 恢复连接并完成持刀奔跑动画接线
+
+- 用户已正常重新打开编辑器，要求继续上一轮持刀奔跑与提速。MCP恢复，开始时无PIE、无脏内容包，新C++字段已加载；沿用上一轮成功编译结果，本轮没有改C++或重复构建。
+- 完成：通过ObjectTools给BP_CharacterAnim1设置Sheathed/Drawn Sprint Start/Loop/Turn六个动画引用，全部使用Sprint目录对应RT_序列；在SprintStart、Sprint、SprintTurn暴露Sequence引脚并分别连接ActiveSprintStartAnimation、ActiveSprintLoopAnimation、ActiveSprintTurnAnimation，由已有C++按武器状态选择。保留原显式时间、循环倍率、惯性化和7状态20转换结构。
+- 验证：动画蓝图编译状态BS_UP_TO_DATE，状态机结构检查is_valid=True、errors/warnings为空。读回六引用均正确、骨架均SK_Fenrir_Skeleton，三个Sequence引脚和原ExplicitTime/PlayRate、Pose全部已连。起步倍率1.15、动画匹配基准600；角色蓝图默认移动组件和地图BP_Character_C_1的SprintSpeed均720，无需修改用户角色蓝图/地图。保存AnimBP，结束时无脏内容包。没有运行PIE、模拟输入或功能测试；停步仍复用现有Stop，高速脚步和掉头观感待用户测试。
+- 调用探索：首次用Python读取角色get_character_movement未暴露报错，改用get_component_by_class(CharacterMovementComponent)读取完成；未影响资源。
+- 修改文件：Content/BP/MyCharatcer/BP_CharacterAnim1.uasset、Docs/UnarmedSprint.md、Docs/ExecutionLog.md。源代码与三段持刀动画已在上一提交e3e73f1；本次追加完成接线提交，保留用户其他源文件、模型、材质、地图、配置修改。沿用此前自动审批拒绝远程推送限制，不重试。
