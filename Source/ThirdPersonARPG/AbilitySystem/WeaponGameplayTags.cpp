@@ -2,6 +2,8 @@
 
 namespace WeaponGameplayTags
 {
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Attack_Light, "Ability.Attack.Light", "Single grounded light attack.");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Action_Attacking, "State.Action.Attacking", "Attack ability owns the full-body action.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Weapon_Drawn, "State.Weapon.Drawn", "Weapon is committed to the hand socket.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Weapon_Sheathed, "State.Weapon.Sheathed", "Weapon is committed to the sheath socket.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Action_Drawing, "State.Action.Drawing", "Draw montage is in progress.");

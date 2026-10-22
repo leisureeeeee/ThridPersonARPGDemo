@@ -19,6 +19,7 @@ public:
 	bool IsSprinting() const;
 	float GetSprintTurnTime() const { return FMath::Min(PivotElapsed * 2.0f, 1.1f); }
 	virtual float GetMaxSpeed() const override;
+	virtual float GetMaxAcceleration() const override;
 	bool IsPivoting() const { return bPivotBraking || bPivotTurning; }
 	bool HasDirectionalStart() const;
 	bool IsDirectionalStartComplete() const;
@@ -33,6 +34,7 @@ protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 
 private:
+	bool IsActionMovementLocked() const;
 	void ResetPivot();
 	bool BeginDirectionalStart(const FVector& DesiredDirection);
 	void UpdateDirectionalStart(float DeltaTime, const FVector& DesiredDirection);

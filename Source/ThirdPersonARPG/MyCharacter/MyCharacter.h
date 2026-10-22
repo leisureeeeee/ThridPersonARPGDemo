@@ -37,6 +37,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	bool ToggleWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	bool RequestLightAttack();
+
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsAttacking() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	bool SheatheWeapon();
 

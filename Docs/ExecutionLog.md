@@ -1332,3 +1332,14 @@
 - 文件：MyPlayerController.h/.cpp、MyCharacter.h/.cpp、Docs/WeaponStateGAS.md 和本日志。更新当前操作说明，历史执行记录保留当时键位。修改前源码备份在工作区 .ue-alt-weapon/backup，原有用户已修改/删除的跟踪文件哈希或缺失状态验证保持不变，只暂存本次六个文件。
 - 编译与加载：修改前及关闭前通过本机 MCP 检查无 PIE、无脏内容/地图，正常退出编辑器。Development Editor 完整 C++ 编译一次成功（13.28秒），正常重新打开单个编辑器实例；只读加载检查确认角色与动画蓝图均 BS_UP_TO_DATE、PlayerState/ASC/AS 归属正常，结束无脏内容/地图且 PIE=False。未执行自动化、PIE、模拟输入或功能测试。格式检查通过；Git 提示文档换行将标准化为 LF，不涉及语义变化。
 - 用户操作：进入游戏后按一次左/右 Alt 应拔刀，松开后再按应收刀；长按保持当前动作，不反复切换，拔收刀中重复按键应被现有逻辑拒绝。鼠标左右键不再触发拔收刀。实际按键、动画和系统快捷键交互仍待用户运行观察；不宣称功能实测通过。按项目持续授权提交并推送，结果见最终回复。
+
+## 2026-10-22 14:24:54 北京时间 — 左键第一段完整轻攻击
+
+- 用户需求：先完成一次完整挥刀，并明确作为轻攻击、左键触发；Alt继续拔收刀。用户负责重定向，本轮没有重定向或改写其源动画，也不实现伤害、命中、连招或实际资源消耗。
+- 初始检查：源 AS_Combo_Attack_05_01_02_V02_Seq 现已使用 SK_Fenrir_Skeleton，长度1.416667秒、无Notify，原根运动关闭。只读采样root从0到Y约91.850121厘米，保留原资产，创建AS_LightAttack播放副本并启用根运动/强制根锁定/动画第一帧根锁。新增AM_LightAttack，FullBody Slot、倍率1、混入0.08/混出0.12、单次播放。原AnimBP上半身DefaultSlot与按骨骼混合保留，在最终输出前增加FullBody Slot；源骨架文件逐字节比对保持不变。
+- GAS与输入：新增原生ULightAttackAbility，InstancedPerActor、ServerOnly、不重入；Ability.Attack.Light标识、要求Drawn、阻塞Drawing/Sheathing/Attacking，通过ActivationOwnedTags持有Attacking。GA校验地面、武器、动画实例、无现有Montage和骨架一致；Commit后由PlayMontageAndWait播放，完成/中断/取消/失败均结束，完整完成前不解锁。配置从新DefaultCombat.ini软引用加载，不在C++硬编码资源路径。ASC绑定时授予一次并复用规格，更换或释放Avatar前取消此能力。
+- 角色与移动：MyPlayerController创建左键LightAttackAction，Started事件只发送请求；Character转发给ASC，新增IsAttacking供查询，拔收刀入口阻塞攻击中。移动组件经IAbilitySystemInterface查Tag，攻击时禁自主加速度、速度上限和自主转向，停止奔跑判定，仍允许蒙太奇根运动驱动胶囊与碰撞；Tag结束后恢复原规则，不全局禁输入或改MovementMode，相机可继续转动。左键收刀状态无动作，按住不连发，动作中输入不缓存。
+- 资产编辑与保护：编辑前无PIE、无脏内容/地图，备份AnimBP和源骨架到工作区.ue-light-attack/backup。首次Python修改Slot结构体数组未显式写回元素，保存后读回仍为DefaultSlot；立即改为取出结构体、修改并写回数组元素，重新保存并确认Montage和图中均FullBody。没有直接编辑uasset二进制；三个本轮资源使用Git LFS。用户原有地图、配置、角色蓝图、EditorTools和源动画等修改哈希/缺失状态保持，未纳入本次提交。
+- 编译：正常退出前确认无PIE/脏资源。首次完整构建所有C++编译动作通过，但链接DLL时被运行中的UnrealEditor占用，最终LNK1104失败（55.19秒）；首次重新打开保护检查发现编辑器已运行，未再创建实例。重新只读确认编辑器无PIE/脏资源，正常请求退出并等待进程真正结束后，重试链接和元数据写入成功（2.62秒），没有强制结束进程。随后正常打开一个编辑器实例并加载最终二进制。
+- 加载验证：MCP读回LightAttackAbility已加载、DefaultCombat.ini正确解析AM_LightAttack与倍率1、required/blocked/owned标签正确；蒙太奇长1.416667、Slot=FullBody，图中FullBody正确串入最终输出，副本根运动=True而源动画保持False；动画实例仍为RootMotionFromMontagesOnly，角色/动画蓝图BS_UP_TO_DATE，移动状态机7状态20转换is_valid=True、errors/warnings空，结束无脏包且PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试，不将加载检查当作实际挥刀、根运动碰撞或取消测试。
+- 文件：新增AbilitySystem/Abilities/LightAttackAbility.h/.cpp、Config/DefaultCombat.ini、Docs/LightAttack.md、LightAttack下两个动画资源；修改玩家ASC、WeaponGameplayTags、MyCharacter、MyPlayerController、ARPGCharacterMovementComponent各.h/.cpp、BP_CharacterAnim1.uasset和本日志。文档解释调用链、GA与GE分工、配置位置及用户验证步骤。实际联机输入、预测和表现同步未接入，保持单机范围。仅暂存本次明确文件并按项目授权提交/推送，结果见最终回复。

@@ -278,6 +278,18 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+bool AMyCharacter::RequestLightAttack()
+{
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	return ASC && ASC->RequestLightAttack(this);
+}
+
+bool AMyCharacter::IsAttacking() const
+{
+	const UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking);
+}
+
 bool AMyCharacter::ToggleWeapon()
 {
 	// Draw/Sheathe already reject transitions while either montage is active.
@@ -291,7 +303,7 @@ bool AMyCharacter::DrawWeapon()
 	{
 		return false;
 	}
-	if (IsDrawingWeapon() || IsSheathingWeapon() || IsWeaponDrawn() || !GetCurrentWeapon()
+	if (IsAttacking() || IsDrawingWeapon() || IsSheathingWeapon() || IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
@@ -390,7 +402,7 @@ bool AMyCharacter::SheatheWeapon()
 	{
 		return false;
 	}
-	if (IsDrawingWeapon() || IsSheathingWeapon() || !IsWeaponDrawn() || !GetCurrentWeapon()
+	if (IsAttacking() || IsDrawingWeapon() || IsSheathingWeapon() || !IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;

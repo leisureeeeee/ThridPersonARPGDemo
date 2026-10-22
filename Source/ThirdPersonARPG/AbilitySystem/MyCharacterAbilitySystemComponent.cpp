@@ -1,5 +1,6 @@
 #include "AbilitySystem/MyCharacterAbilitySystemComponent.h"
 #include "AbilitySystem/WeaponGameplayTags.h"
+#include "AbilitySystem/Abilities/LightAttackAbility.h"
 #include "AbilitySystem/WeaponStateEffect.h"
 #include "MyCharacter/MyCharacter.h"
 
@@ -7,9 +8,14 @@ void UMyCharacterAbilitySystemComponent::BindWeaponAvatar(AMyCharacter* Characte
 {
     if (GetAvatarActor() != Character)
     {
+        CancelLightAttack();
         ClearWeaponEffects();
     }
     InitAbilityActorInfo(GetOwner(), Character);
+    if (GetOwner()->HasAuthority() && !FindAbilitySpecFromHandle(LightAttackHandle))
+    {
+        LightAttackHandle = GiveAbility(FGameplayAbilitySpec(ULightAttackAbility::StaticClass(), 1));
+    }
 }
 
 void UMyCharacterAbilitySystemComponent::ReleaseWeaponAvatar(const AMyCharacter* ExpectedAvatar)
@@ -17,6 +23,7 @@ void UMyCharacterAbilitySystemComponent::ReleaseWeaponAvatar(const AMyCharacter*
     // An old pawn ending play must not clear a newly possessed pawn's state.
     if (GetAvatarActor() == ExpectedAvatar)
     {
+        CancelLightAttack();
         ClearWeaponEffects();
         ClearActorInfo();
     }
@@ -73,5 +80,19 @@ void UMyCharacterAbilitySystemComponent::ClearWeaponEffects()
         RemoveActiveGameplayEffect(WeaponStateEffect);
         WeaponActionEffect.Invalidate();
         WeaponStateEffect.Invalidate();
+    }
+}
+
+bool UMyCharacterAbilitySystemComponent::RequestLightAttack(const AMyCharacter* ExpectedAvatar)
+{
+    return CanChangeWeaponState(ExpectedAvatar) && LightAttackHandle.IsValid()
+        && TryActivateAbility(LightAttackHandle, false);
+}
+
+void UMyCharacterAbilitySystemComponent::CancelLightAttack()
+{
+    if (LightAttackHandle.IsValid())
+    {
+        CancelAbilityHandle(LightAttackHandle);
     }
 }

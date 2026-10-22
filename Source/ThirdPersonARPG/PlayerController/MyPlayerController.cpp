@@ -62,6 +62,7 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AMyPlayerController::HandleSprintInput);
+	EnhancedInput->BindAction(LightAttackAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleLightAttackInput);
 	RegisterInputMappingContext();
 }
 
@@ -108,6 +109,10 @@ void AMyPlayerController::CreateInputMappingContext()
 	ToggleWeaponAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(ToggleWeaponAction, EKeys::LeftAlt);
 	PlayerMappingContext->MapKey(ToggleWeaponAction, EKeys::RightAlt);
+
+	LightAttackAction = NewObject<UInputAction>(this, TEXT("LightAttackAction"), RF_Transient);
+	LightAttackAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(LightAttackAction, EKeys::LeftMouseButton);
 
 	SprintAction = NewObject<UInputAction>(this, TEXT("SprintAction"), RF_Transient);
 	SprintAction->ValueType = EInputActionValueType::Boolean;
@@ -225,5 +230,15 @@ void AMyPlayerController::HandleSprintInput(const FInputActionValue& Value)
 		const bool bAllowed = IsLocalPlayerController() && ControlledCharacter->InputEnabled()
 			&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter;
 		ControlledCharacter->SetSprintRequested(bAllowed && Value.Get<bool>());
+	}
+}
+
+void AMyPlayerController::HandleLightAttackInput(const FInputActionValue& Value)
+{
+	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
+	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
+		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
+	{
+		ControlledCharacter->RequestLightAttack();
 	}
 }

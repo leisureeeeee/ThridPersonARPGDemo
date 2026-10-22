@@ -33,6 +33,7 @@ private:
 	void HandleLookInput(const FInputActionValue& Value);
 	void HandleZoomInput(const FInputActionValue& Value);
 	void HandleToggleWeaponInput(const FInputActionValue& Value);
+	void HandleLightAttackInput(const FInputActionValue& Value);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -54,6 +55,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> ToggleWeaponAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> LightAttackAction;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SprintAction;

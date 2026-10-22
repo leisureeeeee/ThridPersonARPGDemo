@@ -1,4 +1,7 @@
 #include "ARPGCharacterMovementComponent.h"
+#include "AbilitySystemInterface.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystem/WeaponGameplayTags.h"
 #include "GameFramework/Character.h"
 #include "ARPGDirectionalStartSet.h"
 
@@ -202,6 +205,10 @@ void UARPGCharacterMovementComponent::CalcVelocity(float DeltaTime, float Fricti
 
 void UARPGCharacterMovementComponent::PhysicsRotation(float DeltaTime)
 {
+	if (IsActionMovementLocked())
+	{
+		return;
+	}
 	if (!IsMovingOnGround() || !bOrientRotationToMovement || !HasValidData()
 		|| HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity())
 	{
@@ -248,10 +255,26 @@ void UARPGCharacterMovementComponent::SetSprintRequested(bool bRequested)
 
 bool UARPGCharacterMovementComponent::IsSprinting() const
 {
-	return bSprintRequested && IsMovingOnGround() && !IsCrouching();
+	return bSprintRequested && !IsActionMovementLocked() && IsMovingOnGround() && !IsCrouching();
 }
 
 float UARPGCharacterMovementComponent::GetMaxSpeed() const
 {
+	if (IsActionMovementLocked())
+	{
+		return 0.f;
+	}
 	return IsSprinting() ? FMath::Max(Super::GetMaxSpeed(), SprintSpeed) : Super::GetMaxSpeed();
+}
+
+bool UARPGCharacterMovementComponent::IsActionMovementLocked() const
+{
+	const IAbilitySystemInterface* AbilityOwner = Cast<IAbilitySystemInterface>(CharacterOwner);
+	const UAbilitySystemComponent* ASC = AbilityOwner ? AbilityOwner->GetAbilitySystemComponent() : nullptr;
+	return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking);
+}
+
+float UARPGCharacterMovementComponent::GetMaxAcceleration() const
+{
+	return IsActionMovementLocked() ? 0.f : Super::GetMaxAcceleration();
 }
