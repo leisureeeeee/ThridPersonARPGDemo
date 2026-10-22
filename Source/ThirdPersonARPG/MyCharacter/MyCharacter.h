@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "Character/CharacterBase.h"
 #include "MyCharacter.generated.h"
 
 class USpringArmComponent;
@@ -17,7 +17,7 @@ class UAnimNotify_DrawWeapon;
 class UAnimNotify_SheatheWeapon;
 
 UCLASS()
-class THIRDPERSONARPG_API AMyCharacter : public ACharacter
+class THIRDPERSONARPG_API AMyCharacter : public ACharacterBase
 {
 	GENERATED_BODY()
 

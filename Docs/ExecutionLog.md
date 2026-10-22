@@ -1282,3 +1282,13 @@
 - 校验过程：初次应用后的 uproject 字符串校验因 Git 将 CRLF 转换为 LF 而停止；确认标准化换行后完全相等，恢复原有 CRLF 后通过。随后 diff --check 将恢复基线 DefaultEngine.ini 的既有末尾空行标为新增 EOF 空行；该配置的暂存内容已证明与 0d0f39e 完全一致，因此保留原样并对其他本轮文件执行格式检查通过。没有因此改动或清理用户原有配置。
 - 编译与加载：编辑器退出前无 PIE、无脏内容/地图，正常退出并确认项目进程结束；恢复后的 Development Editor 完整 C++ 编译一次成功（12.91 秒），正常重新启动且避免重复实例。MCP 确认本会话 GAS/PlayerState 类型均未加载，GameMode.PlayerStateClass 恢复引擎 PlayerState，角色蓝图状态 BS_UP_TO_DATE，结束无脏包且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试。
 - 一致性与版本：提交前比较暂存区与 0d0f39e，除执行记录外没有文件差异；原有用户工作区修改继续保留。仅提交本轮撤回及日志，远程同步结果见最终回复。编辑器现在加载的是 GAS 创建前的 C++ 项目结构；可继续使用既有移动、动画与拔收刀配置，实际运行表现仍以用户验证为准。
+
+
+## 2026-10-22 13:32:08 北京时间 — 新增角色、ASC、属性集基类并调整 MyCharacter 继承
+
+- 用户需求：新增 CharacterBase，MyCharacter 继承该基类；建立 ASC 基类、AttributeSet 基类，CharacterBase 保存指向两者的指针。用户在初次只读检查后要求暂停，暂停时未修改代码；收到“继续”后按此前说明的最小范围实施，保留指针为空供后续子类/PlayerState 注入。
+- 实现：新增抽象 ACharacterBase : ACharacter, IAbilitySystemInterface；新增抽象 UAbilitySystemComponentBase : UAbilitySystemComponent 与 UAttributeSetBase : UAttributeSet。CharacterBase 声明两个 protected 的 UPROPERTY/Transient/TObjectPtr，供角色子类赋值；GetAbilitySystemComponent 实现引擎查询接口，GetAttributeSet 提供只读访问。没有创建 ASC 或属性集实例、添加实际属性、初始化 ActorInfo、授予能力或实现战斗逻辑，没有新增 PlayerState。
+- 继承与职责：MyCharacter.h 只替换 include 与直接父类，MyCharacter.cpp 完全未改；原相机、拔收刀和移动逻辑仍在具体角色类，输入仍由现有 PlayerController 负责。CharacterBase 构造函数原样转发 FObjectInitializer，维持现有自定义移动组件替换。启用 GameplayAbilities 插件并增加三个 GAS 模块依赖，供新基类类型编译。
+- 编译与加载：暂停前 MCP 只读请求因本地编辑器未运行而连接失败；继续后重新确认无项目编辑器进程，直接执行完整 Development Editor 编译，一次成功（16.45 秒）。启动前检查避免重复实例；首次通过 get_editor_property 查询蓝图 parent_class 因属性未暴露报错，改用 BlueprintService 读取后完成检查。编辑器加载后确认三个新类型存在，MyCharacter 属于 CharacterBase，角色默认对象的两个引用均为 None、没有 ASC 组件实例，移动组件仍为 ARPGCharacterMovementComponent；角色蓝图父类仍为 MyCharacter，状态 BS_UP_TO_DATE，地图角色同样属于 CharacterBase 且维持原移动组件。结束无脏地图/内容包且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试，原有运行表现未在本轮实测。
+- 文件：新增 Character/CharacterBase.h/.cpp、AbilitySystem/AbilitySystemComponentBase.h/.cpp、AbilitySystem/AttributeSetBase.h/.cpp、Docs/CharacterBase.md；修改 MyCharacter.h、ThirdPersonARPG.Build.cs、ThirdPersonARPG.uproject 的 GameplayAbilities 插件段及本日志。修改前原文件备份在工作区 .ue-character-base/backup。用户既有配置、地图、资源、EditorTools 代码和未跟踪文件保留；uproject 的 ModelContextProtocol/MCPClientToolset 原有启用差异不纳入提交，仅暂存本轮 GAS 段。
+- 查看与后续：继承链为 ACharacter → ACharacterBase → AMyCharacter。角色蓝图 Class Settings（类设置）父类仍应为 MyCharacter；继承属性里的两个引用为空是预期状态。具体 ASC/属性集子类、PlayerState 持有与生命周期绑定、实际技能和属性规则均留待后续实现。本轮仅提交明确相关文件与执行记录，远程同步结果见最终回复。
