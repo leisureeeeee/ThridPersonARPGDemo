@@ -4,11 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "AbilitySystemInterface.h"
-#include "GameplayTagContainer.h"
 #include "MyCharacter.generated.h"
 
-class UMyCharacterAbilitySystemSComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UARPGCameraRigComponent;
@@ -20,18 +17,12 @@ class UAnimNotify_DrawWeapon;
 class UAnimNotify_SheatheWeapon;
 
 UCLASS()
-class THIRDPERSONARPG_API AMyCharacter : public ACharacter, public IAbilitySystemInterface
+class THIRDPERSONARPG_API AMyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	AMyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	// Semantic action tags only; PlayerController owns future input bindings.
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	bool RequestCombatAction(FGameplayTag ActionTag);
 
 	// Input-independent request; equipment rules stay on the character.
 	void SetSprintRequested(bool bRequested);
@@ -55,22 +46,11 @@ public:
 	bool IsWeaponDrawn() const { return bWeaponDrawn; }
 
 protected:
-	virtual void PossessedBy(AController* NewController) override;
-	virtual void OnRep_Controller() override;
-	virtual void OnRep_PlayerState() override;
-	virtual void UnPossessed() override;
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	void InitializePlayerAbilitySystem();
-	void ReleasePlayerAbilitySystem();
-
-	// Non-owning cache only. The PlayerState creates and retains the ASC.
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UMyCharacterAbilitySystemSComponent> CachedAbilitySystem;
-
 	friend class UAnimNotify_DrawWeapon;
 	friend class UAnimNotify_SheatheWeapon;
 	void InitializeWeapon();

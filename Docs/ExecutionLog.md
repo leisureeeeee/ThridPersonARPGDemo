@@ -1272,3 +1272,13 @@
 - 验证：编辑器退出前无 PIE、无脏内容/地图，正常退出且确认无残留项目进程；Development Editor 完整 C++ 构建一次成功（23.34 秒），正常重新启动且避免重复实例。MCP 读回 AARPGPlayerState 和新名 ASC 均加载，PS 默认对象持有 ASC=True、ASC 持有属性集=True、GameMode.PlayerStateClass=ARPGPlayerState；Character 默认对象及地图 BP_Character_C_1 均无本地 ASC，角色蓝图 BS_UP_TO_DATE，配置仍为 None，结束无脏包/地图且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试；未验证实际换角色、重生及网络复制行为。
 - 文件：新增 PlayerState/ARPGPlayerState.h/.cpp；ASC 两文件重命名及初始化更新；MyCharacter.h/.cpp、GameMode/ARPGGameMode.cpp、Combat/ARPGCombatDefinition.h、Combat/ARPGCombatAttributeSet.h、Config/DefaultEngine.ini、Docs/GASCombatFramework.md 与本日志。原文件备份位于工作区 .ue-gas-playerstate/backup。未修改用户已有地图、角色/动画蓝图、模型、武器、EditorTools 或 uproject 的原有插件差异。
 - 查看与后续：在原生 PlayerState 默认对象可见 MyCharacterAbilitySystemSComponent；需要编辑配置时，从 ARPGPlayerState 派生蓝图并在实际 GameMode 的 Player State Class（玩家状态类）指定。编辑器非运行关卡角色无 PlayerState/本地 ASC 为预期；具体战斗能力保持抽象入口，输入、动画及数值结算继续留空。本轮只提交明确迁移文件及日志，远程同步结果见最终回复。
+
+
+## 2026-10-22 13:10:32 北京时间 — 撤回 GAS 框架，恢复创建之前的项目版本
+
+- 用户需求：回到 GAS 还没创建的版本。核对连续两个 GAS 提交 cc7f5b5、b9aef60 后，确定恢复目标为 0d0f39e（持刀行走停步修复完成后的版本）。采用新提交撤回两个提交的合并改动，不重写既有历史，不丢弃用户原有未提交修改。
+- 撤回范围：删除本会话新增的能力系统组件、属性集、能力类、原生标签、战斗配置、PlayerState 类型及 GAS 框架文档；恢复 MyCharacter、GameMode、Build.cs、DefaultEngine.ini 和 uproject 的 GAS 创建前接线、依赖和配置。保留 Docs/ExecutionLog.md 中真实执行历史，并追加本条撤回记录。
+- 数据保护：变更前相关文件备份在工作区 .ue-gas-rollback/backup；生成限定范围反向补丁，应用前验证工作区与索引都可无冲突撤回。对原有已修改/删除的非任务跟踪文件逐一记录 SHA256 或缺失标记，撤回后全部匹配；uproject 保留原有 ModelContextProtocol/MCPClientToolset 插件差异，移除的只有 GameplayAbilities 段。原有地图、动画、武器、模型、EditorTools、配置及未跟踪文件未纳入撤回或本次提交。
+- 校验过程：初次应用后的 uproject 字符串校验因 Git 将 CRLF 转换为 LF 而停止；确认标准化换行后完全相等，恢复原有 CRLF 后通过。随后 diff --check 将恢复基线 DefaultEngine.ini 的既有末尾空行标为新增 EOF 空行；该配置的暂存内容已证明与 0d0f39e 完全一致，因此保留原样并对其他本轮文件执行格式检查通过。没有因此改动或清理用户原有配置。
+- 编译与加载：编辑器退出前无 PIE、无脏内容/地图，正常退出并确认项目进程结束；恢复后的 Development Editor 完整 C++ 编译一次成功（12.91 秒），正常重新启动且避免重复实例。MCP 确认本会话 GAS/PlayerState 类型均未加载，GameMode.PlayerStateClass 恢复引擎 PlayerState，角色蓝图状态 BS_UP_TO_DATE，结束无脏包且 PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试。
+- 一致性与版本：提交前比较暂存区与 0d0f39e，除执行记录外没有文件差异；原有用户工作区修改继续保留。仅提交本轮撤回及日志，远程同步结果见最终回复。编辑器现在加载的是 GAS 创建前的 C++ 项目结构；可继续使用既有移动、动画与拔收刀配置，实际运行表现仍以用户验证为准。
