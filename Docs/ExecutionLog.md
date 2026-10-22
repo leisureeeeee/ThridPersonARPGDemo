@@ -1303,3 +1303,15 @@
 - 范围与未验证：只新增角色类并创建基础对象，不初始化实际 ActorInfo，不添加复制策略、实际属性、技能授予、AI、网格或动画；没有创建 Boss 蓝图或将其放入关卡。未新增/执行自动化、PIE、模拟输入或功能测试；默认对象读回不代表战斗机制已可用。
 - 文件与版本：新增 Character/BossCharacter.h/.cpp；修改 AbilitySystem/AbilitySystemComponentBase.h、AbilitySystem/AttributeSetBase.h、Docs/CharacterBase.md 和本日志。原文件备份位于工作区 .ue-boss-character/backup。保留用户既有源文件、地图、资源与配置修改，MyCharacter、GameMode 和 uproject 本轮未改；只提交上述明确文件，远程同步结果见最终回复。
 - 编辑器查看：可从 BossCharacter 创建 Blueprint Class（蓝图类），在组件面板查看 AbilitySystemComponent，在继承的 Abilities（能力）属性中查看两个引用。AttributeSet 是 UObject（引擎对象）而非 ActorComponent（Actor 组件），不要求出现在组件列表；对象通过默认子对象和反射指针由引擎管理生命周期，无需普通 C++ new/delete。
+
+## 2026-10-22 13:53:52 北京时间 — 持刀与收刀状态迁移至 PlayerState GAS
+
+- 用户需求：仅重构持刀/收刀状态，按本会话确定的 PlayerState 初始化 ASC、AS 的架构接入 GAS，保留现有动作表现。本轮不恢复此前已撤回的战斗框架，也不新增攻击、招架或技能树。
+- 初始检查：当前仅有 CharacterBase/ASC/AS 基类，玩家两个引用尚为空，现有装备状态由 MyCharacter 的 bWeaponDrawn/bDrawingWeapon/bSheathingWeapon 保存。实际项目位于工作区之外，首次普通 Git 读取被权限限制，按工具权限升级后完成；完整记录原有用户修改及文件 SHA256，未覆盖或暂存用户资源、配置、EditorTools、uproject 等修改。
+- 实现：新增 ARPGPlayerState，构造函数分别创建 MyCharacterAbilitySystemComponent、AttributeSetBase，Outer 均为 PlayerState；ASC 复制模式 Mixed，使用 SetNetUpdateFrequency(100.f)。GameMode 指定新 PlayerState。MyCharacter 通过 PossessedBy/OnRep_PlayerState 绑定 Owner=PlayerState、Avatar=Character，BeginPlay 补齐，OnRep_Controller 刷新；CharacterBase 与 Boss 的持有方式保持不变。
+- 状态：新增 State.Weapon.Drawn、State.Weapon.Sheathed、State.Action.Drawing、State.Action.Sheathing 四个原生 Tag。原生 UWeaponStateEffect 为 Infinite GE，通过每份 Spec.DynamicGrantedTags 授予相应状态；ASC 分别持有稳定状态和动作状态的效果句柄，只替换/移除本模块自己的效果。MyCharacter 删除三个原生状态布尔值，保留查询函数，改为从当前 Avatar 对应 ASC 读 Tag。现有 AnimInstance、奔跑、控制器输入、动画资源及蓝图接线无需改动。
+- 时机与清理：Montage 播放成功后记录动作状态，原 Notify 完成武器挂接与激活/关闭后提交稳定状态，Montage 正常结束/中断均清理动作状态；通知前中断保留旧姿态，通知后中断保留已提交结果。GE 应用失败保护旧状态并回退挂接。UnPossessed/EndPlay 解除结束委托、停止两个 Montage、清理效果并释放 ActorInfo/引用；ExpectedAvatar 校验防止旧身体清除新身体状态。重新绑定按实际挂接恢复，初始化成功默认收刀，无武器不授予稳定状态。
+- 范围：拔收刀过程仍由现有 Character 动态 Montage 驱动，本轮仅迁移状态唯一来源，没有新建 GA。AS 仍无具体属性。沿用项目已有单机流程，状态修改限权威端；未接入联机输入 RPC、远端 Montage/武器挂接复制或预测，不能将 GE 可复制视为联机动作已完成。效果替换的 Tag 委托不是多标签原子事务，当前消费者读取调用完成后的状态。
+- 编译与加载：应用前发现编辑器正在运行，保护脚本在写入前停止；经本机 MCP 确认无 PIE、无脏内容/地图后正常退出，没有强制结束进程。第一次完整 Development Editor 编译成功（19.88秒），发现 NetUpdateFrequency 弃用警告，改用正式 setter 后再次编译成功（16.00秒），无新增源码警告。正常重新打开一个编辑器实例，MCP 只读确认新 PlayerState/ASC 已加载、两个子对象 Outer 正确、GameMode.PlayerStateClass 正确、地图无 GameMode 覆盖、GE 为 Infinite，角色与动画蓝图均 BS_UP_TO_DATE，结束无脏资源/地图、PIE=False。
+- 未验证：未新增/执行自动化、PIE、模拟输入或功能测试。构建与默认对象检查不能替代实际拔收刀、中断、解除控制或网络验证。用户可左键拔刀、右键收刀，并观察连续点击、移动中切换与持刀/收刀奔跑，确认动作和装备姿态仍匹配。
+- 文件：新增 AbilitySystem/MyCharacterAbilitySystemComponent.h/.cpp、WeaponGameplayTags.h/.cpp、WeaponStateEffect.h/.cpp、PlayerState/ARPGPlayerState.h/.cpp、Docs/WeaponStateGAS.md；修改 MyCharacter.h/.cpp、GameMode/ARPGGameMode.cpp、Docs/CharacterBase.md 与本日志。初始相关源码备份在工作区 .ue-weapon-gas/backup；原有用户已修改/删除的跟踪文件哈希/缺失状态逐一验证保持不变。首次暂存格式检查发现本条记录末尾多余空行，已修正后通过。仅暂存本次明确文件，提交和远程同步结果见最终回复。

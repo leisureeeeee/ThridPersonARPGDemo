@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyCharacter.h"
+#include "AbilitySystem/MyCharacterAbilitySystemComponent.h"
+#include "AbilitySystem/WeaponGameplayTags.h"
+#include "PlayerState/ARPGPlayerState.h"
 #include "Weapon/WeaponBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -51,6 +54,98 @@ void AMyCharacter::PostInitializeComponents()
 	ensure(CameraRig->InitializeRig(SpringArm, FollowCamera));
 }
 
+void AMyCharacter::PossessedBy(AController* NewController)
+{
+    Super::PossessedBy(NewController);
+    InitializeAbilitySystem();
+}
+
+void AMyCharacter::OnRep_PlayerState()
+{
+    Super::OnRep_PlayerState();
+    InitializeAbilitySystem();
+}
+
+void AMyCharacter::OnRep_Controller()
+{
+    Super::OnRep_Controller();
+    InitializeAbilitySystem();
+}
+
+void AMyCharacter::UnPossessed()
+{
+    ReleaseAbilitySystem();
+    Super::UnPossessed();
+}
+
+UMyCharacterAbilitySystemComponent* AMyCharacter::GetWeaponASC() const
+{
+    UMyCharacterAbilitySystemComponent* ASC = Cast<UMyCharacterAbilitySystemComponent>(AbilitySystemComponent);
+    return ASC && ASC->GetAvatarActor() == this ? ASC : nullptr;
+}
+
+void AMyCharacter::InitializeAbilitySystem()
+{
+    AARPGPlayerState* PS = GetPlayerState<AARPGPlayerState>();
+    if (!PS)
+    {
+        ReleaseAbilitySystem();
+        return;
+    }
+    if (AbilitySystemComponent != PS->GetPlayerASC())
+    {
+        ReleaseAbilitySystem();
+        AbilitySystemComponent = PS->GetPlayerASC();
+        AttributeSet = PS->GetPlayerAS();
+    }
+    UMyCharacterAbilitySystemComponent* ASC = PS->GetPlayerASC();
+    const bool bAlreadyBound = ASC->GetAvatarActor() == this;
+    ASC->BindWeaponAvatar(this);
+    if (!bAlreadyBound)
+    {
+        SyncWeaponStateFromAttachment();
+    }
+}
+
+void AMyCharacter::ReleaseAbilitySystem()
+{
+    StopWeaponMontages();
+    if (UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC())
+    {
+        ASC->ReleaseWeaponAvatar(this);
+    }
+    AbilitySystemComponent = nullptr;
+    AttributeSet = nullptr;
+}
+
+void AMyCharacter::SyncWeaponStateFromAttachment()
+{
+    AWeaponBase* Weapon = GetCurrentWeapon();
+    if (UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC(); ASC && Weapon
+        && Weapon->GetAttachParentActor() == this && Weapon->GetRootComponent())
+    {
+        ASC->SetWeaponDrawn(this, Weapon->GetRootComponent()->GetAttachSocketName() == DrawnWeaponSocket);
+    }
+}
+
+bool AMyCharacter::IsWeaponDrawn() const
+{
+    const UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+    return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Weapon_Drawn);
+}
+
+bool AMyCharacter::IsDrawingWeapon() const
+{
+    const UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+    return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Drawing);
+}
+
+bool AMyCharacter::IsSheathingWeapon() const
+{
+    const UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+    return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Sheathing);
+}
+
 AWeaponBase* AMyCharacter::GetCurrentWeapon() const
 {
 	return IsValid(CurrentWeapon.Get()) ? CurrentWeapon.Get() : nullptr;
@@ -59,6 +154,7 @@ AWeaponBase* AMyCharacter::GetCurrentWeapon() const
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	InitializeAbilitySystem();
 	// Defaults-only draw settings must follow the Blueprint template, including old placed actors.
 	const AMyCharacter* Defaults = GetClass()->GetDefaultObject<AMyCharacter>();
 	if (Defaults && Defaults != this)
@@ -143,9 +239,10 @@ void AMyCharacter::InitializeWeapon()
 
 	Weapon->SetActorRelativeTransform(HolsteredWeaponOffset);
 	CurrentWeapon = Weapon;
+	SyncWeaponStateFromAttachment();
 }
 
-void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AMyCharacter::StopWeaponMontages()
 {
 	if (UAnimInstance* Animation = GetMesh()->GetAnimInstance(); Animation && ActiveDrawMontage)
 	{
@@ -160,10 +257,12 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Animation->Montage_Stop(0.0f, ActiveSheatheMontage);
 	}
 	ActiveSheatheMontage = nullptr;
-	bSheathingWeapon = false;
 	ActiveDrawMontage = nullptr;
-	bDrawingWeapon = false;
-	bWeaponDrawn = false;
+}
+
+void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	ReleaseAbilitySystem();
 	if (IsValid(SpawnedWeapon.Get()))
 	{
 		SpawnedWeapon->Destroy();
@@ -181,7 +280,12 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 bool AMyCharacter::DrawWeapon()
 {
-	if (bDrawingWeapon || bSheathingWeapon || bWeaponDrawn || !GetCurrentWeapon()
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	if (!ASC || !ASC->CanChangeWeaponState(this))
+	{
+		return false;
+	}
+	if (IsDrawingWeapon() || IsSheathingWeapon() || IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
@@ -204,7 +308,12 @@ bool AMyCharacter::DrawWeapon()
 	{
 		return false;
 	}
-	bDrawingWeapon = true;
+	if (!ASC->SetWeaponAction(this, WeaponGameplayTags::State_Action_Drawing))
+	{
+		Animation->Montage_Stop(0.0f, ActiveDrawMontage);
+		ActiveDrawMontage = nullptr;
+		return false;
+	}
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleDrawMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveDrawMontage);
@@ -213,9 +322,14 @@ bool AMyCharacter::DrawWeapon()
 
 void AMyCharacter::HandleWeaponGripNotify(UAnimSequenceBase* Animation)
 {
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	if (!ASC || !ASC->CanChangeWeaponState(this))
+	{
+		return;
+	}
 	AWeaponBase* Weapon = GetCurrentWeapon();
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
-	if (!bDrawingWeapon || bWeaponDrawn || !Weapon || Animation != DrawWeaponAnimation.Get()
+	if (!IsDrawingWeapon() || IsWeaponDrawn() || !Weapon || Animation != DrawWeaponAnimation.Get()
 		|| !Instance || !ActiveDrawMontage || !Instance->Montage_IsPlaying(ActiveDrawMontage))
 	{
 		return;
@@ -235,7 +349,13 @@ void AMyCharacter::HandleWeaponGripNotify(UAnimSequenceBase* Animation)
 		Instance->Montage_Stop(0.1f, ActiveDrawMontage);
 		return;
 	}
-	bWeaponDrawn = true;
+	if (!ASC->SetWeaponDrawn(this, true))
+	{
+		Weapon->DeactivateWeapon();
+		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PreviousSocket);
+		Weapon->SetActorRelativeTransform(PreviousRelative);
+		Instance->Montage_Stop(0.1f, ActiveDrawMontage);
+	}
 }
 
 void AMyCharacter::HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -246,17 +366,25 @@ void AMyCharacter::HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	}
 	// Before the grip notify, an interruption keeps the weapon holstered.
 	// After the grip notify, retain the committed hand attachment and drawn state.
-	if (!bInterrupted && !bWeaponDrawn)
+	if (!bInterrupted && !IsWeaponDrawn())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: Draw animation ended without a successful weapon grip notify."), *GetName());
 	}
-	bDrawingWeapon = false;
+	if (UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC())
+	{
+		ASC->SetWeaponAction(this, FGameplayTag());
+	}
 	ActiveDrawMontage = nullptr;
 }
 
 bool AMyCharacter::SheatheWeapon()
 {
-	if (bDrawingWeapon || bSheathingWeapon || !bWeaponDrawn || !GetCurrentWeapon()
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	if (!ASC || !ASC->CanChangeWeaponState(this))
+	{
+		return false;
+	}
+	if (IsDrawingWeapon() || IsSheathingWeapon() || !IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
@@ -279,7 +407,12 @@ bool AMyCharacter::SheatheWeapon()
 	{
 		return false;
 	}
-	bSheathingWeapon = true;
+	if (!ASC->SetWeaponAction(this, WeaponGameplayTags::State_Action_Sheathing))
+	{
+		Animation->Montage_Stop(0.0f, ActiveSheatheMontage);
+		ActiveSheatheMontage = nullptr;
+		return false;
+	}
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleSheatheMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveSheatheMontage);
@@ -288,9 +421,14 @@ bool AMyCharacter::SheatheWeapon()
 
 void AMyCharacter::HandleWeaponSheathNotify(UAnimSequenceBase* Animation)
 {
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	if (!ASC || !ASC->CanChangeWeaponState(this))
+	{
+		return;
+	}
 	AWeaponBase* Weapon = GetCurrentWeapon();
 	UAnimInstance* Instance = GetMesh()->GetAnimInstance();
-	if (!bSheathingWeapon || !bWeaponDrawn || !Weapon || Animation != SheatheWeaponAnimation.Get()
+	if (!IsSheathingWeapon() || !IsWeaponDrawn() || !Weapon || Animation != SheatheWeaponAnimation.Get()
 		|| !Instance || !ActiveSheatheMontage || !Instance->Montage_IsPlaying(ActiveSheatheMontage))
 	{
 		return;
@@ -310,7 +448,13 @@ void AMyCharacter::HandleWeaponSheathNotify(UAnimSequenceBase* Animation)
 		Instance->Montage_Stop(0.1f, ActiveSheatheMontage);
 		return;
 	}
-	bWeaponDrawn = false;
+	if (!ASC->SetWeaponDrawn(this, false))
+	{
+		Weapon->ActivateWeapon();
+		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, PreviousSocket);
+		Weapon->SetActorRelativeTransform(PreviousRelative);
+		Instance->Montage_Stop(0.1f, ActiveSheatheMontage);
+	}
 }
 
 void AMyCharacter::HandleSheatheMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -320,11 +464,14 @@ void AMyCharacter::HandleSheatheMontageEnded(UAnimMontage* Montage, bool bInterr
 		return;
 	}
 	// Only the notify commits the equipment state. Interruptions preserve that result.
-	if (!bInterrupted && bWeaponDrawn)
+	if (!bInterrupted && IsWeaponDrawn())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s: Sheathe animation ended without a successful weapon sheath notify."), *GetName());
 	}
-	bSheathingWeapon = false;
+	if (UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC())
+	{
+		ASC->SetWeaponAction(this, FGameplayTag());
+	}
 	ActiveSheatheMontage = nullptr;
 }
 

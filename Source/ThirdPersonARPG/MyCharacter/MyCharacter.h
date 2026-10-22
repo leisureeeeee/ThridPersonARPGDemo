@@ -15,6 +15,7 @@ class UAnimSequenceBase;
 class UAnimMontage;
 class UAnimNotify_DrawWeapon;
 class UAnimNotify_SheatheWeapon;
+class UMyCharacterAbilitySystemComponent;
 
 UCLASS()
 class THIRDPERSONARPG_API AMyCharacter : public ACharacterBase
@@ -37,22 +38,31 @@ public:
 	bool SheatheWeapon();
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
-	bool IsSheathingWeapon() const { return bSheathingWeapon; }
+	bool IsSheathingWeapon() const;
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
-	bool IsDrawingWeapon() const { return bDrawingWeapon; }
+	bool IsDrawingWeapon() const;
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
-	bool IsWeaponDrawn() const { return bWeaponDrawn; }
+	bool IsWeaponDrawn() const;
 
 protected:
 	virtual void PostInitializeComponents() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
+	virtual void OnRep_Controller() override;
+	virtual void UnPossessed() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	friend class UAnimNotify_DrawWeapon;
 	friend class UAnimNotify_SheatheWeapon;
+	void InitializeAbilitySystem();
+	void ReleaseAbilitySystem();
+	UMyCharacterAbilitySystemComponent* GetWeaponASC() const;
+	void StopWeaponMontages();
+	void SyncWeaponStateFromAttachment();
 	void InitializeWeapon();
 	void HandleWeaponGripNotify(UAnimSequenceBase* Animation);
 	void HandleDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -100,9 +110,6 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> ActiveDrawMontage;
 
-	bool bDrawingWeapon = false;
-	bool bWeaponDrawn = false;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Draw", meta = (ClampMin = "0.1", ClampMax = "3.0"))
 	float DrawWeaponPlayRate = 1.3f;
 
@@ -114,6 +121,4 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> ActiveSheatheMontage;
-
-	bool bSheathingWeapon = false;
 };
