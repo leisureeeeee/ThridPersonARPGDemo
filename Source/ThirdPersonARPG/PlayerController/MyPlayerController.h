@@ -32,8 +32,7 @@ private:
 	void HandleMoveInput(const FInputActionValue& Value);
 	void HandleLookInput(const FInputActionValue& Value);
 	void HandleZoomInput(const FInputActionValue& Value);
-	void HandleDrawWeaponInput(const FInputActionValue& Value);
-	void HandleSheatheWeaponInput(const FInputActionValue& Value);
+	void HandleToggleWeaponInput(const FInputActionValue& Value);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -54,10 +53,7 @@ private:
 	TWeakObjectPtr<UEnhancedInputLocalPlayerSubsystem> MappingSubsystem;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> DrawWeaponAction;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UInputAction> SheatheWeaponAction;
+	TObjectPtr<UInputAction> ToggleWeaponAction;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SprintAction;

@@ -58,8 +58,7 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleMoveInput);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleLookInput);
 	EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleZoomInput);
-	EnhancedInput->BindAction(DrawWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleDrawWeaponInput);
-	EnhancedInput->BindAction(SheatheWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleSheatheWeaponInput);
+	EnhancedInput->BindAction(ToggleWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleToggleWeaponInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AMyPlayerController::HandleSprintInput);
@@ -105,18 +104,15 @@ void AMyPlayerController::CreateInputMappingContext()
 	// Wheel up is positive (closer); wheel down is negative (farther).
 	PlayerMappingContext->MapKey(ZoomAction, EKeys::MouseWheelAxis);
 
-	DrawWeaponAction = NewObject<UInputAction>(this, TEXT("DrawWeaponAction"), RF_Transient);
-	DrawWeaponAction->ValueType = EInputActionValueType::Boolean;
-	PlayerMappingContext->MapKey(DrawWeaponAction, EKeys::LeftMouseButton);
+	ToggleWeaponAction = NewObject<UInputAction>(this, TEXT("ToggleWeaponAction"), RF_Transient);
+	ToggleWeaponAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(ToggleWeaponAction, EKeys::LeftAlt);
+	PlayerMappingContext->MapKey(ToggleWeaponAction, EKeys::RightAlt);
 
 	SprintAction = NewObject<UInputAction>(this, TEXT("SprintAction"), RF_Transient);
 	SprintAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(SprintAction, EKeys::LeftShift);
 	PlayerMappingContext->MapKey(SprintAction, EKeys::RightShift);
-
-	SheatheWeaponAction = NewObject<UInputAction>(this, TEXT("SheatheWeaponAction"), RF_Transient);
-	SheatheWeaponAction->ValueType = EInputActionValueType::Boolean;
-	PlayerMappingContext->MapKey(SheatheWeaponAction, EKeys::RightMouseButton);
 }
 
 void AMyPlayerController::RegisterInputMappingContext()
@@ -203,23 +199,13 @@ void AMyPlayerController::HandleZoomInput(const FInputActionValue& Value)
 	}
 }
 
-void AMyPlayerController::HandleDrawWeaponInput(const FInputActionValue& Value)
+void AMyPlayerController::HandleToggleWeaponInput(const FInputActionValue& Value)
 {
 	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
 	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
 		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
 	{
-		ControlledCharacter->DrawWeapon();
-	}
-}
-
-void AMyPlayerController::HandleSheatheWeaponInput(const FInputActionValue& Value)
-{
-	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
-	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
-		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
-	{
-		ControlledCharacter->SheatheWeapon();
+		ControlledCharacter->ToggleWeapon();
 	}
 }
 

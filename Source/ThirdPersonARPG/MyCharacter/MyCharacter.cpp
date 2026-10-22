@@ -278,6 +278,12 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+bool AMyCharacter::ToggleWeapon()
+{
+	// Draw/Sheathe already reject transitions while either montage is active.
+	return IsWeaponDrawn() ? SheatheWeapon() : DrawWeapon();
+}
+
 bool AMyCharacter::DrawWeapon()
 {
 	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();

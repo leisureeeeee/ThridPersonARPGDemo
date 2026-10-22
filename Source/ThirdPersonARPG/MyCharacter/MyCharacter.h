@@ -35,6 +35,9 @@ public:
 	bool DrawWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool ToggleWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	bool SheatheWeapon();
 
 	UFUNCTION(BlueprintPure, Category = "Weapon")
