@@ -1249,3 +1249,15 @@
 - 验证：修改前无PIE/脏内容或地图；备份源码及AnimBP于工作区.ue-combat-walk-backup；正常退出后Development Editor编译成功，启动前检查避免重复实例，正常重新加载。AnimBP编译BS_UP_TO_DATE，结构检查is_valid=True、errors/warnings空，保存成功。未运行PIE或功能测试。未改起步系列、武器插槽、拔收刀或奔跑速度；建议用户持刀W行走后松键观察右手，并对比收刀停步。
 - 文件：Source/ThirdPersonARPG/AnimInstance/MyCharacterAnimInstance.h/.cpp、BP_CharacterAnim1.uasset、CombatWalk下两动画、Docs/CombatWalkStopFix.md和本记录。保留用户其他修改，仅提交明确文件；沿用此前自动审批拒绝远程推送限制，不重试。
 - 前序暂停检查补记：此前空格躲避请求只读取8段Evade序列和根轨迹，用户随即要求稍等，未修改代码或资源；随后仅讨论GAS架构，尚未实现躲避/GAS。
+
+
+## 2026-10-22 11:45:23 北京时间 — C++ GAS 战斗整体框架
+
+- 用户需求：生命值、双方招架条、玩家能量；普通/特殊攻击、招架、躲避；完美招架、后摇缩短、满条处决/回能、延迟衰减。用户先要求暂停，随后明确先用 C++ GAS 搭整体框架，实际机制暂不实现。暂停前只读检查未修改项目，本轮按最新范围建立框架。
+- 实现：启用 GameplayAbilities 插件，添加 GameplayAbilities/GameplayTags/GameplayTasks 模块依赖。新增可复用 ASC、共享六属性 AttributeSet、抽象能力基类及普通攻击/特殊攻击/招架/躲避/处决五类入口、原生标签和战斗配置数据资产类型。ASC 负责属性子对象、角色信息初始化、服务端一次性初始化效果和能力授予、动作请求与服务端事件分发；属性集仅做复制通知与边界保护。
+- 角色接入：AMyCharacter 组合 CombatAbilitySystem 并实现引擎 IAbilitySystemInterface；PossessedBy/OnRep_Controller 刷新 Owner/Avatar，组件 BeginPlay 初始化。角色不新增键位、Enhanced Input 依赖或数值结算。处决只保留服务端事件触发定义。配置默认空，无具体技能授予或自动应用效果。
+- 契约：保留完美窗口、普通/完美招架后摇、衰减延迟/速率、完美招架压力、处决能量奖励及六类效果引用。文档区分已建立基础设施和待实现规则，并说明完美招架也需重置受攻击计时、事件双方语义、处决完成/取消清理和能量消耗的后续归属。未实现命中、窗口判定、动画、恢复、处决、技能消耗或 UI。
+- 编译与加载：编辑器初检及退出前均无 PIE、无脏内容/地图，正常退出且确认旧进程结束；Development Editor 完整构建一次成功（22.18 秒）。新增反射和构造函数已通过完整重启加载，启动前检查避免双实例。MCP 读回九个新增原生类全部存在，地图 BP_Character_C_1 的 ASC 和属性集均存在，CombatDefinition=None，结束无脏内容/地图且 PIE=False。未新增或执行自动化、PIE、模拟输入或功能测试；没有把构建/加载通过当作战斗机制或联网验证。
+- 执行记录：首次沙箱内 Git 读取实际项目路径被拒，按工具权限升级后完成；首次全项目 diff --check 报用户已有 DefaultEditor.ini/DefaultGame.ini 空行，未改这些文件，限定本轮文件检查通过。引擎私有源码路径查询不存在，使用已发现公开头与成功编译校核。本轮未使用视觉输入或运行 see。
+- 文件：Source/ThirdPersonARPG/Combat 下 11 个新 C++ 文件、MyCharacter.h/.cpp、ThirdPersonARPG.Build.cs、ThirdPersonARPG.uproject 的 GameplayAbilities 插件段、Docs/GASCombatFramework.md 与本记录。修改前原文件备份在工作区 .ue-gas-framework/backup。保留用户地图/模型/动画/配置/EditorTools 等改动；uproject 原有 ModelContextProtocol/MCPClientToolset 启用差异留在工作区，仅暂存本轮 GAS 插件段。
+- 版本与后续：仅提交本轮明确文件和日志；远程同步结果见本轮最终回复。编辑器可在角色组件面板查看 CombatAbilitySystem，在数据资产类型中查找 ARPGCombatDefinition；默认无新战斗效果为预期行为。实际机制、素材配置和功能验证留待后续任务。

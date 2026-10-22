@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyCharacter.h"
+#include "Combat/ARPGAbilitySystemComponent.h"
 #include "Weapon/WeaponBase.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
@@ -18,6 +19,7 @@ AMyCharacter::AMyCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UARPGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
+	CombatAbilitySystem = CreateDefaultSubobject<UARPGAbilitySystemComponent>(TEXT("CombatAbilitySystem"));
 
 	// The capsule origin is its center; this mesh's origin is at the feet.
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f,
@@ -335,4 +337,26 @@ void AMyCharacter::SetSprintRequested(bool bRequested)
 		// Equipment montages only own the upper body; movement intent stays independent.
 		Movement->SetSprintRequested(bRequested);
 	}
+}
+
+UAbilitySystemComponent* AMyCharacter::GetAbilitySystemComponent() const
+{
+	return CombatAbilitySystem;
+}
+
+bool AMyCharacter::RequestCombatAction(FGameplayTag ActionTag)
+{
+	return CombatAbilitySystem && CombatAbilitySystem->RequestCombatAction(ActionTag);
+}
+
+void AMyCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	CombatAbilitySystem->InitializeCombat();
+}
+
+void AMyCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+	CombatAbilitySystem->InitializeCombat();
 }

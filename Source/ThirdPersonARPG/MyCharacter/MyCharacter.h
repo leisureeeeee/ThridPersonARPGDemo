@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "MyCharacter.generated.h"
 
+class UARPGAbilitySystemComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UARPGCameraRigComponent;
@@ -17,12 +20,18 @@ class UAnimNotify_DrawWeapon;
 class UAnimNotify_SheatheWeapon;
 
 UCLASS()
-class THIRDPERSONARPG_API AMyCharacter : public ACharacter
+class THIRDPERSONARPG_API AMyCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	AMyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	// Semantic action tags only; PlayerController owns future input bindings.
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	bool RequestCombatAction(FGameplayTag ActionTag);
 
 	// Input-independent request; equipment rules stay on the character.
 	void SetSprintRequested(bool bRequested);
@@ -46,11 +55,16 @@ public:
 	bool IsWeaponDrawn() const { return bWeaponDrawn; }
 
 protected:
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_Controller() override;
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UARPGAbilitySystemComponent> CombatAbilitySystem;
+
 	friend class UAnimNotify_DrawWeapon;
 	friend class UAnimNotify_SheatheWeapon;
 	void InitializeWeapon();
