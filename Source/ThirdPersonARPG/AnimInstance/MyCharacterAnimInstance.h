@@ -171,4 +171,23 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "0.05", Units = "s"))
 	float DrawnSprintTurnDuration = 0.55f;
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Weapon Poses")
+	TObjectPtr<UAnimSequence> SheathedWalkAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Weapon Poses")
+	TObjectPtr<UAnimSequence> DrawnWalkAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Weapon Poses")
+	TObjectPtr<UAnimSequence> SheathedStopAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Weapon Poses")
+	TObjectPtr<UAnimSequence> DrawnStopAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Weapon Poses", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveWalkAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Weapon Poses", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveStopAnimation;
+
 };

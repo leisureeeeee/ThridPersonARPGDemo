@@ -14,6 +14,8 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 	ActiveSprintStartAnimation = SheathedSprintStartAnimation;
 	ActiveSprintLoopAnimation = SheathedSprintLoopAnimation;
 	ActiveSprintTurnAnimation = SheathedSprintTurnAnimation;
+	ActiveWalkAnimation = SheathedWalkAnimation;
+	ActiveStopAnimation = SheathedStopAnimation;
 	ActiveIdleAnimation = SheathedIdleAnimation;
 	GroundSpeed = 0.0f;
 	bShouldMove = false;
@@ -227,6 +229,9 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	const AMyCharacter* WeaponCharacter = Cast<AMyCharacter>(Character);
 	ActiveIdleAnimation = WeaponCharacter && WeaponCharacter->IsWeaponDrawn() && DrawnIdleAnimation
 		? DrawnIdleAnimation : SheathedIdleAnimation;
+	const bool bWeaponDrawn = WeaponCharacter && WeaponCharacter->IsWeaponDrawn();
+	ActiveWalkAnimation = bWeaponDrawn && DrawnWalkAnimation ? DrawnWalkAnimation : SheathedWalkAnimation;
+	ActiveStopAnimation = bWeaponDrawn && DrawnStopAnimation ? DrawnStopAnimation : SheathedStopAnimation;
 	DeltaSeconds = FMath::IsFinite(DeltaSeconds) ? FMath::Max(0.0f, DeltaSeconds) : 0.0f;
 	float DistanceMoved = 0.0f;
 	if (IsValid(Character))

@@ -1239,3 +1239,13 @@
 - 用户指定AS_Idle_Combat_To_Idle_Seq作为持刀Idle。只读通过MCP核对，该序列长1.75秒、UE4_Mannequin_Skeleton，正是角色当前SheatheWeaponAnimation（收刀动作）；当前Fenrir AnimBP DrawnIdleAnimation已经是目标骨架版本AS_Idle_Combat_Seq。
 - 该路径与已有收刀语义冲突，不擅自循环收刀动画或猜测定格帧；向用户确认是路径贴错、应继续使用Combat待机，还是确实要采用该过渡。尚未修改动画、蓝图或C++，无编译或功能测试。
 - 本轮只提交执行记录，保留其他改动；沿用此前自动审批拒绝远程推送限制不重试。see技能前序查找不可用，本轮以Unreal资源接口核对路径。
+
+## 2026-10-22 10:58:16 北京时间 — 持刀行走停步右手回正修复
+
+- 用户反馈持刀走路后停下，右手明显抖动回正。只读检查BP_CharacterAnim1确认Idle动态使用战斗待机，但Walk/Stop仍固定普通行走/停步；优先修复该资源姿势不一致，不声称已经实机排除全部原因。
+- 修改：MyCharacterAnimInstance.h/.cpp新增Sheathed/Drawn Walk/Stop四个配置和ActiveWalk/Stop两个运行输出，按IsWeaponDrawn选择；动画图Walk/Stop暴露Sequence引脚并连接活动引用，原WalkPlayRate、StopAnimationTime、惯性化和7状态20转换保持不变。
+- 资源：使用现有IKRIg_Man_to_ironman，源Samurai人偶、目标Fenrir，重定向Katana战斗系列前向Loop/Stop到Content/BP/MyCharatcer/Animations/CombatWalk的RT_文件，未覆盖原资产。复制原动画根配置：RootMotion关闭、ForceRootLock开启、RefPose根锁，防止额外位移。
+- 数据依据：普通和战斗停步长度均1.183333秒，60Hz目标根轨迹最大差约0.05269厘米，沿用停步距离曲线。原普通停步最后hand_r相对root约(-33.75,26.36,119.42)，战斗停步约(-37.32,19.89,117.41)，战斗待机采样约(-38.06,21.52,118.99)，战斗停步更接近目标持刀手姿势。首次采样列表为空，重新确认非PIE后完成轨迹采样，不把空列表当作无骨骼。
+- 验证：修改前无PIE/脏内容或地图；备份源码及AnimBP于工作区.ue-combat-walk-backup；正常退出后Development Editor编译成功，启动前检查避免重复实例，正常重新加载。AnimBP编译BS_UP_TO_DATE，结构检查is_valid=True、errors/warnings空，保存成功。未运行PIE或功能测试。未改起步系列、武器插槽、拔收刀或奔跑速度；建议用户持刀W行走后松键观察右手，并对比收刀停步。
+- 文件：Source/ThirdPersonARPG/AnimInstance/MyCharacterAnimInstance.h/.cpp、BP_CharacterAnim1.uasset、CombatWalk下两动画、Docs/CombatWalkStopFix.md和本记录。保留用户其他修改，仅提交明确文件；沿用此前自动审批拒绝远程推送限制，不重试。
+- 前序暂停检查补记：此前空格躲避请求只读取8段Evade序列和根轨迹，用户随即要求稍等，未修改代码或资源；随后仅讨论GAS架构，尚未实现躲避/GAS。
