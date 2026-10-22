@@ -4,6 +4,7 @@
 #include "AbilitySystem/Abilities/EvadeAbility.h"
 #include "AbilitySystem/WeaponStateEffect.h"
 #include "MyCharacter/MyCharacter.h"
+#include "Combat/AttackTraceComponent.h"
 
 void UMyCharacterAbilitySystemComponent::BindWeaponAvatar(AMyCharacter* Character)
 {
@@ -114,6 +115,11 @@ bool UMyCharacterAbilitySystemComponent::RequestEvade(
         return false;
     }
     int32 Sector = 4; // No movement intent: step backward relative to current facing.
+    if (HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking)
+        && !HasMatchingGameplayTag(WeaponGameplayTags::Window_Cancel_Evade))
+    {
+        return ExpectedAvatar->GetAttackTrace()->BufferEvade(WorldDirection);
+    }
     if (!WorldDirection.IsNearlyZero())
     {
         const FVector LocalDirection = ExpectedAvatar->GetActorTransform()

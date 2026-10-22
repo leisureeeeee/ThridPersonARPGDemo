@@ -7,6 +7,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MyCharacter/MyCharacter.h"
+#include "AbilitySystemComponent.h"
 
 UEvadeAbility::UEvadeAbility()
 {
@@ -16,7 +17,6 @@ UEvadeAbility::UEvadeAbility()
     SetAssetTags(FGameplayTagContainer(WeaponGameplayTags::Ability_Evade));
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Drawing);
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Sheathing);
-    ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Attacking);
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Evading);
     ActivationOwnedTags.AddTag(WeaponGameplayTags::State_Action_Evading);
 
@@ -36,8 +36,12 @@ bool UEvadeAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
     }
     const AMyCharacter* Character = ActorInfo ? Cast<AMyCharacter>(ActorInfo->AvatarActor.Get()) : nullptr;
     const UAnimInstance* Animation = Character && Character->GetMesh() ? Character->GetMesh()->GetAnimInstance() : nullptr;
+    const UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
+    const bool bAttacking = ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking);
+    const bool bCanCancelAttack = bAttacking && ASC->HasMatchingGameplayTag(WeaponGameplayTags::Window_Cancel_Evade);
     return Character && Character->GetCharacterMovement()->IsMovingOnGround()
-        && EvadeMontages.Num() == 8 && Animation && !Animation->IsAnyMontagePlaying();
+        && EvadeMontages.Num() == 8 && Animation
+        && (bAttacking ? bCanCancelAttack : !Animation->IsAnyMontagePlaying());
 }
 
 void UEvadeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -62,6 +66,8 @@ void UEvadeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
         return;
     }
 
+    FGameplayTagContainer AttackTags(WeaponGameplayTags::Ability_Attack_Light);
+    ActorInfo->AbilitySystemComponent->CancelAbilities(&AttackTags);
     Character->ConsumeMovementInputVector();
     Character->GetCharacterMovement()->StopMovementImmediately();
     const float Rate = FMath::IsFinite(PlayRate) ? FMath::Clamp(PlayRate, .1f, 3.f) : 1.f;

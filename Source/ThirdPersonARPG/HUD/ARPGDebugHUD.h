@@ -12,4 +12,7 @@ class THIRDPERSONARPG_API AARPGDebugHUD : public AHUD
 
 public:
 	virtual void DrawHUD() override;
+
+private:
+	void DrawAttackTrace();
 };

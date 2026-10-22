@@ -1398,3 +1398,16 @@
 - 网格修复：改为Slate post-tick回调在工具调用外执行导入，显式关闭此7820三角面武器的Nanite及自动lightmapUV，采用已验证源FBX，禁导材质/贴图/动画，恢复原资产路径并重新绑定MI。工作区import_sword_deferred.py和deferred_import_status.json保留执行证据。保存后LOD=1，bounds半径95.025878cm，extent约19.79614/6.166867/94.953903cm；编辑器LOD0面板显示7820三角面/23460顶点，StaticMeshEditorSubsystem.get_number_verts返回0，与面板不一致，未据此声称顶点数API验证通过。
 - 验证与限制：编辑器连接再次中断，恢复后只读确认同一路径mesh的LOD和尺寸以及MI绑定已持久化，逐项重新读取五贴图引用、sRGB及绿通道设置均正确。最终窗口捕获时用户已自行进入PIE，助手未启动/停止或输入，未强制干预游戏；未取得清晰的大剑最终预览，因此只确认配置/结构，不声称画面验证成功。第一次CaptureAssetImage返回编码缩略图，第二次失败，再尝试返回空缩略图，没有作为正确外观证据。
 - 范围：只配置/修复大剑，未改人物骨架、武器逻辑、装备类、现有光剑或用户游戏进程。仅提交五纹理、新MI、修复后大剑网格、主材质本轮保存变化和记录；其他用户资产/修改不纳入。沿用此前远程审批限制，不重试被拒绝推送。
+
+## 2026-10-22 16:17:00 北京时间 — 轻攻击动作窗口与实时刀刃轨迹HUD
+
+- 用户需求：试接上一轮轻攻击帧段，并增加可观察实时挥刀轨迹的HUD。沿用用户已接受的60FPS、从0开始计帧：9–16命中，24帧起躲避取消，36帧起移动取消；无后续输入时完整收势。
+- 实现：新增AttackWindow枚举、无角色运行状态的AnimNotifyState_AttackWindow和独立AttackTraceComponent。在AM_LightAttack加入AttackHit、CancelEvade、CancelMove三条通知状态。通知向ASC报告开始/结束，自身蒙太奇事件由LightAttackAbility接收，持有Window.Attack.Hit、Window.Cancel.Evade、Window.Cancel.Move；正常结束、取消、中断及播放失败均兜底移除。没有把时序计时器写进Character，也没有增加临时状态GE。
+- 取消与缓冲：ASC在攻击中接收0.10秒躲避方向缓冲；窗口开放后由组件消费，过期失效。EvadeAbility检查取消权限，选中动画和Commit成功后取消旧攻击技能。组件在移动窗口检查当前移动输入，请求攻击技能结束并触发蒙太奇原有0.12秒混出；解除Attacking后自主移动恢复。输入仍只在PlayerController，Character仅协调组件及转发请求。
+- 轨迹与HUD：WeaponBase提供世界刀刃端点查询，LightsaberWeapon用可配置的局部刀根/刀尖转换。通过UE MCP读取Lightsaber静态网格SaberBlade分区35顶点，Z范围20.9874077–122.1273956厘米，配置BP_LightsaberWeapon新字段，未猜测手腕路径。组件在骨骼姿态更新后采样，保留最多512次，HUD按当前相机重投影，显示刀尖粗线、刀根细线和刀刃扇面；红/青/绿表示命中/可躲避/可移动，当前刀刃黄色，结束保留2秒。左上角显示实际动画帧、窗口、时间条、采样和接触数；arpg.Debug.AttackTrace 0/1独立开关。
+- 接触范围：仅命中窗口沿整段刀刃多点球扫掠Pawn及WorldDynamic，忽略角色和武器，同一挥刀按Actor去重并画黄色接触标记；不结算伤害。当前是运行帧之间直线扫掠诊断，没有离线姿态子采样、精确弧线、遮挡过滤或联机同步。
+- 编译与纠正：初始LightAttackAbility.cpp已有UAbilit yTask拼写断裂，恢复正确类型以解除编译阻塞。首次完整Development Editor编译成功26.23秒。PIE观察到后台3FPS下Queued通知延后一帧，改为原生Branching Point通知；并修正正常结束HUD停留最后采样帧，现设为动画结束帧。最终完整编译成功21.75秒。两个取消状态末尾分支点重合曾触发警告，将CancelEvade结束提前1毫秒，最终再播放无重合警告；GA结束仍统一清理。
+- UE与环境：所有资产操作及临时检查通过原生UE MCP直接执行，没有新增.py脚本。see技能此前及本轮目录检索均未安装，沿用资源接口与原生截图，不声称运行see。初始PIE已停止；构建前正常退出，不强杀。并发大剑材质工作曾产生不可保存的运行时MaterialInstanceDynamic包及静态网格非法引用，首次保存失败并中止关闭；该工作保存为MaterialInstanceConstant后确认无未保存注册资产，仅孤立运行时包，才正常退出。之后大剑FBX重导入Bad MeshDescription阻塞MCP，首次启动PIE请求失败，编辑器恢复后重试成功；本轮未修复、提交或覆盖该并发任务的资产。
+- 功能验证：用户“试试看”授权本轮定向PIE验证，通过角色公开请求及临时Slate回调观察四个场景：完整攻击1.4167秒并清空窗口（109次采样）；0.1003秒输入缓冲过期，0.4598秒仍攻击，0.5094秒窗口内请求成功进入躲避；0.3299秒缓冲在0.4142秒触发躲避；持续移动0.6086秒取消。四场景窗口均清空，无回调错误。最终调整分支点后额外完整挥刀1.4166666秒、102次采样、窗口清空；第14帧截图确认命中窗开启、18次采样、实时轨迹及黄色刀刃与实际光剑对齐。截图Saved/VibeUE/Captures/capture-game-20261022-161400.png；工作区functional-results.json保留检查数据。
+- 测试边界与清理：测试通过公开角色方法，不宣称物理按键链路实测；未实际验证接触目标数及去重、极低帧率扫掠精度、正式伤害或联机。临时目标生成检查因GameplayStatics未暴露生成函数而未生成Actor，未据此宣称接触已验证。已注销回调、解除暂停、恢复倍率/准星开关/后台CPU节流设置、停止PIE；最终无脏内容或地图。未新增持久测试框架。
+- 文件与版本：修改18个明确C++文件（含新增5个头/源文件）、AM_LightAttack、BP_LightsaberWeapon，新增Docs/AttackWindows.md，更新LightAttack.md、Evade.md及本日志。保留用户已有配置、角色/地图、EditorTools及其他资产修改，初始版本与源码/资源备份在工作区.ue-attack-hud/before；仅提交本轮路径，按AGENTS继续尝试既有远程推送，实际结果见最终回复。

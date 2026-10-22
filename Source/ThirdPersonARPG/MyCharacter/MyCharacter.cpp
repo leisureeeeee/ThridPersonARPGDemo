@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Movement/ARPGCharacterMovementComponent.h"
+#include "Combat/AttackTraceComponent.h"
 
 AMyCharacter::AMyCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UARPGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -37,6 +38,7 @@ AMyCharacter::AMyCharacter(const FObjectInitializer& ObjectInitializer)
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
 	CameraRig = CreateDefaultSubobject<UARPGCameraRigComponent>(TEXT("CameraRig"));
+	AttackTrace = CreateDefaultSubobject<UAttackTraceComponent>(TEXT("AttackTrace"));
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	bUseControllerRotationYaw = false;

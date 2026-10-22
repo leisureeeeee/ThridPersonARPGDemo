@@ -7,6 +7,23 @@
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "MyCharacter/MyCharacter.h"
+#include "AbilitySystemComponent.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "Combat/AttackTraceComponent.h"
+
+namespace
+{
+    FGameplayTag GetWindowTag(int32 Window)
+    {
+        switch (static_cast<EAttackWindow>(Window))
+        {
+        case EAttackWindow::Hit: return WeaponGameplayTags::Window_Attack_Hit;
+        case EAttackWindow::EvadeCancel: return WeaponGameplayTags::Window_Cancel_Evade;
+        case EAttackWindow::MoveCancel: return WeaponGameplayTags::Window_Cancel_Move;
+        default: return FGameplayTag();
+        }
+    }
+}
 
 ULightAttackAbility::ULightAttackAbility()
 {
@@ -47,6 +64,7 @@ void ULightAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
     const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
     const FGameplayEventData* TriggerEventData)
 {
+    bEnding = false;
     AMyCharacter* Character = ActorInfo ? Cast<AMyCharacter>(ActorInfo->AvatarActor.Get()) : nullptr;
     UAnimMontage* Montage = AttackMontage.LoadSynchronous();
     if (!Character || !Montage || !CommitAbility(Handle, ActorInfo, ActivationInfo))
@@ -54,6 +72,19 @@ void ULightAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
         EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
         return;
     }
+
+    OpenWindows = 0;
+    TraceComponent = Character->GetAttackTrace();
+    TraceComponent->BeginAttack(Montage);
+    TraceComponent->OnMoveCancel.AddUObject(this, &ULightAttackAbility::OnMoveCancel);
+    UAbilityTask_WaitGameplayEvent* BeginTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+        this, WeaponGameplayTags::Event_Attack_WindowBegin, nullptr, false, true);
+    BeginTask->EventReceived.AddDynamic(this, &ULightAttackAbility::OnWindowBegin);
+    BeginTask->ReadyForActivation();
+    UAbilityTask_WaitGameplayEvent* EndTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
+        this, WeaponGameplayTags::Event_Attack_WindowEnd, nullptr, false, true);
+    EndTask->EventReceived.AddDynamic(this, &ULightAttackAbility::OnWindowEnd);
+    EndTask->ReadyForActivation();
 
     // Stop voluntary locomotion; montage root motion still drives collision-aware movement.
     Character->ConsumeMovementInputVector();
@@ -74,7 +105,7 @@ void ULightAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 
 void ULightAttackAbility::OnAttackCompleted()
 {
-    if (IsActive())
+    if (IsActive() && !bEnding)
     {
         EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, false);
     }
@@ -82,8 +113,81 @@ void ULightAttackAbility::OnAttackCompleted()
 
 void ULightAttackAbility::OnAttackCancelled()
 {
-    if (IsActive())
+    if (IsActive() && !bEnding)
     {
         EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
     }
+}
+
+void ULightAttackAbility::OnWindowBegin(FGameplayEventData Event)
+{
+    UpdateWindow(Event, true);
+}
+
+void ULightAttackAbility::OnWindowEnd(FGameplayEventData Event)
+{
+    UpdateWindow(Event, false);
+}
+
+void ULightAttackAbility::UpdateWindow(const FGameplayEventData& Event, bool bOpen)
+{
+    if (!IsActive() || bEnding || Event.OptionalObject != AttackMontage.Get()
+        || !FMath::IsFinite(Event.EventMagnitude) || Event.EventMagnitude < 0.f || Event.EventMagnitude > 2.f)
+    {
+        return;
+    }
+    const int32 Index = FMath::RoundToInt(Event.EventMagnitude);
+    const uint8 Mask = 1 << Index;
+    if (((OpenWindows & Mask) != 0) == bOpen)
+    {
+        return;
+    }
+    OpenWindows = bOpen ? OpenWindows | Mask : OpenWindows & ~Mask;
+    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    {
+        if (bOpen) { ASC->AddLooseGameplayTag(GetWindowTag(Index)); }
+        else { ASC->RemoveLooseGameplayTag(GetWindowTag(Index)); }
+    }
+    if (TraceComponent.IsValid())
+    {
+        TraceComponent->SetWindow(static_cast<EAttackWindow>(Index), bOpen);
+    }
+}
+
+void ULightAttackAbility::OnMoveCancel()
+{
+    if (IsActive() && !bEnding && (OpenWindows & (1 << static_cast<uint8>(EAttackWindow::MoveCancel))))
+    {
+        // Ending the montage task initiates the montage's configured blend-out.
+        EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, true, true);
+    }
+}
+
+void ULightAttackAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+    const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+    bool bReplicateEndAbility, bool bWasCancelled)
+{
+    if (!IsEndAbilityValid(Handle, ActorInfo) || bEnding)
+    {
+        return;
+    }
+    bEnding = true;
+    if (UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo())
+    {
+        for (int32 Index = 0; Index != 3; ++Index)
+        {
+            if (OpenWindows & (1 << Index))
+            {
+                ASC->RemoveLooseGameplayTag(GetWindowTag(Index));
+            }
+        }
+    }
+    OpenWindows = 0;
+    if (TraceComponent.IsValid())
+    {
+        TraceComponent->OnMoveCancel.RemoveAll(this);
+        TraceComponent->EndAttack(!bWasCancelled);
+        TraceComponent.Reset();
+    }
+    Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

@@ -2,7 +2,7 @@
 
 ## 操作和范围
 
-Alt 拔刀后，左键单次按下播放一刀；收刀、拔收刀过程中、离地、已有 Montage 或攻击进行中不激活。按住左键不连发，动作中额外点击不缓存；完成后需要下一次点击。攻击中 Alt 不打断，攻击结束后可正常收刀。第一版仅做完整动作，不含命中检测、伤害、体力消耗、连招、弹反、锁定或自动转向。
+Alt 拔刀后，左键单次按下播放一刀；收刀、拔收刀过程中、离地、已有 Montage 或攻击进行中不激活。按住左键不连发，动作中额外点击不缓存；完成后需要下一次点击。攻击中 Alt 不打断，攻击结束后可正常收刀。当前动作帧、取消窗口、刀刃接触诊断和实时HUD（抬头显示）见[AttackWindows.md](AttackWindows.md)。未加入正式伤害、体力消耗、连招、弹反、锁定或自动转向。
 
 ## 从输入到 GAS
 
@@ -32,7 +32,9 @@ ARPGCharacterMovementComponent 通过 IAbilitySystemInterface 查询 ASC 的 Sta
 
 Config/DefaultCombat.ini 的 [/Script/ThirdPersonARPG.LightAttackAbility] 配置 AttackMontage 和 PlayRate。GA 使用 Config 属性和 TSoftObjectPtr（软对象引用），C++ 不硬编码动画资源路径。未来替换蒙太奇只需改此配置；当前以新原生类的默认对象读取配置，不需修改用户已有 BP_Character 资产。
 
-## 验证范围与操作
+## 初版验证范围与操作
+
+以下是最初接入整段动作时的验证记录；后续动作帧和HUD的实现、PIE实测范围见[AttackWindows.md](AttackWindows.md)。
 
 完成 C++ 构建、完整编辑器重新加载、原生类默认对象及配置读回、骨架一致性与动画图连线检查；角色/动画蓝图 BS_UP_TO_DATE，移动状态机结构验证无错误或警告。未运行自动化、PIE（在编辑器中运行）、模拟输入或功能测试。这些检查不等于挥刀手感、根位移碰撞和打断行为实测。
 

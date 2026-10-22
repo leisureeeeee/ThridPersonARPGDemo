@@ -16,6 +16,7 @@ class UAnimMontage;
 class UAnimNotify_DrawWeapon;
 class UAnimNotify_SheatheWeapon;
 class UMyCharacterAbilitySystemComponent;
+class UAttackTraceComponent;
 
 UCLASS()
 class THIRDPERSONARPG_API AMyCharacter : public ACharacterBase
@@ -42,6 +43,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Combat")
 	bool IsAttacking() const;
+
+	UFUNCTION(BlueprintPure, Category = "Combat|Debug")
+	UAttackTraceComponent* GetAttackTrace() const { return AttackTrace; }
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	bool RequestEvade(const FVector& WorldDirection);
@@ -71,6 +75,9 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAttackTraceComponent> AttackTrace;
+
 	friend class UAnimNotify_DrawWeapon;
 	friend class UAnimNotify_SheatheWeapon;
 	void InitializeAbilitySystem();

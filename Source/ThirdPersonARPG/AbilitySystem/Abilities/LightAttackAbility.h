@@ -5,6 +5,7 @@
 #include "LightAttackAbility.generated.h"
 
 class UAnimMontage;
+class UAttackTraceComponent;
 
 // Asset references live in DefaultCombat.ini, not hard-coded resource paths.
 UCLASS(Config = Combat, DefaultConfig)
@@ -25,7 +26,23 @@ protected:
         const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
         const FGameplayEventData* TriggerEventData) override;
 
+    virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
+        const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+        bool bReplicateEndAbility, bool bWasCancelled) override;
+
 private:
+    UFUNCTION()
+    void OnWindowBegin(FGameplayEventData Event);
+
+    UFUNCTION()
+    void OnWindowEnd(FGameplayEventData Event);
+
+    void UpdateWindow(const FGameplayEventData& Event, bool bOpen);
+    void OnMoveCancel();
+    uint8 OpenWindows = 0;
+    bool bEnding = false;
+    TWeakObjectPtr<UAttackTraceComponent> TraceComponent;
+
     UFUNCTION()
     void OnAttackCompleted();
 

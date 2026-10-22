@@ -18,6 +18,9 @@ public:
 	virtual bool ActivateWeapon();
 	virtual bool DeactivateWeapon();
 
+	// World-space blade endpoints supplied by the concrete weapon.
+	virtual bool GetBladeSegment(FVector& OutBase, FVector& OutTip) const { return false; }
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> WeaponRoot;

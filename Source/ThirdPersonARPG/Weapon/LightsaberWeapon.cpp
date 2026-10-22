@@ -3,6 +3,18 @@
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
+bool ALightsaberWeapon::GetBladeSegment(FVector& OutBase, FVector& OutTip) const
+{
+	if (!bIsIgnited || !WeaponMesh || BladeBaseLocal.Equals(BladeTipLocal))
+	{
+		return false;
+	}
+	const FTransform& Transform = WeaponMesh->GetComponentTransform();
+	OutBase = Transform.TransformPosition(BladeBaseLocal);
+	OutTip = Transform.TransformPosition(BladeTipLocal);
+	return true;
+}
+
 ALightsaberWeapon::ALightsaberWeapon()
 {
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));

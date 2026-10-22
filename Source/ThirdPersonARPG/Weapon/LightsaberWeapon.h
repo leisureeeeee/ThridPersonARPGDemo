@@ -17,6 +17,7 @@ public:
 	ALightsaberWeapon();
 	virtual bool ActivateWeapon() override;
 	virtual bool DeactivateWeapon() override;
+	virtual bool GetBladeSegment(FVector& OutBase, FVector& OutTip) const override;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Lightsaber")
 	bool Ignite();
@@ -39,6 +40,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Lightsaber")
 	FName BladeMaterialSlot = TEXT("SaberBlade");
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Trace")
+	FVector BladeBaseLocal = FVector::ZeroVector;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon|Trace")
+	FVector BladeTipLocal = FVector::ZeroVector;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> BladeMaterialInstance;
