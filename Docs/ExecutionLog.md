@@ -1389,3 +1389,12 @@
 - 验证：用Cycles渲染并实际查看大剑预览，外观贴图正常；FBX重新读入干净米制场景，确认1网格0骨架、7820三角面、1材质槽、高约1.899078米。Blender扩展缓存写Roaming目录被沙箱拒绝，不影响读取和导出验证。输出9文件复制到Content/Asset/Fenrir_UE5/Greatsword并逐文件SHA256一致，现有Asset/Fenrir_UE5/*自动导入排除仍在，未创建uasset。
 - 文件：新目录含独立FBX、blend、5贴图、README和verification.json；预览保留当前工作区Fenrir_Greatsword_UE5/greatsword_preview.png，脚本在Fenrir_UE5/scripts/extract_greatsword.py。没有改火箭筒、角色、骨架、动画、光剑或原包；未执行PIE/功能测试。
 - 版本范围：仅提交此9个交付文件及本记录，保留用户其他修改。沿用此前远程审批限制，不重试被拒绝推送。
+
+## 2026-10-22 16:11:18 北京时间 — 为导入的大剑配置材质并修复空静态网格
+
+- 用户需求：为已导入的大剑配置正确材质。检查实际资产是StaticMesh /Game/Asset/Fenrir_UE5/Greatsword/SM_Fenrir_Greatsword，并非SkeletalMesh，已向用户说明；五张贴图已有导入。初始mesh及自动导入Greatsword材质包为dirty，未擅自清理或保存其他用户内容。
+- 材质：复用已存在M_Fenrir_PBR主材质创建独立MI_Fenrir_Greatsword，绑定大剑BaseColor/Metallic/Roughness/NormalOpenGL/Emissive五贴图，EmissiveStrength=1。颜色与自发光sRGB开启，金属/粗糙度/法线关闭；法线Normalmap压缩并FlipGreenChannel=True。静态网格槽0使用新实例，保存新实例、五纹理和网格；主材质编译返回空错误列表，编译造成主材质脏后单独保存，未改材质图逻辑。前置磁盘uasset备份在工作区Fenrir_Greatsword_UE5/material-backup。
+- 额外根因：预览未见网格，读取实际资产LOD=0、bounds=0，确认初始资产为空，贴好材质也不会显示。尝试工具调用内同步FbxFactory重新导入时连接中断，日志Bad MeshDescription并卡在网格构建；未强杀或重启用户编辑器。连接恢复后资产仍空，保留已保存材质并备份空mesh到material-backup/SM_Fenrir_Greatsword.empty-before-reimport.uasset。
+- 网格修复：改为Slate post-tick回调在工具调用外执行导入，显式关闭此7820三角面武器的Nanite及自动lightmapUV，采用已验证源FBX，禁导材质/贴图/动画，恢复原资产路径并重新绑定MI。工作区import_sword_deferred.py和deferred_import_status.json保留执行证据。保存后LOD=1，bounds半径95.025878cm，extent约19.79614/6.166867/94.953903cm；编辑器LOD0面板显示7820三角面/23460顶点，StaticMeshEditorSubsystem.get_number_verts返回0，与面板不一致，未据此声称顶点数API验证通过。
+- 验证与限制：编辑器连接再次中断，恢复后只读确认同一路径mesh的LOD和尺寸以及MI绑定已持久化，逐项重新读取五贴图引用、sRGB及绿通道设置均正确。最终窗口捕获时用户已自行进入PIE，助手未启动/停止或输入，未强制干预游戏；未取得清晰的大剑最终预览，因此只确认配置/结构，不声称画面验证成功。第一次CaptureAssetImage返回编码缩略图，第二次失败，再尝试返回空缩略图，没有作为正确外观证据。
+- 范围：只配置/修复大剑，未改人物骨架、武器逻辑、装备类、现有光剑或用户游戏进程。仅提交五纹理、新MI、修复后大剑网格、主材质本轮保存变化和记录；其他用户资产/修改不纳入。沿用此前远程审批限制，不重试被拒绝推送。
