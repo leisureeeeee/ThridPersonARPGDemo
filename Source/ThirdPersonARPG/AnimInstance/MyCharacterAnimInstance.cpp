@@ -11,6 +11,9 @@ void UMyCharacterAnimInstance::NativeInitializeAnimation()
 	bSprintStopping = true;
 	SprintStartTime = SprintTurnTime = 0.0f;
 	SprintPlayRate = 1.0f;
+	ActiveSprintStartAnimation = SheathedSprintStartAnimation;
+	ActiveSprintLoopAnimation = SheathedSprintLoopAnimation;
+	ActiveSprintTurnAnimation = SheathedSprintTurnAnimation;
 	ActiveIdleAnimation = SheathedIdleAnimation;
 	GroundSpeed = 0.0f;
 	bShouldMove = false;
@@ -259,18 +262,30 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bShouldWalk = bGrounded && bShouldMove && !bSprintMode;
 	bSprintTurning = bSprintMode && bPivoting && bInput;
 	bSprintStopping = !bShouldWalk && !bShouldSprint && !bSprintTurning;
+	const bool bDrawnSprint = WeaponCharacter && WeaponCharacter->IsWeaponDrawn();
+	// Retain outgoing assets while a draw/sheath montage commits an equipment change.
+	// A fresh sprint or pivot selects the correct set before the graph evaluates it.
+	if (bShouldSprint || bSprintTurning)
+	{
+		ActiveSprintStartAnimation = bDrawnSprint ? DrawnSprintStartAnimation : SheathedSprintStartAnimation;
+		ActiveSprintLoopAnimation = bDrawnSprint ? DrawnSprintLoopAnimation : SheathedSprintLoopAnimation;
+		ActiveSprintTurnAnimation = bDrawnSprint ? DrawnSprintTurnAnimation : SheathedSprintTurnAnimation;
+	}
+	const float ActiveStartDuration = FMath::Max(0.05f, bDrawnSprint ? DrawnSprintStartDuration : SprintStartDuration);
 	if (bShouldSprint)
 	{
 		if (!bHadSprintIntent)
 		{
 			SprintStartTime = 0.0f;
 		}
-		SprintStartTime = FMath::Min(SprintStartTime + DeltaSeconds, FMath::Max(0.05f, SprintStartDuration));
+		SprintStartTime = FMath::Min(SprintStartTime + DeltaSeconds * FMath::Clamp(SprintStartPlayRate, 0.1f, 3.0f), ActiveStartDuration);
 	}
-	bSprintStartComplete = bShouldSprint && SprintStartTime >= FMath::Max(0.05f, SprintStartDuration) - UE_KINDA_SMALL_NUMBER;
+	bSprintStartComplete = bShouldSprint && SprintStartTime >= ActiveStartDuration - UE_KINDA_SMALL_NUMBER;
 	if (bSprintTurning)
 	{
-		SprintTurnTime = GroundMovement->GetSprintTurnTime();
+		const float TurnProgress = FMath::Clamp(GroundMovement->GetSprintTurnTime() / 1.1f, 0.0f, 1.0f);
+		SprintTurnTime = bDrawnSprint ? TurnProgress * FMath::Max(0.05f, DrawnSprintTurnDuration)
+			: GroundMovement->GetSprintTurnTime();
 	}
 	bHadSprintIntent = bShouldSprint;
 	SprintPlayRate = FMath::Clamp(GroundSpeed / FMath::Max(1.0f, SprintAuthoredSpeed), 0.0f, 1.6f);

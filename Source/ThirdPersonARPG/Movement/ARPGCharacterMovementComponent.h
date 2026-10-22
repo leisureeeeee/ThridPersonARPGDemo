@@ -74,7 +74,7 @@ private:
 	FVector DirectionalPreviousLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ground Locomotion|Sprint", meta = (ClampMin = "1", Units = "cm/s"))
-	float SprintSpeed = 600.0f;
+	float SprintSpeed = 720.0f;
 
 	bool bSprintRequested = false;
 

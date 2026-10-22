@@ -1207,3 +1207,13 @@
 - 验证：第一次C++编译因控制器局部Character隐藏引擎成员失败，已改ControlledCharacter，第二次Development Editor编译成功并正常重启加载。编译前无PIE/脏包，正常退出后确认进程结束，未强杀。重启后用户自行运行关卡，工具被PIE拦截，已请求用户停止并在读回停止后继续；没有主动启动/停止PIE或模拟输入。AnimBP编译状态BS_UP_TO_DATE，结构检查无错误警告，三状态姿势/显式时间/循环倍率引脚连接完整、目标骨架均SK_Fenrir_Skeleton、根运动关闭、末尾无脏内容包。
 - 文件：Source/ThirdPersonARPG 的 PlayerController/MyPlayerController、MyCharacter/MyCharacter、Movement/ARPGCharacterMovementComponent、AnimInstance/MyCharacterAnimInstance 四组h/cpp；Content/BP/MyCharatcer/BP_CharacterAnim1.uasset；Animations/Sprint下3动画；Docs/UnarmedSprint.md 和本日志。修改前原8源文件及AnimBP备份在工作区 .ue-sprint-backup。工具产生保存依赖骨架行为，已有Fenrir未跟踪文件不擅自纳入提交。
 - 版本：仅提交本任务文件，保留用户配置、地图、模型、材质、EditorTools等无关改动。沿用此前自动审批拒绝远程推送的限制，不重试；只保留本地提交。see技能/脚本在本会话前序查找不可用，本轮通过Unreal资源接口读取用户给定动画路径。
+
+## 2026-10-22 09:53:53 北京时间 — 奔跑提速与持刀动画扩展（待编辑器连接完成接线）
+
+- 用户需求：奔跑再快一点，持刀时使用 ARPG_Samurai Anim_ARPGSamurai_Sprint 同系列。
+- 已做：移动组件默认 SprintSpeed 从600调到720（+20%）；角色允许持刀奔跑，仍禁止拔收刀过程中奔跑；动画实例新增持刀/收刀各三段配置及三个活动引用，在奔跑/掉头时按武器状态选择，保留出状态时的资产；起步倍率1.15，持刀起步时长0.75，持刀掉头按进度映射0.55秒。控制器与原7状态20转换拓扑未改。
+- 动画：复用原IK重定向器和源Samurai/目标Fenrir，生成并保存 RT_Anim_ARPGSamurai_Sprint_Start、RT_Anim_ARPGSamurai_Sprint、RT_Anim_ARPGSamurai_Sprint_Turn180，位于Content/BP/MyCharatcer/Animations/Sprint，目标骨架SK_Fenrir_Skeleton。保留原资产。
+- 编译：修改前无PIE或脏内容/地图，正常退出后确认进程结束。Development Editor C++编译一次成功，未主动运行PIE或测试。启动时发生两个实例竞争，主日志显示一个正常退出，剩余实例日志为ThirdPersonARPG_2且MCP不可达；不能据此声称闪退。已请求用户正常关闭重开，未强杀进程，也未继续重复启动。
+- 未完成：等待用户恢复MCP连接后，给AnimBP六个配置引用赋值、三个Sequence引脚绑定ActiveSprint引用、编译保存AnimBP、读回实际速度默认值/地图实例与引用/引脚。当前图仍使用上一版静态无武器动画，不应声称持刀动画已接完。工作区已准备.ue-armed-sprint-wire.py，已备份原源文件和AnimBP于.ue-armed-sprint-backup。
+- 文件：MyCharacter.cpp、Movement/ARPGCharacterMovementComponent.h、AnimInstance/MyCharacterAnimInstance.h/.cpp；三段新增持刀重定向动画；Docs/UnarmedSprint.md与本记录。用户其他模型/地图/武器/EditorTools等修改不纳入。see技能及see.sh未在技能目录找到，通过Unreal资源接口检查用户资产路径。
+- 版本：先保存本轮已完成部分的本地提交，待连接后追加完成接线的提交。沿用此前自动审批拒绝远程推送限制，不重试。

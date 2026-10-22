@@ -334,6 +334,6 @@ void AMyCharacter::SetSprintRequested(bool bRequested)
 {
 	if (UARPGCharacterMovementComponent* Movement = Cast<UARPGCharacterMovementComponent>(GetCharacterMovement()))
 	{
-		Movement->SetSprintRequested(bRequested && !bWeaponDrawn && !bDrawingWeapon && !bSheathingWeapon);
+		Movement->SetSprintRequested(bRequested && !bDrawingWeapon && !bSheathingWeapon);
 	}
 }

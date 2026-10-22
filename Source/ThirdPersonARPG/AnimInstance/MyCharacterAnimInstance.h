@@ -133,4 +133,42 @@ private:
 
 	bool bHadSprintIntent = false;
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> SheathedSprintStartAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> SheathedSprintLoopAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> SheathedSprintTurnAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> DrawnSprintStartAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> DrawnSprintLoopAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint|Animations")
+	TObjectPtr<UAnimSequence> DrawnSprintTurnAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveSprintStartAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveSprintLoopAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimSequence> ActiveSprintTurnAnimation;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "0.1", ClampMax = "3"))
+	float SprintStartPlayRate = 1.15f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "0.05", Units = "s"))
+	float DrawnSprintStartDuration = 0.75f;
+
+	// The armed turn clip is 0.55 s, half the unarmed clip's useful motion.
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "0.05", Units = "s"))
+	float DrawnSprintTurnDuration = 0.55f;
+
 };
