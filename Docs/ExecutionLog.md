@@ -1380,3 +1380,12 @@
 - 输入与取消建议：可提供约0.10秒的躲避输入缓冲，窗口开放时消费一次，过期丢弃。攻击GA继续持有Attacking，窗口另行表达取消权限；Evade在攻击中仅窗口允许时激活并取消旧攻击GA，不能仅移除全局阻塞标签。移动取消需同时混出攻击Montage再恢复移动，避免只放开移动而全身动画继续覆盖导致滑步。
 - 实现建议：在当前攻击蒙太奇配置AnimNotifyState（动画通知状态）的持续范围，例如HitWindow、CancelEvade、CancelMove；Notify只报告开始/结束，攻击GA持有并统一清理窗口，正常结束/取消/中断均兜底释放，不将动作时序写成Character里的硬编码计时器。参考Epic官方Animation Notifies文档确认NotifyState支持持续范围；具体帧点仍是待刀刃预览和手感标定的初始值，不声称已经实装或验证。
 - 验证与范围：读取时PIE=False，无脏内容。未修改资源、未构建、未运行PIE、自动化、模拟输入或功能测试。本轮仅追加本条执行记录，保留其他用户修改，只提交日志并按项目授权推送，结果见最终回复。
+
+## 2026-10-22 15:43:19 北京时间 — 提取 Fenrir 大剑为独立UE源文件
+
+- 用户需求：将前述源包的大剑解析出来。按前文交付方式，提取独立FBX、处理后blend及贴图，放到Asset，不自动导入UE或替换光剑。
+- 源检查：使用已有便携Blender4.5.9 LTS、禁用自动执行，读取G:/动画素材/Fenrir_Blend/Fenrir_Blend/Greatsword.blend。仅一个Greatsword网格、无骨架或动画，3876顶点、单材质，5张2048x2048贴图已内嵌；原始长约1.899078米。
+- 处理：保留原作者原点和比例，转换厘米数据，应用平滑修改器、增加三角化，重建简单Principled材质、导出并重新打包五张贴图，生成SM_Fenrir_Greatsword.fbx和Fenrir_Greatsword_UE5.blend。未猜测握持点或更改源文件。武器为刚性静态网格，后续可挂接手部插槽；导入说明记录OpenGL法线需翻绿、材质需正确连接及握持偏移调节。
+- 验证：用Cycles渲染并实际查看大剑预览，外观贴图正常；FBX重新读入干净米制场景，确认1网格0骨架、7820三角面、1材质槽、高约1.899078米。Blender扩展缓存写Roaming目录被沙箱拒绝，不影响读取和导出验证。输出9文件复制到Content/Asset/Fenrir_UE5/Greatsword并逐文件SHA256一致，现有Asset/Fenrir_UE5/*自动导入排除仍在，未创建uasset。
+- 文件：新目录含独立FBX、blend、5贴图、README和verification.json；预览保留当前工作区Fenrir_Greatsword_UE5/greatsword_preview.png，脚本在Fenrir_UE5/scripts/extract_greatsword.py。没有改火箭筒、角色、骨架、动画、光剑或原包；未执行PIE/功能测试。
+- 版本范围：仅提交此9个交付文件及本记录，保留用户其他修改。沿用此前远程审批限制，不重试被拒绝推送。
