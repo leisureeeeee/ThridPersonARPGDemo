@@ -69,7 +69,7 @@ float UARPGCharacterMovementComponent::GetDirectionalMeshYaw() const
 
 bool UARPGCharacterMovementComponent::BeginDirectionalStart(const FVector& DesiredDirection)
 {
-	if (!IsValid(DirectionalStartSet))
+	if (IsSprinting() || !IsValid(DirectionalStartSet))
 	{
 		return false;
 	}
@@ -160,7 +160,7 @@ void UARPGCharacterMovementComponent::CalcVelocity(float DeltaTime, float Fricti
 		PivotElapsed += FMath::Max(0.0f, DeltaTime);
 		// W->S->W should cancel the brake rather than finish an obsolete turn.
 		if ((bPivotBraking && Speed > PivotTurnSpeedThreshold && VelocityDot > 0.5f)
-			|| PivotElapsed > 0.75f)
+			|| PivotElapsed > (IsSprinting() ? 1.0f : 0.75f))
 		{
 			ResetPivot();
 			PivotCooldown = 0.15f;
@@ -177,7 +177,8 @@ void UARPGCharacterMovementComponent::CalcVelocity(float DeltaTime, float Fricti
 				bPivotBraking = false;
 				bPivotTurning = true;
 			}
-			if (bPivotTurning && FVector::DotProduct(CharacterOwner->GetActorForwardVector(), DesiredDirection)
+			if (bPivotTurning && (!IsSprinting() || PivotElapsed >= 0.55f)
+				&& FVector::DotProduct(CharacterOwner->GetActorForwardVector(), DesiredDirection)
 				>= FMath::Cos(FMath::DegreesToRadians(PivotExitAngle)))
 			{
 				ResetPivot();
@@ -232,4 +233,25 @@ void UARPGCharacterMovementComponent::PhysicsRotation(float DeltaTime)
 	Super::PhysicsRotation(DeltaTime);
 	Acceleration = RequestedAcceleration;
 	RotationRate = SavedRotationRate;
+}
+
+void UARPGCharacterMovementComponent::SetSprintRequested(bool bRequested)
+{
+	if (bSprintRequested != bRequested)
+	{
+		// A walk turn must not keep ownership of rotation during a gait change.
+		DirectionalProfileIndex = INDEX_NONE;
+		ResetPivot();
+		bSprintRequested = bRequested;
+	}
+}
+
+bool UARPGCharacterMovementComponent::IsSprinting() const
+{
+	return bSprintRequested && IsMovingOnGround() && !IsCrouching();
+}
+
+float UARPGCharacterMovementComponent::GetMaxSpeed() const
+{
+	return IsSprinting() ? FMath::Max(Super::GetMaxSpeed(), SprintSpeed) : Super::GetMaxSpeed();
 }

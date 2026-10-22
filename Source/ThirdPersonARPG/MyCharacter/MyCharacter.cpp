@@ -205,6 +205,7 @@ bool AMyCharacter::DrawWeapon()
 		return false;
 	}
 	bDrawingWeapon = true;
+	SetSprintRequested(false);
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleDrawMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveDrawMontage);
@@ -280,6 +281,7 @@ bool AMyCharacter::SheatheWeapon()
 		return false;
 	}
 	bSheathingWeapon = true;
+	SetSprintRequested(false);
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMyCharacter::HandleSheatheMontageEnded);
 	Animation->Montage_SetEndDelegate(EndDelegate, ActiveSheatheMontage);
@@ -326,4 +328,12 @@ void AMyCharacter::HandleSheatheMontageEnded(UAnimMontage* Montage, bool bInterr
 	}
 	bSheathingWeapon = false;
 	ActiveSheatheMontage = nullptr;
+}
+
+void AMyCharacter::SetSprintRequested(bool bRequested)
+{
+	if (UARPGCharacterMovementComponent* Movement = Cast<UARPGCharacterMovementComponent>(GetCharacterMovement()))
+	{
+		Movement->SetSprintRequested(bRequested && !bWeaponDrawn && !bDrawingWeapon && !bSheathingWeapon);
+	}
 }

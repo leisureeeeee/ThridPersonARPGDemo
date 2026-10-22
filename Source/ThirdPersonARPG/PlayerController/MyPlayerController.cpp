@@ -60,6 +60,9 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleZoomInput);
 	EnhancedInput->BindAction(DrawWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleDrawWeaponInput);
 	EnhancedInput->BindAction(SheatheWeaponAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleSheatheWeaponInput);
+	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AMyPlayerController::HandleSprintInput);
+	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMyPlayerController::HandleSprintInput);
+	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AMyPlayerController::HandleSprintInput);
 	RegisterInputMappingContext();
 }
 
@@ -106,6 +109,11 @@ void AMyPlayerController::CreateInputMappingContext()
 	DrawWeaponAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(DrawWeaponAction, EKeys::LeftMouseButton);
 
+	SprintAction = NewObject<UInputAction>(this, TEXT("SprintAction"), RF_Transient);
+	SprintAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(SprintAction, EKeys::LeftShift);
+	PlayerMappingContext->MapKey(SprintAction, EKeys::RightShift);
+
 	SheatheWeaponAction = NewObject<UInputAction>(this, TEXT("SheatheWeaponAction"), RF_Transient);
 	SheatheWeaponAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(SheatheWeaponAction, EKeys::RightMouseButton);
@@ -139,6 +147,10 @@ void AMyPlayerController::RemoveInputMappingContext()
 
 void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn()))
+	{
+		ControlledCharacter->SetSprintRequested(false);
+	}
 	RemoveInputMappingContext();
 	Super::EndPlay(EndPlayReason);
 }
@@ -208,5 +220,24 @@ void AMyPlayerController::HandleSheatheWeaponInput(const FInputActionValue& Valu
 		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
 	{
 		ControlledCharacter->SheatheWeapon();
+	}
+}
+
+void AMyPlayerController::OnUnPossess()
+{
+	if (AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn()))
+	{
+		ControlledCharacter->SetSprintRequested(false);
+	}
+	Super::OnUnPossess();
+}
+
+void AMyPlayerController::HandleSprintInput(const FInputActionValue& Value)
+{
+	if (AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn()))
+	{
+		const bool bAllowed = IsLocalPlayerController() && ControlledCharacter->InputEnabled()
+			&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter;
+		ControlledCharacter->SetSprintRequested(bAllowed && Value.Get<bool>());
 	}
 }

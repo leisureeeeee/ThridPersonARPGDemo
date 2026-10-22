@@ -20,10 +20,12 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnUnPossess() override;
 	virtual void SetupInputComponent() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
+	void HandleSprintInput(const FInputActionValue& Value);
 	void CreateInputMappingContext();
 	void RegisterInputMappingContext();
 	void RemoveInputMappingContext();
@@ -56,4 +58,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SheatheWeaponAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> SprintAction;
 };

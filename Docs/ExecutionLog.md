@@ -1197,3 +1197,13 @@
 - 验证：两个序列Skeleton均为SK_Fenrir_Skeleton；0和0.4秒采样root/pelvis/upperarm_l/thigh_l/calf_l，最大旋转变化约41.99/79.334度，采样骨骼缩放均1/1/1，确认有真实运动且与目标骨架匹配；读回profiles确认动画引用在指定目录、转向角和运动采样JSON逐项保持一致。保存两动画与数据集，脏内容包为空。未主动运行PIE、输入或功能测试，不声称已实机复现并排除所有视觉原因。未改光剑、现有插槽、旧动画或其他用户修改。
 - 插槽说明：向用户说明打开SK_Fenrir骨架编辑页，在骨骼树右键pelvis添加Socket并命名scabbard1，调整为腰侧挂剑位置；没有将其误建为动画蒙太奇槽或Actor组件。
 - 版本范围：仅提交两个新动画、DA_DirectionalStarts与本记录；沿用此前远程审批限制，不重试已被拒绝的推送。
+
+## 2026-10-22 09:44:28 北京时间 — Shift 未持武器奔跑
+
+- 用户需求：在现有动作基础上，接入 ARPG_Samurai 的 Sprint 和同名 no_weapon 系列，按住 Shift 在未拔武器时奔跑。检查现用 BP_Character 为 SK_Fenrir + BP_CharacterAnim1，保留现有模型、武器和用户修改。
+- 实现：控制器新增左右 Shift Boolean 输入的 Triggered/Completed/Canceled，解除控制及结束时清请求；角色裁决持刀/拔刀/收刀禁用，拔收动作成功开始即取消；移动组件覆写 GetMaxSpeed，奔跑初始600、退出恢复原步行上限，奔跑避免复用步行侧向起步，掉头沿用原制动旋转并调整持续时间。
+- 动画：使用现有 IK 重定向器，匹配源 Samurai 人偶及目标 Fenrir，新增三段 RT_ 无武器起步/循环/180掉头动画，未覆盖原动画。当前 AnimBP 新增 SprintStart/Sprint/SprintTurn，14条转换，与原4状态/6转换合计7状态20转换。C++ 提供步行/奔跑意图、起步完成、掉头/停止和播放时间/倍率；起步/掉头使用求值器，循环读实际速度倍率，新增转换均接已有惯性化链路。
+- 参数/限制：源起步和掉头有较长静止尾帧，只使用前0.85/1.1秒；掉头时间以2倍推进、最短0.55秒。循环选同组 Sprint_no_weapon 而非通用可能持械版本；未发现独立Sprint Stop，复用现有停步。600为初始可调基准，未实机标定，不声称脚步距离精确匹配。
+- 验证：第一次C++编译因控制器局部Character隐藏引擎成员失败，已改ControlledCharacter，第二次Development Editor编译成功并正常重启加载。编译前无PIE/脏包，正常退出后确认进程结束，未强杀。重启后用户自行运行关卡，工具被PIE拦截，已请求用户停止并在读回停止后继续；没有主动启动/停止PIE或模拟输入。AnimBP编译状态BS_UP_TO_DATE，结构检查无错误警告，三状态姿势/显式时间/循环倍率引脚连接完整、目标骨架均SK_Fenrir_Skeleton、根运动关闭、末尾无脏内容包。
+- 文件：Source/ThirdPersonARPG 的 PlayerController/MyPlayerController、MyCharacter/MyCharacter、Movement/ARPGCharacterMovementComponent、AnimInstance/MyCharacterAnimInstance 四组h/cpp；Content/BP/MyCharatcer/BP_CharacterAnim1.uasset；Animations/Sprint下3动画；Docs/UnarmedSprint.md 和本日志。修改前原8源文件及AnimBP备份在工作区 .ue-sprint-backup。工具产生保存依赖骨架行为，已有Fenrir未跟踪文件不擅自纳入提交。
+- 版本：仅提交本任务文件，保留用户配置、地图、模型、材质、EditorTools等无关改动。沿用此前自动审批拒绝远程推送的限制，不重试；只保留本地提交。see技能/脚本在本会话前序查找不可用，本轮通过Unreal资源接口读取用户给定动画路径。

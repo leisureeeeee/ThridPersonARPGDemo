@@ -7,6 +7,10 @@
 void UMyCharacterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+	bShouldWalk = bShouldSprint = bSprintTurning = bSprintStartComplete = bHadSprintIntent = false;
+	bSprintStopping = true;
+	SprintStartTime = SprintTurnTime = 0.0f;
+	SprintPlayRate = 1.0f;
 	ActiveIdleAnimation = SheathedIdleAnimation;
 	GroundSpeed = 0.0f;
 	bShouldMove = false;
@@ -248,6 +252,28 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		&& Movement->GetCurrentAcceleration().SizeSquared2D() > UE_KINDA_SMALL_NUMBER && !bPivoting;
 	UpdateMovementBlocked(DeltaSeconds, DistanceMoved, Movement, GroundMovement);
 	bShouldMove &= !bMovementBlocked;
+	const bool bGrounded = IsValid(Movement) && Movement->IsMovingOnGround();
+	const bool bSprintMode = bGrounded && IsValid(GroundMovement) && GroundMovement->IsSprinting();
+	const bool bInput = bGrounded && Movement->GetCurrentAcceleration().SizeSquared2D() > UE_KINDA_SMALL_NUMBER;
+	bShouldSprint = bSprintMode && bShouldMove;
+	bShouldWalk = bGrounded && bShouldMove && !bSprintMode;
+	bSprintTurning = bSprintMode && bPivoting && bInput;
+	bSprintStopping = !bShouldWalk && !bShouldSprint && !bSprintTurning;
+	if (bShouldSprint)
+	{
+		if (!bHadSprintIntent)
+		{
+			SprintStartTime = 0.0f;
+		}
+		SprintStartTime = FMath::Min(SprintStartTime + DeltaSeconds, FMath::Max(0.05f, SprintStartDuration));
+	}
+	bSprintStartComplete = bShouldSprint && SprintStartTime >= FMath::Max(0.05f, SprintStartDuration) - UE_KINDA_SMALL_NUMBER;
+	if (bSprintTurning)
+	{
+		SprintTurnTime = GroundMovement->GetSprintTurnTime();
+	}
+	bHadSprintIntent = bShouldSprint;
+	SprintPlayRate = FMath::Clamp(GroundSpeed / FMath::Max(1.0f, SprintAuthoredSpeed), 0.0f, 1.6f);
 	const float TargetWalkRate = GroundSpeed > 3.0f
 		? FMath::Clamp(GroundSpeed / FMath::Max(1.0f, WalkAuthoredSpeed), 0.0f, 2.0f) : 0.0f;
 	WalkPlayRate = TargetWalkRate <= UE_KINDA_SMALL_NUMBER ? 0.0f
@@ -261,6 +287,10 @@ void UMyCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		return;
 	}
 	UpdateStartMatching(DeltaSeconds, DistanceMoved, GroundMovement);
+	if (bSprintMode)
+	{
+		StartRootYawOffset = 0.0f;
+	}
 	if (bShouldMove)
 	{
 		ResetStopMatching();

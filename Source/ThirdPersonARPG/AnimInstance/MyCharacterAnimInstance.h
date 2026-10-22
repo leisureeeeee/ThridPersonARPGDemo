@@ -100,4 +100,37 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimSequence> ActiveIdleAnimation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	bool bShouldWalk = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	bool bShouldSprint = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	bool bSprintTurning = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	bool bSprintStopping = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	bool bSprintStartComplete = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	float SprintStartTime = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	float SprintTurnTime = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category = "Locomotion|Sprint", meta = (AllowPrivateAccess = "true"))
+	float SprintPlayRate = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "0.05", Units = "s"))
+	float SprintStartDuration = 0.85f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Locomotion|Sprint", meta = (ClampMin = "1", Units = "cm/s"))
+	float SprintAuthoredSpeed = 600.0f;
+
+	bool bHadSprintIntent = false;
+
 };

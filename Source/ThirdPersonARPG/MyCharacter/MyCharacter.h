@@ -24,6 +24,9 @@ class THIRDPERSONARPG_API AMyCharacter : public ACharacter
 public:
 	AMyCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	// Input-independent request; equipment rules stay on the character.
+	void SetSprintRequested(bool bRequested);
+
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	AWeaponBase* GetCurrentWeapon() const;
 

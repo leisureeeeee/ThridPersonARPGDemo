@@ -15,6 +15,10 @@ class THIRDPERSONARPG_API UARPGCharacterMovementComponent : public UCharacterMov
 	GENERATED_BODY()
 
 public:
+	void SetSprintRequested(bool bRequested);
+	bool IsSprinting() const;
+	float GetSprintTurnTime() const { return FMath::Min(PivotElapsed * 2.0f, 1.1f); }
+	virtual float GetMaxSpeed() const override;
 	bool IsPivoting() const { return bPivotBraking || bPivotTurning; }
 	bool HasDirectionalStart() const;
 	bool IsDirectionalStartComplete() const;
@@ -68,4 +72,10 @@ private:
 	float DirectionalTurnProgress = 0.0f;
 	FVector DirectionalTarget = FVector::ZeroVector;
 	FVector DirectionalPreviousLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Ground Locomotion|Sprint", meta = (ClampMin = "1", Units = "cm/s"))
+	float SprintSpeed = 600.0f;
+
+	bool bSprintRequested = false;
+
 };
