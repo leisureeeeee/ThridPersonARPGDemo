@@ -1315,3 +1315,12 @@
 - 编译与加载：应用前发现编辑器正在运行，保护脚本在写入前停止；经本机 MCP 确认无 PIE、无脏内容/地图后正常退出，没有强制结束进程。第一次完整 Development Editor 编译成功（19.88秒），发现 NetUpdateFrequency 弃用警告，改用正式 setter 后再次编译成功（16.00秒），无新增源码警告。正常重新打开一个编辑器实例，MCP 只读确认新 PlayerState/ASC 已加载、两个子对象 Outer 正确、GameMode.PlayerStateClass 正确、地图无 GameMode 覆盖、GE 为 Infinite，角色与动画蓝图均 BS_UP_TO_DATE，结束无脏资源/地图、PIE=False。
 - 未验证：未新增/执行自动化、PIE、模拟输入或功能测试。构建与默认对象检查不能替代实际拔收刀、中断、解除控制或网络验证。用户可左键拔刀、右键收刀，并观察连续点击、移动中切换与持刀/收刀奔跑，确认动作和装备姿态仍匹配。
 - 文件：新增 AbilitySystem/MyCharacterAbilitySystemComponent.h/.cpp、WeaponGameplayTags.h/.cpp、WeaponStateEffect.h/.cpp、PlayerState/ARPGPlayerState.h/.cpp、Docs/WeaponStateGAS.md；修改 MyCharacter.h/.cpp、GameMode/ARPGGameMode.cpp、Docs/CharacterBase.md 与本日志。初始相关源码备份在工作区 .ue-weapon-gas/backup；原有用户已修改/删除的跟踪文件哈希/缺失状态逐一验证保持不变。首次暂存格式检查发现本条记录末尾多余空行，已修正后通过。仅暂存本次明确文件，提交和远程同步结果见最终回复。
+
+## 2026-10-22 14:02:09 北京时间 — 首个轻攻击动作接入方案与资源只读检查
+
+- 用户需求：针对 AS_Combo_Attack_05_01_02_V02_Seq 说明第一个攻击动作的接入安排，尚未要求实现；随后用户明确“重定向我来”。尊重最新分工，本轮不创建重定向资源、不修改动画、不实现攻击代码。
+- 规范与只读检查：按路径输入规则查找 see 技能，系统技能、插件缓存、工作区及项目对应目录中均未找到 SKILL.md/see.sh，已告知用户；使用现有本机 Unreal MCP 读取资源元数据，没有视觉预览，不推断挥刀动作或具体命中帧。读取现有 PlayerController、玩家 ASC 与动画源码，确认左键当前绑定拔刀，玩家 ASC 尚无攻击技能授予入口。
+- 资源事实：/Game/Asset/Fenrir_UE5/Anim/light_attack/AS_Combo_Attack_05_01_02_V02_Seq 为 AnimSequence，长度约1.416667秒、RateScale=1、EnableRootMotion=False、ForceRootLock=False；实际 Skeleton 为 UE4_Mannequin_Skeleton，当前角色为 SK_Fenrir、Skeleton 为 SK_Fenrir_Skeleton，目标兼容骨架列表为空。首次直接读取 notifies 因受保护失败，改用 AnimationLibrary.get_animation_notify_events，返回空列表。只读检查时 PIE=False，无脏内容/地图。
+- 调整分工：用户负责动画重定向；接入时采用可配置 Montage 引用，不硬编码本次源动画路径。当前仅提供方案，后续实施仍以用户指令为准。
+- 建议安排：持刀时左键请求轻攻击，收刀时保持左键只拔刀、下一次点击才攻击；PlayerController 处理输入，Character 转发动作请求，ASC 授予并激活 GA_LightAttack。GA 要求 Drawn、阻塞 Drawing/Sheathing/Attacking，播放配置的攻击 Montage，管理 State.Action.Attacking 与结束/中断清理；收刀路径同步检查攻击状态。角色全身攻击使用合适的 Slot，避免沿用拔收刀上半身混合导致下半身动作不匹配。首版单次地面攻击，控制移动与转向约束并可靠恢复；根运动策略和精确窗口待用户目标动画就绪后确认。先完成动作生命周期，不引入伤害、数值消耗、连招或自动连点；命中窗口由后续预览标定，未来复用 GA 事件接检测。
+- 验证与版本：未修改游戏源码、配置或资产，未构建、运行 PIE、自动化或功能测试；仅追加本条执行记录并单独提交。此前用户未提交修改继续保留；提交及推送结果见最终回复。
