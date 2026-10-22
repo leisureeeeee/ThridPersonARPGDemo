@@ -1343,3 +1343,13 @@
 - 编译：正常退出前确认无PIE/脏资源。首次完整构建所有C++编译动作通过，但链接DLL时被运行中的UnrealEditor占用，最终LNK1104失败（55.19秒）；首次重新打开保护检查发现编辑器已运行，未再创建实例。重新只读确认编辑器无PIE/脏资源，正常请求退出并等待进程真正结束后，重试链接和元数据写入成功（2.62秒），没有强制结束进程。随后正常打开一个编辑器实例并加载最终二进制。
 - 加载验证：MCP读回LightAttackAbility已加载、DefaultCombat.ini正确解析AM_LightAttack与倍率1、required/blocked/owned标签正确；蒙太奇长1.416667、Slot=FullBody，图中FullBody正确串入最终输出，副本根运动=True而源动画保持False；动画实例仍为RootMotionFromMontagesOnly，角色/动画蓝图BS_UP_TO_DATE，移动状态机7状态20转换is_valid=True、errors/warnings空，结束无脏包且PIE=False。未新增/执行自动化、PIE、模拟输入或功能测试，不将加载检查当作实际挥刀、根运动碰撞或取消测试。
 - 文件：新增AbilitySystem/Abilities/LightAttackAbility.h/.cpp、Config/DefaultCombat.ini、Docs/LightAttack.md、LightAttack下两个动画资源；修改玩家ASC、WeaponGameplayTags、MyCharacter、MyPlayerController、ARPGCharacterMovementComponent各.h/.cpp、BP_CharacterAnim1.uasset和本日志。文档解释调用链、GA与GE分工、配置位置及用户验证步骤。实际联机输入、预测和表现同步未接入，保持单机范围。仅暂存本次明确文件并按项目授权提交/推送，结果见最终回复。
+
+## 2026-10-22 14:38:42 北京时间 — 修复首段攻击在 Fenrir 上严重变形
+
+- 用户反馈攻击动作在机器人上比小白人严重变形，并提供动画编辑器截图，躯干和肢体挤压错位。先询问单独预览/游戏表现，用户确认是该攻击动画适配问题。本轮遵守此前用户负责原动画重定向的分工，原资源保持不变，仅修复本次接入的播放链路。
+- 诊断：通过UE MCP execute_python_code读取原始Katana、小白人骨架、Fenrir来源动画、旧AS_LightAttack及正常CombatWalk；无Additive设置。抽查10根骨骼在0/0.1/0.3/0.5/0.8/1.1/1.4秒，Fenrir来源/旧播放副本与小白人原始动作旋转一致（最大1-abs(dot)约3.33e-16），局部平移最大差约0.3741厘米、缩放无差。旧右前臂仍为局部X约-30.34厘米，正常Fenrir为Y约-34.40厘米；说明骨架引用虽已改变，轨道未转换为目标骨骼坐标。此前只验证Skeleton引用而未验证姿态数据，是本会话接入检查遗漏。
+- 视觉输入与接口：再次查找see技能/see.sh未找到；直接读取已提供截图并使用UE资源接口定位，不将缺失技能当作不能处理图片。本轮没有新建Python脚本文件，通过现有本机MCP客户端内联调用UE的execute_python_code及capture_image；游戏运行逻辑未修改。
+- 修复：用现有IKRIg_Man_to_ironman，明确源ARPG_Samurai/SK_Mannequin、目标SK_Fenrir，从Katana原始UE4动作调用IKRetargetBatchOperation.run_batch_retarget，新建AS_LightAttack_Fenrir，禁止覆盖现有文件。读回脊柱、手臂、腿部坐标已转换为Fenrir轴向与长度，例如右前臂Y=-34.404427、右手Y=-31.406073。新资源保留原1.416667秒时长，启用根运动、强制根锁、动画第一帧根锁；AM_LightAttack的唯一动画片段改指向新资源，FullBody Slot与播放长度保持，旧AS_LightAttack保留但不再引用。
+- 保护：变更前备份蒙太奇与相关文档，记录用户现有修改哈希；用户原攻击、原IK重定向器、Fenrir骨架及原有资源/配置/EditorTools修改逐一比对未变。没有修改C++、GAS逻辑、骨架结构、全身混合链路或用户原始动画。仅修改AM_LightAttack、新增AS_LightAttack_Fenrir并更新说明与本记录。
+- 验证：UE资源读回确认蒙太奇引用新序列；新序列骨架、时长、骨骼轴向与根运动配置正确，保存后无脏内容/地图且PIE=False。打开新动画资源编辑器，通过预览实例暂停在0.3秒与0.8秒，UE MCP截图后视觉核对，未见用户原截图的躯干四肢坍缩错位；截图保留Saved/VibeUE/Captures/capture-window-20261022-143621.png与143622.png供对照。资源预览不代表实际游戏验证；未启动PIE、模拟输入、自动化或游戏功能测试。无C++修改，无需重新编译或重启编辑器；当前预览停在0.8秒。
+- 版本：按Git LFS暂存新动画与蒙太奇，只提交本次四个文件及记录。后续用户运行Alt拔刀、左键攻击，观察全身姿态和持刀/根运动衔接；更细的穿插、持刀约束或IK姿态微调需结合实际游戏画面。提交与推送结果见最终回复。
