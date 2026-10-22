@@ -5,6 +5,7 @@
 #include "Camera/CameraTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "EnhancedPlayerInput.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/Pawn.h"
 #include "InputAction.h"
@@ -63,6 +64,7 @@ void AMyPlayerController::SetupInputComponent()
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AMyPlayerController::HandleSprintInput);
 	EnhancedInput->BindAction(LightAttackAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleLightAttackInput);
+	EnhancedInput->BindAction(EvadeAction, ETriggerEvent::Started, this, &AMyPlayerController::HandleEvadeInput);
 	RegisterInputMappingContext();
 }
 
@@ -113,6 +115,10 @@ void AMyPlayerController::CreateInputMappingContext()
 	LightAttackAction = NewObject<UInputAction>(this, TEXT("LightAttackAction"), RF_Transient);
 	LightAttackAction->ValueType = EInputActionValueType::Boolean;
 	PlayerMappingContext->MapKey(LightAttackAction, EKeys::LeftMouseButton);
+
+	EvadeAction = NewObject<UInputAction>(this, TEXT("EvadeAction"), RF_Transient);
+	EvadeAction->ValueType = EInputActionValueType::Boolean;
+	PlayerMappingContext->MapKey(EvadeAction, EKeys::SpaceBar);
 
 	SprintAction = NewObject<UInputAction>(this, TEXT("SprintAction"), RF_Transient);
 	SprintAction->ValueType = EInputActionValueType::Boolean;
@@ -166,13 +172,35 @@ void AMyPlayerController::HandleMoveInput(const FInputActionValue& Value)
 	}
 
 	const FVector2D MovementInput = Value.Get<FVector2D>().GetClampedToMaxSize(1.0f);
-	// Use this pawn's base camera, before CameraManager shakes/modifiers. Its
-	// authored relative rotation can differ from the controller's rotation.
+	ControlledPawn->AddMovementInput(GetWorldMovementInput(MovementInput));
+}
+
+FVector AMyPlayerController::GetWorldMovementInput(const FVector2D& Input) const
+{
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		return FVector::ZeroVector;
+	}
 	FMinimalViewInfo CameraView;
 	ControlledPawn->CalcCamera(0.0f, CameraView);
-	const FRotator YawRotation(0.0f, CameraView.Rotation.Yaw, 0.0f);
-	ControlledPawn->AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X), MovementInput.Y);
-	ControlledPawn->AddMovementInput(FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y), MovementInput.X);
+	const FRotator YawRotation(0.f, CameraView.Rotation.Yaw, 0.f);
+	return FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * Input.Y
+		+ FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * Input.X;
+}
+
+void AMyPlayerController::HandleEvadeInput(const FInputActionValue& Value)
+{
+	AMyCharacter* ControlledCharacter = Cast<AMyCharacter>(GetPawn());
+	if (IsLocalPlayerController() && ControlledCharacter && ControlledCharacter->InputEnabled()
+		&& !IsMoveInputIgnored() && GetViewTarget() == ControlledCharacter && Value.Get<bool>())
+	{
+		const UEnhancedPlayerInput* EnhancedPlayerInput = Cast<UEnhancedPlayerInput>(PlayerInput);
+		const FVector2D MovementInput = EnhancedPlayerInput
+			? EnhancedPlayerInput->GetActionValue(MoveAction).Get<FVector2D>().GetClampedToMaxSize(1.f)
+			: FVector2D::ZeroVector;
+		ControlledCharacter->RequestEvade(GetWorldMovementInput(MovementInput));
+	}
 }
 
 void AMyPlayerController::HandleLookInput(const FInputActionValue& Value)

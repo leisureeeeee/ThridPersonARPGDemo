@@ -1,6 +1,7 @@
 #include "AbilitySystem/MyCharacterAbilitySystemComponent.h"
 #include "AbilitySystem/WeaponGameplayTags.h"
 #include "AbilitySystem/Abilities/LightAttackAbility.h"
+#include "AbilitySystem/Abilities/EvadeAbility.h"
 #include "AbilitySystem/WeaponStateEffect.h"
 #include "MyCharacter/MyCharacter.h"
 
@@ -8,13 +9,17 @@ void UMyCharacterAbilitySystemComponent::BindWeaponAvatar(AMyCharacter* Characte
 {
     if (GetAvatarActor() != Character)
     {
-        CancelLightAttack();
+        CancelCharacterActions();
         ClearWeaponEffects();
     }
     InitAbilityActorInfo(GetOwner(), Character);
     if (GetOwner()->HasAuthority() && !FindAbilitySpecFromHandle(LightAttackHandle))
     {
         LightAttackHandle = GiveAbility(FGameplayAbilitySpec(ULightAttackAbility::StaticClass(), 1));
+    }
+    if (GetOwner()->HasAuthority() && !FindAbilitySpecFromHandle(EvadeHandle))
+    {
+        EvadeHandle = GiveAbility(FGameplayAbilitySpec(UEvadeAbility::StaticClass(), 1));
     }
 }
 
@@ -23,7 +28,7 @@ void UMyCharacterAbilitySystemComponent::ReleaseWeaponAvatar(const AMyCharacter*
     // An old pawn ending play must not clear a newly possessed pawn's state.
     if (GetAvatarActor() == ExpectedAvatar)
     {
-        CancelLightAttack();
+        CancelCharacterActions();
         ClearWeaponEffects();
         ClearActorInfo();
     }
@@ -89,10 +94,35 @@ bool UMyCharacterAbilitySystemComponent::RequestLightAttack(const AMyCharacter* 
         && TryActivateAbility(LightAttackHandle, false);
 }
 
-void UMyCharacterAbilitySystemComponent::CancelLightAttack()
+void UMyCharacterAbilitySystemComponent::CancelCharacterActions()
 {
     if (LightAttackHandle.IsValid())
     {
         CancelAbilityHandle(LightAttackHandle);
     }
+    if (EvadeHandle.IsValid())
+    {
+        CancelAbilityHandle(EvadeHandle);
+    }
+}
+
+bool UMyCharacterAbilitySystemComponent::RequestEvade(
+    const AMyCharacter* ExpectedAvatar, const FVector& WorldDirection)
+{
+    if (!CanChangeWeaponState(ExpectedAvatar) || !EvadeHandle.IsValid() || WorldDirection.ContainsNaN())
+    {
+        return false;
+    }
+    int32 Sector = 4; // No movement intent: step backward relative to current facing.
+    if (!WorldDirection.IsNearlyZero())
+    {
+        const FVector LocalDirection = ExpectedAvatar->GetActorTransform()
+            .InverseTransformVectorNoScale(WorldDirection.GetSafeNormal2D());
+        const float Angle = FMath::RadiansToDegrees(FMath::Atan2(LocalDirection.Y, LocalDirection.X));
+        Sector = (FMath::RoundToInt(Angle / 45.f) + 8) % 8;
+    }
+    FGameplayEventData Event;
+    Event.EventTag = WeaponGameplayTags::Event_Action_Evade;
+    Event.EventMagnitude = static_cast<float>(Sector);
+    return HandleGameplayEvent(Event.EventTag, &Event) > 0;
 }

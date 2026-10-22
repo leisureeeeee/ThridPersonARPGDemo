@@ -271,7 +271,8 @@ bool UARPGCharacterMovementComponent::IsActionMovementLocked() const
 {
 	const IAbilitySystemInterface* AbilityOwner = Cast<IAbilitySystemInterface>(CharacterOwner);
 	const UAbilitySystemComponent* ASC = AbilityOwner ? AbilityOwner->GetAbilitySystemComponent() : nullptr;
-	return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking);
+	return ASC && (ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking)
+		|| ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Evading));
 }
 
 float UARPGCharacterMovementComponent::GetMaxAcceleration() const

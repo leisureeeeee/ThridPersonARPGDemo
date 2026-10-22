@@ -43,6 +43,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Combat")
 	bool IsAttacking() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	bool RequestEvade(const FVector& WorldDirection);
+
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	bool IsEvading() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	bool SheatheWeapon();
 

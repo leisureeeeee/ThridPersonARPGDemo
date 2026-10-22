@@ -2,6 +2,9 @@
 
 namespace WeaponGameplayTags
 {
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Evade, "Ability.Evade", "Grounded directional evade.");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(Event_Action_Evade, "Event.Action.Evade", "Evade request with a captured direction sector.");
+    UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Action_Evading, "State.Action.Evading", "Evade ability owns the full-body action.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_Attack_Light, "Ability.Attack.Light", "Single grounded light attack.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Action_Attacking, "State.Action.Attacking", "Attack ability owns the full-body action.");
     UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Weapon_Drawn, "State.Weapon.Drawn", "Weapon is committed to the hand socket.");

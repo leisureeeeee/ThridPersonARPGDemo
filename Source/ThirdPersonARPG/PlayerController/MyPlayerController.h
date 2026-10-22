@@ -34,6 +34,8 @@ private:
 	void HandleZoomInput(const FInputActionValue& Value);
 	void HandleToggleWeaponInput(const FInputActionValue& Value);
 	void HandleLightAttackInput(const FInputActionValue& Value);
+	void HandleEvadeInput(const FInputActionValue& Value);
+	FVector GetWorldMovementInput(const FVector2D& Input) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputMappingContext> PlayerMappingContext;
@@ -58,6 +60,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> LightAttackAction;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> EvadeAction;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> SprintAction;

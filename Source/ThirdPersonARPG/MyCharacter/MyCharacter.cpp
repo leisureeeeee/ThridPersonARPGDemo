@@ -290,6 +290,18 @@ bool AMyCharacter::IsAttacking() const
 	return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Attacking);
 }
 
+bool AMyCharacter::RequestEvade(const FVector& WorldDirection)
+{
+	UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	return ASC && ASC->RequestEvade(this, WorldDirection);
+}
+
+bool AMyCharacter::IsEvading() const
+{
+	const UMyCharacterAbilitySystemComponent* ASC = GetWeaponASC();
+	return ASC && ASC->HasMatchingGameplayTag(WeaponGameplayTags::State_Action_Evading);
+}
+
 bool AMyCharacter::ToggleWeapon()
 {
 	// Draw/Sheathe already reject transitions while either montage is active.
@@ -303,7 +315,7 @@ bool AMyCharacter::DrawWeapon()
 	{
 		return false;
 	}
-	if (IsAttacking() || IsDrawingWeapon() || IsSheathingWeapon() || IsWeaponDrawn() || !GetCurrentWeapon()
+	if (IsAttacking() || IsEvading() || IsDrawingWeapon() || IsSheathingWeapon() || IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;
@@ -402,7 +414,7 @@ bool AMyCharacter::SheatheWeapon()
 	{
 		return false;
 	}
-	if (IsAttacking() || IsDrawingWeapon() || IsSheathingWeapon() || !IsWeaponDrawn() || !GetCurrentWeapon()
+	if (IsAttacking() || IsEvading() || IsDrawingWeapon() || IsSheathingWeapon() || !IsWeaponDrawn() || !GetCurrentWeapon()
 		|| !GetCharacterMovement()->IsMovingOnGround())
 	{
 		return false;

@@ -18,6 +18,7 @@ ULightAttackAbility::ULightAttackAbility()
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Drawing);
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Sheathing);
     ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Attacking);
+    ActivationBlockedTags.AddTag(WeaponGameplayTags::State_Action_Evading);
     ActivationOwnedTags.AddTag(WeaponGameplayTags::State_Action_Attacking);
 }
 

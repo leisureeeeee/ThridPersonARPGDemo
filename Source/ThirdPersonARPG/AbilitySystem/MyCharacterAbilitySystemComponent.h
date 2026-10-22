@@ -23,10 +23,12 @@ private:
     bool ReplaceStateEffect(FActiveGameplayEffectHandle& Handle, const FGameplayTag& Tag);
     void ClearWeaponEffects();
     bool RequestLightAttack(const AMyCharacter* ExpectedAvatar);
-    void CancelLightAttack();
+    bool RequestEvade(const AMyCharacter* ExpectedAvatar, const FVector& WorldDirection);
+    void CancelCharacterActions();
 
     // Handles identify this subsystem's effects; the actual state lives in GAS tags.
     FGameplayAbilitySpecHandle LightAttackHandle;
+    FGameplayAbilitySpecHandle EvadeHandle;
     FActiveGameplayEffectHandle WeaponStateEffect;
     FActiveGameplayEffectHandle WeaponActionEffect;
 };

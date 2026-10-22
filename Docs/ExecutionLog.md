@@ -1353,3 +1353,14 @@
 - 保护：变更前备份蒙太奇与相关文档，记录用户现有修改哈希；用户原攻击、原IK重定向器、Fenrir骨架及原有资源/配置/EditorTools修改逐一比对未变。没有修改C++、GAS逻辑、骨架结构、全身混合链路或用户原始动画。仅修改AM_LightAttack、新增AS_LightAttack_Fenrir并更新说明与本记录。
 - 验证：UE资源读回确认蒙太奇引用新序列；新序列骨架、时长、骨骼轴向与根运动配置正确，保存后无脏内容/地图且PIE=False。打开新动画资源编辑器，通过预览实例暂停在0.3秒与0.8秒，UE MCP截图后视觉核对，未见用户原截图的躯干四肢坍缩错位；截图保留Saved/VibeUE/Captures/capture-window-20261022-143621.png与143622.png供对照。资源预览不代表实际游戏验证；未启动PIE、模拟输入、自动化或游戏功能测试。无C++修改，无需重新编译或重启编辑器；当前预览停在0.8秒。
 - 版本：按Git LFS暂存新动画与蒙太奇，只提交本次四个文件及记录。后续用户运行Alt拔刀、左键攻击，观察全身姿态和持刀/根运动衔接；更细的穿插、持刀约束或IK姿态微调需结合实际游戏画面。提交与推送结果见最终回复。
+## 2026-10-22 14:56:10 北京时间 — 空格八方向躲避动作接入
+
+- 用户需求：先接入ARPGSamurai Evade_Backward这一系列躲避；随后明确Fenrir版本已由用户生成。本轮直接使用用户目标动画，不做重定向、不改原文件；空格触发，有输入按移动世界方向躲避，无输入向当前朝向后方躲避。Alt拔收刀与左键轻攻击保留。
+- 检查：原ARPG_Samurai系列八方向均0.9秒、UE4骨架、根位移正向约400厘米；用户 /Game/Asset/Fenrir_UE5/Anim/evade 八个目标动作均为Fenrir骨架，抽查右前臂局部Y约-34.4厘米，符合目标坐标而非只换Skeleton。目标根位移正向约568.728943厘米、对角每轴约426.546722厘米。使用本轮已恢复的原生UE MCP工具直接操作，没有新建Python脚本。see技能本会话已搜索不可用，路径按资源接口核对，不拒绝处理。
+- 资产：新建Animations/Evade下八个AS_Evade_*播放副本和八个AM_Evade_*；副本启用根运动、强制根锁、动画第一帧根锁，蒙太奇FullBody、单次、混入0.06/混出0.1、倍率1。复用既有全身Slot，不修改AnimBP结构。原八个用户目标动画哈希逐一保护，源动画/骨架/重定向器均未编辑。
+- 输入与方向：PlayerController增加SpaceBar的EvadeAction/Started事件。最终从UEnhancedPlayerInput.GetActionValue读取当前帧移动值，移动和躲避共用相机偏航到世界方向换算，Character只转发请求；ASC确认权威端和Avatar，换算局部角度的45度扇区，按前/右前/右/右后/后/左后/左/左前的顺序将索引装入Event.Action.Evade的EventMagnitude。没有输入选后撤；方向在请求时确定，不在动作中切换。
+- GAS：新增UEvadeAbility，InstancedPerActor、ServerOnly、不重入，通过GameplayEvent触发。ASC绑定时一次授予并保存句柄，更换/释放Avatar前由CancelCharacterActions同时取消攻击和躲避。GA只允许地面、无其他Montage、八项配置有效；选中蒙太奇检查骨架后Commit并由PlayMontageAndWait完成，完成/中断/取消/播放失败结束，混出开始不提前解锁。State.Action.Evading为GA激活持有标签；与攻击/拔收刀互斥，持刀和收刀均可躲避，动作输入不缓存，没有无敌帧、消耗或取消窗口。
+- 移动：已有IsActionMovementLocked扩展查询Evading，沿用限制自主加速度/速度/转向及奔跑判定的机制，蒙太奇根运动仍由引擎驱动胶囊与碰撞。结束移除Tag自动恢复原规则，相机可继续操作；不瞬移、不全局禁输入、不改变MovementMode。DefaultCombat.ini追加八个软引用、PlayRate=1和RootMotionTranslationScale=1，保留用户目标位移比例，C++不硬编码资源路径。
+- 编译与加载：初始无PIE/脏包；正常退出编辑器并等待进程结束。第一版完整Development Editor编译成功20.78秒。随后将方向来源从输入回调缓存改为当前帧增强输入值，消除同时按方向键与空格的事件先后依赖，最终再次编译成功10.08秒，无新增源码警告。正常重开单一编辑器实例，原生EvadeAbility与八项蒙太奇配置加载正确；标签、触发源GameplayEvent、倍率/根运动比例正确，八个蒙太奇FullBody、骨架一致、根运动开启、时长0.9秒。按网格-90度偏航换算根位移后与各扇区对齐值均1.0；角色和动画蓝图BS_UP_TO_DATE，结束无脏内容/地图且PIE=False。
+- 预览与未验证：打开AS_Evade_Backward资源，在0.3秒暂停预览，截图Saved/VibeUE/Captures/capture-window-20261022-145319.png，未见此前攻击的肢体坍缩错位。没有新增/执行自动化、PIE、模拟输入或游戏功能测试；编译/资源/预览检查不等于实际方向、碰撞和手感实测。当前保持单机范围，客户端请求RPC、预测及联机表现未接入。
+- 文件与保护：新增EvadeAbility.h/.cpp、Docs/Evade.md和16个LFS资源；修改玩家ASC、WeaponGameplayTags、MyCharacter、MyPlayerController相关头/源文件、LightAttackAbility.cpp、移动组件.cpp、DefaultCombat.ini和本日志。初始源码备份及用户修改哈希在工作区.ue-evade/backup、preserved.json。未改用户原有资源、配置、角色蓝图、EditorTools等修改，逐项校验保护通过；仅暂存本轮31个明确文件并提交推送。用户可按文档观察空格后撤、WASD/斜方向、换相机角度、持刀/收刀、重入互斥和动作结束恢复。提交与同步结果见最终回复。
