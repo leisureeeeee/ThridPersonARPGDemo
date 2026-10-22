@@ -1233,3 +1233,9 @@
 - 修改：移除两处SetSprintRequested(false)，角色转发原始bRequested给移动组件，不再使用装备动作状态过滤。控制器解除控制/结束时原有清理仍保留，拔收刀之间互斥不变，速度/制动/转向继续由原移动组件处理。更新Docs/UnarmedSprint.md对应旧限制和职责说明。
 - 验证：开始无PIE、无脏内容或地图，正常退出并确认进程结束后Development Editor编译成功；启动前检查进程避免重复实例，正常重新加载并恢复MCP。读回AnimBP状态BS_UP_TO_DATE、PIE False、无脏内容包。未运行PIE、模拟输入或功能测试，因此不声称已经实机排除全部腿部姿势跳变；请用户保持Shift+W连续拔收刀，观察速度和腿部动作连续性。
 - 文件与版本：仅MyCharacter.cpp、Docs/UnarmedSprint.md及本记录；保留用户EditorTools、模型、材质、地图等已有修改。提交本轮明确文件；沿用此前自动审批拒绝远程推送限制，不重试。
+
+## 2026-10-22 10:06:01 北京时间 — 核对用户指定持刀Idle资源
+
+- 用户指定AS_Idle_Combat_To_Idle_Seq作为持刀Idle。只读通过MCP核对，该序列长1.75秒、UE4_Mannequin_Skeleton，正是角色当前SheatheWeaponAnimation（收刀动作）；当前Fenrir AnimBP DrawnIdleAnimation已经是目标骨架版本AS_Idle_Combat_Seq。
+- 该路径与已有收刀语义冲突，不擅自循环收刀动画或猜测定格帧；向用户确认是路径贴错、应继续使用Combat待机，还是确实要采用该过渡。尚未修改动画、蓝图或C++，无编译或功能测试。
+- 本轮只提交执行记录，保留其他改动；沿用此前自动审批拒绝远程推送限制不重试。see技能前序查找不可用，本轮以Unreal资源接口核对路径。
